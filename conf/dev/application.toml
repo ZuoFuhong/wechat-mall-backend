@@ -1,0 +1,13 @@
+[mysql]
+addr = "127.0.0.1:3306"
+username = "root"
+password = "123456"
+
+[redis]
+addr = "47.98.199.80:6379"
+passwd = "myredis"
+db = 0
+
+[wxapp]
+appid = "wxa36fea40b02677d0"
+appsecret = "4cec8431ec6eac438bab553566f4a1d8"
