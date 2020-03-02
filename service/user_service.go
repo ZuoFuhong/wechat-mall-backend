@@ -3,9 +3,9 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"wechat-mall-web/dbops"
 	"wechat-mall-web/defs"
 	"wechat-mall-web/env"
-	"wechat-mall-web/store"
 	"wechat-mall-web/utils"
 )
 
@@ -14,13 +14,11 @@ type IUserService interface {
 }
 
 type UserService struct {
-	DbStore    *store.MySQLStore
-	RedisStore *store.RedisStore
-	Conf       *env.Conf
+	Conf *env.Conf
 }
 
-func NewUserService(dbStore *store.MySQLStore, redisStore *store.RedisStore, conf *env.Conf) *UserService {
-	return &UserService{DbStore: dbStore, RedisStore: redisStore, Conf: conf}
+func NewUserService(conf *env.Conf) IUserService {
+	return &UserService{Conf: conf}
 }
 
 func (service *UserService) LoginCodeAuth(code string) (defs.WxappLoginResp, error) {
@@ -43,24 +41,24 @@ func (service *UserService) LoginCodeAuth(code string) (defs.WxappLoginResp, err
 
 	// {"session_key":"TppZM2zEd6\/dGzkqbbrriQ==","expires_in":7200,"openid":"oQOru0EUuLdidBZH0r_F8fDURPjI"}
 	token := utils.RandomStr(32)
-	err = service.RedisStore.SetStr(store.MiniappTokenPrefix+token, tmpVal, store.MiniappTokenExpire)
+	err = dbops.SetStr(dbops.MiniappTokenPrefix+token, tmpVal, dbops.MiniappTokenExpire)
 	if err != nil {
 		panic("redis异常")
 	}
-	registerUser(service, result["openid"].(string))
+	registerUser(result["openid"].(string))
 
-	resp := defs.WxappLoginResp{Token: token, ExpirationInMinutes: store.MiniappTokenExpire}
+	resp := defs.WxappLoginResp{Token: token, ExpirationInMinutes: dbops.MiniappTokenExpire}
 	return resp, nil
 }
 
-func registerUser(us *UserService, openid string) {
-	user, err := us.DbStore.GetUserByOpenid(openid)
+func registerUser(openid string) {
+	user, err := dbops.GetUserByOpenid(openid)
 	if err != nil {
 		panic(err.Error())
 	}
 	if user.Id == 0 {
 		newUser := &WxappUser{Openid: openid, Nickname: "", Avatar: "", Mobile: "", City: ""}
-		_, err := us.DbStore.AddMiniappUser((*store.WxappUser)(newUser))
+		_, err := dbops.AddMiniappUser((*dbops.WxappUser)(newUser))
 		if err != nil {
 			panic(err.Error())
 		}

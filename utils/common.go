@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"math/rand"
 	"time"
 )
@@ -18,4 +20,11 @@ func RandomStr(lenth int) string {
 		tmpArr = append(tmpArr, chars[n])
 	}
 	return string(tmpArr)
+}
+
+func Md5Encrpyt(passwd string) string {
+	ctx := md5.New()
+	ctx.Write([]byte(passwd))
+	ctx.Write([]byte("salt123"))
+	return hex.EncodeToString(ctx.Sum(nil))
 }

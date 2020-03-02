@@ -19,4 +19,5 @@ func registerHandler(router *mux.Router, handler *handler.Handler) {
 	router.Handle("/api/wxapp/login", chain.ThenFunc(handler.WxappHandler.Login)).Methods("POST")
 	router.Handle("/api/cms/login", chain.ThenFunc(handler.CMSHandler.Login)).Methods("POST")
 	router.Handle("/api/cms/register", chain.ThenFunc(handler.CMSHandler.Register)).Methods("POST")
+	router.Handle("/cms/register/activate/{code:[0-9a-zA-Z]+}", chain.ThenFunc(handler.CMSHandler.RegisterActivate)).Methods("GET")
 }

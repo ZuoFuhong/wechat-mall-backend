@@ -1,9 +1,9 @@
-package store
+package dbops
 
 import "time"
 
-func (m *MySQLStore) GetUserByOpenid(openid string) (*WxappUser, error) {
-	stmt, err := m.client.Prepare("SELECT * FROM wxapp_mall_user WHERE openid = ?")
+func GetUserByOpenid(openid string) (*WxappUser, error) {
+	stmt, err := dbConn.Prepare("SELECT * FROM wxapp_mall_user WHERE openid = ?")
 	if err != nil {
 		return nil, err
 	}
@@ -21,12 +21,12 @@ func (m *MySQLStore) GetUserByOpenid(openid string) (*WxappUser, error) {
 	return &user, nil
 }
 
-func (m *MySQLStore) AddMiniappUser(user *WxappUser) (int64, error) {
+func AddMiniappUser(user *WxappUser) (int64, error) {
 	sql := `
 INSERT INTO wxapp_mall_user(openid, nickname, avatar, mobile, city, create_time, update_time) 
 VALUES(?, ?, ?, ?, ?, ?, ?)
 `
-	stmt, err := m.client.Prepare(sql)
+	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return 0, err
 	}

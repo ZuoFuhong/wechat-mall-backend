@@ -1,4 +1,4 @@
-package store
+package dbops
 
 import (
 	"database/sql"
@@ -10,14 +10,12 @@ type ID model.ID
 type WxappUser model.WxappUser
 type CMSUser model.CMSUser
 
-type MySQLStore struct {
-	client *sql.DB
-}
+var dbConn *sql.DB
 
-func NewMySQLStore(username, password, addr string) *MySQLStore {
-	db, err := sql.Open("mysql", username+":"+password+"@tcp("+addr+")/wechat_mall")
+func InitDbConn(username, password, addr string) {
+	conn, err := sql.Open("mysql", username+":"+password+"@tcp("+addr+")/wechat_mall")
 	if err != nil {
 		panic("Connect to mysql error：" + err.Error())
 	}
-	return &MySQLStore{client: db}
+	dbConn = conn
 }
