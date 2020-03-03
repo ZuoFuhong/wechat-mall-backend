@@ -1,7 +1,7 @@
 package main
 
 import (
-	"wechat-mall-web/web"
+	"wechat-mall-backend/web"
 )
 
 func main() {

@@ -3,10 +3,12 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"wechat-mall-web/dbops"
-	"wechat-mall-web/defs"
-	"wechat-mall-web/env"
-	"wechat-mall-web/utils"
+	"github.com/prometheus/common/log"
+	"wechat-mall-backend/dbops"
+	"wechat-mall-backend/defs"
+	"wechat-mall-backend/env"
+	"wechat-mall-backend/errs"
+	"wechat-mall-backend/utils"
 )
 
 type IUserService interface {
@@ -33,17 +35,18 @@ func (service *UserService) LoginCodeAuth(code string) (defs.WxappLoginResp, err
 	result := make(map[string]interface{})
 	err = json.Unmarshal([]byte(tmpVal), &result)
 	if err != nil {
-		panic("微信内部异常！")
+		panic(errs.ErrorWechatError)
 	}
 	if result["errcode"] != nil {
-		panic(result["errmsg"])
+		log.Error("微信内部异常：", result)
+		panic(errs.ErrorWechatError)
 	}
 
 	// {"session_key":"TppZM2zEd6\/dGzkqbbrriQ==","expires_in":7200,"openid":"oQOru0EUuLdidBZH0r_F8fDURPjI"}
 	token := utils.RandomStr(32)
 	err = dbops.SetStr(dbops.MiniappTokenPrefix+token, tmpVal, dbops.MiniappTokenExpire)
 	if err != nil {
-		panic("redis异常")
+		panic(errs.ErrorRedisError)
 	}
 	registerUser(result["openid"].(string))
 
@@ -54,13 +57,13 @@ func (service *UserService) LoginCodeAuth(code string) (defs.WxappLoginResp, err
 func registerUser(openid string) {
 	user, err := dbops.GetUserByOpenid(openid)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 	if user.Id == 0 {
 		newUser := &WxappUser{Openid: openid, Nickname: "", Avatar: "", Mobile: "", City: ""}
 		_, err := dbops.AddMiniappUser((*dbops.WxappUser)(newUser))
 		if err != nil {
-			panic(err.Error())
+			panic(err)
 		}
 	}
 }

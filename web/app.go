@@ -3,8 +3,8 @@ package web
 import (
 	"github.com/gorilla/mux"
 	"net/http"
-	"wechat-mall-web/dbops"
-	"wechat-mall-web/env"
+	"wechat-mall-backend/dbops"
+	"wechat-mall-backend/env"
 )
 
 type App struct {

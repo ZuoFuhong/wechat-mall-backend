@@ -2,7 +2,8 @@ package handler
 
 import (
 	"net/http"
-	"wechat-mall-web/service"
+	"wechat-mall-backend/errs"
+	"wechat-mall-backend/service"
 )
 
 type WxappHandler struct {
@@ -18,12 +19,11 @@ func NewWxappHandler(service *service.Service) *WxappHandler {
 func (wh *WxappHandler) Login(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
 	if code == "" {
-		panic("缺少code")
+		panic(errs.NewParameterError("缺少code"))
 	}
 	resp, err := wh.service.UserService.LoginCodeAuth(code)
 	if err != nil {
 		panic(err)
 	}
-
 	sendNormalResponse(w, resp)
 }

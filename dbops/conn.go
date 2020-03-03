@@ -3,7 +3,7 @@ package dbops
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"wechat-mall-web/model"
+	"wechat-mall-backend/model"
 )
 
 type ID model.ID

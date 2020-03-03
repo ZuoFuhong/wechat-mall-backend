@@ -2,7 +2,9 @@ package utils
 
 import (
 	"fmt"
+	"runtime"
 	"testing"
+	"wechat-mall-backend/defs"
 )
 
 func Test_jwt_create(t *testing.T) {
@@ -24,7 +26,14 @@ func Test_jwt_parse_and_validate(t *testing.T) {
 	println(payload)
 }
 
-func Test_Md5(t *testing.T) {
-	encrpyt := Md5Encrpyt("123456")
-	fmt.Println(encrpyt)
+func Test_Error(t *testing.T) {
+	var err error = defs.ErrorNotAuthUser
+	switch err.(type) {
+	case defs.HttpErr:
+		fmt.Println("1")
+	case runtime.Error:
+		fmt.Println("2")
+	default:
+		fmt.Println("3")
+	}
 }

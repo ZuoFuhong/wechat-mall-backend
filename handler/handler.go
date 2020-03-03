@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"wechat-mall-web/env"
-	"wechat-mall-web/service"
+	"wechat-mall-backend/env"
+	"wechat-mall-backend/service"
 )
 
 type Handler struct {

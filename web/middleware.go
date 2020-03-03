@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"wechat-mall-web/defs"
+	"wechat-mall-backend/errs"
 )
 
 type Middleware struct {
@@ -25,12 +25,18 @@ func (m Middleware) RecoverPanic(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
+				var httpErr errs.HttpErr
 				log.Printf("Recover from panic:%+v", err)
+				switch err.(type) {
+				case errs.HttpErr:
+					httpErr = err.(errs.HttpErr)
+				default:
+					httpErr = errs.ErrorInternalFaults
+				}
 
 				w.Header().Add("Content-Type", "application/json;charset=UTF-8")
-				w.WriteHeader(http.StatusInternalServerError)
-				resStr, _ := json.Marshal(defs.Err{Code: 10004, ErrMsg: err.(string)})
-
+				w.WriteHeader(httpErr.HttpSC)
+				resStr, _ := json.Marshal(httpErr.Err)
 				_, _ = io.WriteString(w, string(resStr))
 			}
 		}()

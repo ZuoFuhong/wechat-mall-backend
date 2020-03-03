@@ -1,8 +1,8 @@
 package service
 
 import (
-	"wechat-mall-web/env"
-	"wechat-mall-web/model"
+	"wechat-mall-backend/env"
+	"wechat-mall-backend/model"
 )
 
 type WxappUser model.WxappUser

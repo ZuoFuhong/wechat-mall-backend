@@ -8,7 +8,7 @@ import (
 
 const (
 	MiniappTokenPrefix = "miniappToken:"
-	MiniappTokenExpire = 7200
+	MiniappTokenExpire = 2 * 3600
 	CMSCodePrefix      = "cmscode:"
 	CMSCodeExpire      = 300
 )

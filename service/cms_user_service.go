@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"wechat-mall-web/dbops"
-	"wechat-mall-web/defs"
-	"wechat-mall-web/utils"
+	"wechat-mall-backend/dbops"
+	"wechat-mall-backend/defs"
+	"wechat-mall-backend/utils"
 )
 
 type ICMSUserService interface {

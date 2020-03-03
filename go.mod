@@ -1,4 +1,4 @@
-module wechat-mall-web
+module wechat-mall-backend
 
 go 1.13
 
@@ -11,7 +11,10 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/justinas/alice v1.2.0
 	github.com/leodido/go-urn v1.2.0 // indirect
+	github.com/onsi/ginkgo v1.12.0 // indirect
+	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/pkg/errors v0.8.0
 	github.com/prometheus/common v0.4.0
 	github.com/spf13/viper v1.6.2
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )
