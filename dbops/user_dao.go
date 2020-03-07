@@ -2,12 +2,13 @@ package dbops
 
 import "time"
 
+const userColumnList = `
+id, openid, nickname, avatar, mobile, city, create_time, update_time
+`
+
 func GetUserByOpenid(openid string) (*WxappUser, error) {
-	stmt, err := dbConn.Prepare("SELECT * FROM wxapp_mall_user WHERE openid = ?")
-	if err != nil {
-		return nil, err
-	}
-	rows, err := stmt.Query(openid)
+	sql := "SELECT " + userColumnList + " FROM wxapp_mall_user WHERE openid = " + openid
+	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -22,10 +23,7 @@ func GetUserByOpenid(openid string) (*WxappUser, error) {
 }
 
 func AddMiniappUser(user *WxappUser) (int64, error) {
-	sql := `
-INSERT INTO wxapp_mall_user(openid, nickname, avatar, mobile, city, create_time, update_time) 
-VALUES(?, ?, ?, ?, ?, ?, ?)
-`
+	sql := "INSERT INTO wxapp_mall_user(" + userColumnList[4:] + ") VALUES(?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return 0, err

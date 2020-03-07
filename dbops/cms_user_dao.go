@@ -2,12 +2,11 @@ package dbops
 
 import "time"
 
+const cmsUserColumnList = "id, username, `password`, `email`, `mobile`, `avatar`"
+
 func GetCMSUserByUsername(username string) (*CMSUser, error) {
-	stmt, err := dbConn.Prepare("SELECT id, username, `password`, `email`, `mobile`, `avatar` FROM wxapp_mall_cms_user WHERE username = ?")
-	if err != nil {
-		return nil, err
-	}
-	rows, err := stmt.Query(username)
+	sql := "SELECT " + cmsUserColumnList + " FROM wxapp_mall_cms_user WHERE username = " + username
+	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -22,11 +21,8 @@ func GetCMSUserByUsername(username string) (*CMSUser, error) {
 }
 
 func GetCMSUserByEmail(email string) (*CMSUser, error) {
-	stmt, err := dbConn.Prepare("SELECT id, username, `password`, `email`, `mobile`, `avatar` FROM wxapp_mall_cms_user WHERE email = ?")
-	if err != nil {
-		return nil, err
-	}
-	rows, err := stmt.Query(email)
+	sql := "SELECT " + cmsUserColumnList + " FROM wxapp_mall_cms_user WHERE email = " + email
+	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +37,8 @@ func GetCMSUserByEmail(email string) (*CMSUser, error) {
 }
 
 func AddCMSUser(user *CMSUser) error {
-	stmt, err := dbConn.Prepare("INSERT INTO wxapp_mall_cms_user(`username`, `password`, `email`, `mobile`, `avatar`, `create_time`, `update_time`) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	sql := "INSERT INTO wxapp_mall_cms_user( " + cmsUserColumnList[4:] + " ) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
