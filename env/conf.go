@@ -7,9 +7,15 @@ import (
 )
 
 type Conf struct {
+	Http  Http
 	Mysql Mysql
 	Redis Redis
 	Wxapp Wxapp
+}
+
+type Http struct {
+	Addr string
+	Port string
 }
 
 type Mysql struct {

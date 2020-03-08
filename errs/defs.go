@@ -36,6 +36,10 @@ var (
 	ErrorCoupon                 = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10019, ErrMsg: "Coupon does not exist"}}
 )
 
+func NewAuthUserError(errMsg string) HttpErr {
+	return HttpErr{HttpSC: http.StatusUnauthorized, Err: Err{Code: 10002, ErrMsg: errMsg}}
+}
+
 func NewParameterError(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10001, ErrMsg: errMsg}}
 }

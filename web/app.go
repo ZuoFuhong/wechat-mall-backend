@@ -22,7 +22,9 @@ func (app *App) Initialize() {
 	app.Router = NewRouter(app)
 }
 
-func (app *App) Run(addr string) {
+func (app *App) Run() {
+	addr := app.Conf.Http.Addr + ":" + app.Conf.Http.Port
+	log.Print("Wechat-mall-backend runs on http://" + addr)
 	err := http.ListenAndServe(addr, app.Router)
 	if err != nil {
 		panic(err)

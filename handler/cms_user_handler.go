@@ -36,11 +36,7 @@ func (h *CMSHandler) Login(w http.ResponseWriter, r *http.Request) {
 		panic(errs.NewParameterError(err.Error()))
 	}
 
-	cmsUser, err := h.service.CMSUserService.CMSLoginValidate(loginReq.Username, loginReq.Password)
-	if err != nil {
-		log.Error(err)
-		panic(err)
-	}
+	cmsUser := h.service.CMSUserService.CMSLoginValidate(loginReq.Username, loginReq.Password)
 	accessToken, _ := utils.CreateToken(cmsUser.Id, defs.AccessTokenExpire)
 	refreshToken, _ := utils.CreateToken(cmsUser.Id, defs.RefreshTokenExpire)
 
@@ -83,11 +79,8 @@ func (h *CMSHandler) Register(w http.ResponseWriter, r *http.Request) {
 		panic(errs.NewParameterError(err.Error()))
 	}
 
-	err = h.service.CMSUserService.CMSUserRegister(&registerReq)
-	if err != nil {
-		log.Error(err)
-		panic(err)
-	}
+	h.service.CMSUserService.CMSUserRegister(&registerReq)
+
 	code := utils.RandomStr(32)
 	data, _ := json.Marshal(registerReq)
 	err = dbops.SetStr(dbops.CMSCodePrefix+code, string(data), dbops.CMSCodeExpire)
