@@ -18,7 +18,7 @@ func (h *CMSHandler) GetBannerList(w http.ResponseWriter, r *http.Request) {
 	size, _ := strconv.Atoi(vars["size"])
 	bannerList, total := h.service.BannerService.GetBannerList(page, size)
 
-	var voList []defs.BannerVO
+	voList := []defs.BannerVO{}
 	for _, v := range *bannerList {
 		vo := defs.BannerVO{}
 		vo.Id = v.Id
@@ -95,10 +95,10 @@ func (h *CMSHandler) DoDeleteBanner(w http.ResponseWriter, r *http.Request) {
 
 func (h *CMSHandler) GetBannerItemList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	bannerId, _ := strconv.Atoi(vars["id"])
+	bannerId, _ := strconv.Atoi(vars["bannerId"])
 	itemList := h.service.BannerService.GetBannerItemList(bannerId)
 
-	var itemVOList []defs.BannerItemVO
+	itemVOList := []defs.BannerItemVO{}
 	for _, v := range *itemList {
 		itemVO := defs.BannerItemVO{}
 		itemVO.Id = v.Id
@@ -138,6 +138,10 @@ func (h *CMSHandler) DoEditBannerItem(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	if err = validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
+	}
+	banner := h.service.BannerService.GetBannerById(req.BannerId)
+	if banner.Id == 0 {
+		panic(errs.ErrorBannerNotExist)
 	}
 	if req.Id == 0 {
 		item := model.BannerItem{}

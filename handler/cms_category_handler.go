@@ -16,8 +16,8 @@ func (h *CMSHandler) GetCategoryList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
+	var cateVOList []defs.CategoryVO
 	cateList, total := h.service.CategoryService.GetCategoryList(page, size)
-	var cateVOs []defs.CategoryVO
 	for _, v := range *cateList {
 		cateVO := defs.CategoryVO{}
 		cateVO.Id = v.Id
@@ -27,11 +27,11 @@ func (h *CMSHandler) GetCategoryList(w http.ResponseWriter, r *http.Request) {
 		cateVO.Online = v.Online
 		cateVO.Picture = v.Picture
 		cateVO.Description = v.Description
-		cateVOs = append(cateVOs, cateVO)
+		cateVOList = append(cateVOList, cateVO)
 	}
 
 	resp := make(map[string]interface{})
-	resp["list"] = cateList
+	resp["list"] = cateVOList
 	resp["total"] = total
 	sendNormalResponse(w, resp)
 }
@@ -43,7 +43,16 @@ func (h *CMSHandler) GetCategoryById(w http.ResponseWriter, r *http.Request) {
 	if category.Id == 0 {
 		panic(errs.ErrorCategory)
 	}
-	sendNormalResponse(w, category)
+	cateVO := defs.CategoryVO{}
+	cateVO.Id = category.Id
+	cateVO.ParentId = category.ParentId
+	cateVO.Name = category.Name
+	cateVO.Sort = category.Sort
+	cateVO.Online = category.Online
+	cateVO.Picture = category.Picture
+	cateVO.Description = category.Description
+
+	sendNormalResponse(w, cateVO)
 }
 
 func (h *CMSHandler) DoEditCategory(w http.ResponseWriter, r *http.Request) {
@@ -70,7 +79,7 @@ func (h *CMSHandler) DoEditCategory(w http.ResponseWriter, r *http.Request) {
 		h.service.CategoryService.AddCategory((*model.Category)(category))
 	} else {
 		category := h.service.CategoryService.GetCategoryByName(req.Name)
-		if category.Id != req.Id {
+		if category.Id != 0 && category.Id != req.Id {
 			panic(errs.NewCategoryError("The category name alreadly exists"))
 		}
 		category = h.service.CategoryService.GetCategoryById(req.Id)

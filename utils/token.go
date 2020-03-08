@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"github.com/prometheus/common/log"
@@ -53,7 +52,7 @@ func ParseToken(tokenStr string) (*Payload, error) {
 		return nil, errors.New("token解析失败")
 	}
 	if claims, ok := token.Claims.(*Payload); ok && token.Valid {
-		fmt.Printf("%v %v", claims.Uid, claims.StandardClaims.ExpiresAt)
+		log.Infof("Uid = %v, ExpiresAt = %v", claims.Uid, claims.StandardClaims.ExpiresAt)
 		return claims, nil
 	} else {
 		return nil, errors.New("token无效")

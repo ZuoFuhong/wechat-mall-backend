@@ -2,6 +2,7 @@ package web
 
 import (
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/env"
@@ -13,6 +14,7 @@ type App struct {
 }
 
 func (app *App) Initialize() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	conf := env.LoadConf()
 	app.Conf = conf
 	dbops.InitDbConn(conf.Mysql.Username, conf.Mysql.Password, conf.Mysql.Addr)

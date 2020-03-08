@@ -64,7 +64,7 @@ func (s *sPUService) GetSPUSpecList(spuId int) *[]int {
 	if err != nil {
 		panic(err)
 	}
-	var specIds []int
+	specIds := []int{}
 	for _, v := range *specList {
 		specIds = append(specIds, v.SpecId)
 	}

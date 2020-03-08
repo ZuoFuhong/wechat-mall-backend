@@ -78,7 +78,7 @@ func QuerySpecificationById(id int) (*model.Specification, error) {
 }
 
 func QuerySpecificationByName(name string) (*model.Specification, error) {
-	sql := "SELECT " + specColumnList + " FROM wxapp_mall_specification WHERE is_del = 0 AND name = " + name
+	sql := "SELECT " + specColumnList + " FROM wxapp_mall_specification WHERE is_del = 0 AND name = '" + name + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -96,14 +96,14 @@ func QuerySpecificationByName(name string) (*model.Specification, error) {
 func UpdateSpecificationById(spec *model.Specification) error {
 	sql := `
 UPDATE wxapp_mall_specification 
-SET name = ?, description = ?, unit = ?, standard = ?, update_time = ? 
+SET name = ?, description = ?, unit = ?, standard = ?, is_del = ?, update_time = ? 
 WHERE id = ?
 `
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(spec.Name, spec.Description, spec.Unit, spec.Standard, time.Now())
+	_, err = stmt.Exec(spec.Name, spec.Description, spec.Unit, spec.Standard, spec.Del, time.Now(), spec.Id)
 	if err != nil {
 		return err
 	}

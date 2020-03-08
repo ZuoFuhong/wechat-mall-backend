@@ -7,7 +7,7 @@ id, openid, nickname, avatar, mobile, city, create_time, update_time
 `
 
 func GetUserByOpenid(openid string) (*WxappUser, error) {
-	sql := "SELECT " + userColumnList + " FROM wxapp_mall_user WHERE openid = " + openid
+	sql := "SELECT " + userColumnList + " FROM wxapp_mall_user WHERE openid = '" + openid + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

@@ -15,8 +15,8 @@ func (h *CMSHandler) GetSPUList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
+	spuVOList := []defs.SPUVO{}
 	spuList, total := h.service.SPUService.GetSPUList(page, size)
-	var spuVOList []defs.SPUVO
 	for _, v := range *spuList {
 		spuVO := defs.SPUVO{}
 		spuVO.Id = v.Id
@@ -75,6 +75,10 @@ func (h *CMSHandler) DoEditSPU(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		panic(errs.ErrorParameterValidate)
+	}
+	category := h.service.CategoryService.GetCategoryById(req.CategoryId)
+	if category.Id == 0 {
+		panic(errs.ErrorCategory)
 	}
 	if req.Id == 0 {
 		spuDO := model.SPU{}
@@ -135,7 +139,7 @@ func (h *CMSHandler) DoDeleteSPU(w http.ResponseWriter, r *http.Request) {
 
 func (h *CMSHandler) GetSPUSpecList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := strconv.Atoi(vars["id"])
+	id, _ := strconv.Atoi(vars["spuId"])
 	specList := h.service.SPUService.GetSPUSpecList(id)
 	sendNormalResponse(w, specList)
 }

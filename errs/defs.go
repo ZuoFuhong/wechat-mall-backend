@@ -29,10 +29,11 @@ var (
 	ErrorCategory               = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10012, ErrMsg: "Category does not exist"}}
 	ErrorGridCategory           = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10013, ErrMsg: "GridCategory does not exist"}}
 	ErrorSpecification          = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10014, ErrMsg: "Specification does not exist"}}
-	ErrorSPU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10015, ErrMsg: "SPU does not exist"}}
-	ErrorSKU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: "SKU does not exist"}}
-	ErrorActivity               = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: "Activity does not exist"}}
-	ErrorCoupon                 = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10018, ErrMsg: "Coupon does not exist"}}
+	ErrorSpecificationAttr      = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10015, ErrMsg: "Specification attr does not exist"}}
+	ErrorSPU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: "SPU does not exist"}}
+	ErrorSKU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: "SKU does not exist"}}
+	ErrorActivity               = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10018, ErrMsg: "Activity does not exist"}}
+	ErrorCoupon                 = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10019, ErrMsg: "Coupon does not exist"}}
 )
 
 func NewParameterError(errMsg string) HttpErr {
@@ -51,18 +52,22 @@ func NewSpecificationError(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10014, ErrMsg: errMsg}}
 }
 
-func NewErrorSPU(errMsg string) HttpErr {
+func NewSpecificationAttr(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10015, ErrMsg: errMsg}}
 }
 
-func NewErrorSKU(errMsg string) HttpErr {
+func NewErrorSPU(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: errMsg}}
+}
+
+func NewErrorSKU(errMsg string) HttpErr {
+	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: errMsg}}
 }
 
 func NewErrorActivity(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10018, ErrMsg: errMsg}}
 }
 
 func NewErrorCoupon(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10018, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10019, ErrMsg: errMsg}}
 }

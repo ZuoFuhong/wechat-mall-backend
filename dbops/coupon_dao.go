@@ -21,7 +21,7 @@ func QueryCouponList(activityId int) (*[]model.Coupon, error) {
 	for rows.Next() {
 		coupon := model.Coupon{}
 		err := rows.Scan(&coupon.Id, &coupon.ActivityId, &coupon.Title, &coupon.FullMoney, &coupon.Minus, &coupon.Rate,
-			&coupon.Rate, &coupon.Type, &coupon.StartTime, &coupon.EndTime, &coupon.Description, &coupon.Del,
+			&coupon.Type, &coupon.StartTime, &coupon.EndTime, &coupon.Description, &coupon.Del,
 			&coupon.CreateTime, &coupon.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -32,14 +32,14 @@ func QueryCouponList(activityId int) (*[]model.Coupon, error) {
 }
 
 func QueryCouponById(id int) (*model.Coupon, error) {
-	sql := "SELECT " + couponColumnList + " FROM wxapp_mall_coupon WHERE is_del = 0 AND id = ?" + strconv.Itoa(id)
+	sql := "SELECT " + couponColumnList + " FROM wxapp_mall_coupon WHERE is_del = 0 AND id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
 	}
 	coupon := model.Coupon{}
 	if rows.Next() {
-		err := rows.Scan(&coupon.Id, &coupon.ActivityId, &coupon.Title, &coupon.FullMoney, &coupon.Minus, &coupon.Rate,
+		err := rows.Scan(&coupon.Id, &coupon.ActivityId, &coupon.Title, &coupon.FullMoney, &coupon.Minus,
 			&coupon.Rate, &coupon.Type, &coupon.StartTime, &coupon.EndTime, &coupon.Description, &coupon.Del,
 			&coupon.CreateTime, &coupon.UpdateTime)
 		if err != nil {
@@ -75,7 +75,7 @@ WHERE id = ?
 		return err
 	}
 	_, err = stmt.Exec(coupon.ActivityId, coupon.Title, coupon.FullMoney, coupon.Minus, coupon.Rate, coupon.Type,
-		coupon.StartTime, coupon.Description, coupon.Del, time.Now())
+		coupon.StartTime, coupon.EndTime, coupon.Description, coupon.Del, time.Now(), coupon.Id)
 	if err != nil {
 		return err
 	}

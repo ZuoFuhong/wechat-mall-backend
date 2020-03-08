@@ -15,7 +15,7 @@ func (h *CMSHandler) GetActivityList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
-	var activityVOList []defs.ActivityVO
+	activityVOList := []defs.ActivityVO{}
 	aList, total := h.service.ActivityService.GetActivityList(page, size)
 	for _, v := range *aList {
 		aVO := defs.ActivityVO{}
@@ -85,10 +85,13 @@ func (h *CMSHandler) DoEditActivity(w http.ResponseWriter, r *http.Request) {
 		h.service.ActivityService.AddActivity(activity)
 	} else {
 		activity := h.service.ActivityService.GetActivityByName(req.Name)
-		if activity.Id != req.Id {
+		if activity.Id != 0 && activity.Id != req.Id {
 			panic(errs.NewErrorActivity("The name already exists"))
 		}
 		activity = h.service.ActivityService.GetActivityById(req.Id)
+		if activity.Id == 0 {
+			panic(errs.ErrorActivity)
+		}
 		activity.Title = req.Title
 		activity.Name = req.Name
 		activity.Remark = req.Remark
@@ -100,6 +103,7 @@ func (h *CMSHandler) DoEditActivity(w http.ResponseWriter, r *http.Request) {
 		activity.InternalTopPicture = req.InternalTopPicture
 		h.service.ActivityService.UpdateActivity(activity)
 	}
+	sendNormalResponse(w, "ok")
 }
 
 func (h *CMSHandler) DoDeleteActivity(w http.ResponseWriter, r *http.Request) {

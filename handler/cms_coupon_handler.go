@@ -13,10 +13,10 @@ import (
 
 func (h *CMSHandler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	activityId, _ := strconv.Atoi(vars["id"])
-	couponList := h.service.CouponService.GetCouponList(activityId)
+	activityId, _ := strconv.Atoi(vars["activityId"])
 
-	var couponVOList []defs.CouponVO
+	couponVOList := []defs.CouponVO{}
+	couponList := h.service.CouponService.GetCouponList(activityId)
 	for _, v := range *couponList {
 		couponVO := defs.CouponVO{}
 		couponVO.Id = v.Id
@@ -41,7 +41,19 @@ func (h *CMSHandler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	if coupon.Id == 0 {
 		panic(errs.ErrorCoupon)
 	}
-	sendNormalResponse(w, coupon)
+	couponVO := defs.CouponVO{}
+	couponVO.Id = coupon.Id
+	couponVO.ActivityId = coupon.ActivityId
+	couponVO.Title = coupon.Title
+	couponVO.FullMoney = coupon.FullMoney
+	couponVO.Minus = coupon.Minus
+	couponVO.Rate = coupon.Rate
+	couponVO.Type = coupon.Type
+	couponVO.StartTime = coupon.StartTime
+	couponVO.EndTime = coupon.EndTime
+	couponVO.Description = coupon.Description
+
+	sendNormalResponse(w, couponVO)
 }
 
 func (h *CMSHandler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
@@ -53,6 +65,10 @@ func (h *CMSHandler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	if err := validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
+	}
+	activity := h.service.ActivityService.GetActivityById(req.ActivityId)
+	if activity.Id == 0 {
+		panic(errs.ErrorActivity)
 	}
 	if req.Id == 0 {
 		coupon := model.Coupon{}

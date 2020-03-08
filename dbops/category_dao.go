@@ -63,7 +63,7 @@ func QueryCategoryById(id int) (*model.Category, error) {
 }
 
 func QueryCategoryByName(name string) (*model.Category, error) {
-	sql := "SELECT " + categoryColumnList + " FROM wxapp_mall_spu_category WHERE is_del = 0 AND name = " + name
+	sql := "SELECT " + categoryColumnList + " FROM wxapp_mall_spu_category WHERE is_del = 0 AND name = '" + name + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

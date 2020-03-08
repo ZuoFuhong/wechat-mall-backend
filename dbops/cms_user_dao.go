@@ -1,11 +1,13 @@
 package dbops
 
-import "time"
+import (
+	"time"
+)
 
 const cmsUserColumnList = "id, username, `password`, `email`, `mobile`, `avatar`"
 
 func GetCMSUserByUsername(username string) (*CMSUser, error) {
-	sql := "SELECT " + cmsUserColumnList + " FROM wxapp_mall_cms_user WHERE username = " + username
+	sql := "SELECT " + cmsUserColumnList + " FROM wxapp_mall_cms_user WHERE username = '" + username + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -21,7 +23,7 @@ func GetCMSUserByUsername(username string) (*CMSUser, error) {
 }
 
 func GetCMSUserByEmail(email string) (*CMSUser, error) {
-	sql := "SELECT " + cmsUserColumnList + " FROM wxapp_mall_cms_user WHERE email = " + email
+	sql := "SELECT " + cmsUserColumnList + " FROM wxapp_mall_cms_user WHERE email = '" + email + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

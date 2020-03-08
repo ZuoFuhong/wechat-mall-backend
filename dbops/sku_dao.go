@@ -80,7 +80,7 @@ func GetSKUById(id int) (*model.SKU, error) {
 }
 
 func GetSKUByCode(code string) (*model.SKU, error) {
-	sql := "SELECT " + skuColumnList + " FROM wxapp_mall_sku WHERE is_del = 0 AND code = " + code
+	sql := "SELECT " + skuColumnList + " FROM wxapp_mall_sku WHERE is_del = 0 AND code = '" + code + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

@@ -38,7 +38,14 @@ func (h *CMSHandler) GetSpecification(w http.ResponseWriter, r *http.Request) {
 	if spec.Id == 0 {
 		panic(errs.ErrorSpecification)
 	}
-	sendNormalResponse(w, spec)
+	specVO := defs.SpecificationVO{}
+	specVO.Id = spec.Id
+	specVO.Name = spec.Name
+	specVO.Description = spec.Description
+	specVO.Unit = spec.Unit
+	specVO.Standard = spec.Standard
+
+	sendNormalResponse(w, specVO)
 }
 
 func (h *CMSHandler) DoEditSpecification(w http.ResponseWriter, r *http.Request) {
@@ -59,8 +66,12 @@ func (h *CMSHandler) DoEditSpecification(w http.ResponseWriter, r *http.Request)
 		h.service.SpecificationService.AddSpecification(spec)
 	} else {
 		spec := h.service.SpecificationService.GetSpecificationByName(req.Name)
-		if spec.Id != req.Id {
+		if spec.Id != 0 && spec.Id != req.Id {
 			panic(errs.NewSpecificationError("The name already exists"))
+		}
+		spec = h.service.SpecificationService.GetSpecificationById(req.Id)
+		if spec.Id == 0 {
+			panic(errs.ErrorSpecification)
 		}
 		spec = h.service.SpecificationService.GetSpecificationById(req.Id)
 		spec.Name = req.Name
@@ -69,6 +80,7 @@ func (h *CMSHandler) DoEditSpecification(w http.ResponseWriter, r *http.Request)
 		spec.Standard = req.Standard
 		h.service.SpecificationService.UpdateSpecificationById(spec)
 	}
+	sendNormalResponse(w, "ok")
 }
 
 func (h *CMSHandler) DoDeleteSpecification(w http.ResponseWriter, r *http.Request) {
@@ -85,11 +97,10 @@ func (h *CMSHandler) DoDeleteSpecification(w http.ResponseWriter, r *http.Reques
 
 func (h *CMSHandler) GetSpecificationAttrList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	page, _ := strconv.Atoi(vars["page"])
-	size, _ := strconv.Atoi(vars["size"])
-	specAttrList, total := h.service.SpecificationService.GetSpecificationAttrList(page, size)
+	specId, _ := strconv.Atoi(vars["specId"])
+	specAttrList := h.service.SpecificationService.GetSpecificationAttrList(specId)
 
-	var attrVOs []defs.SpecificationAttrVO
+	attrVOs := []defs.SpecificationAttrVO{}
 	for _, v := range *specAttrList {
 		attrVO := defs.SpecificationAttrVO{}
 		attrVO.Id = v.Id
@@ -98,10 +109,7 @@ func (h *CMSHandler) GetSpecificationAttrList(w http.ResponseWriter, r *http.Req
 		attrVO.Extend = v.Extend
 		attrVOs = append(attrVOs, attrVO)
 	}
-	resp := make(map[string]interface{})
-	resp["list"] = attrVOs
-	resp["total"] = total
-	sendNormalResponse(w, resp)
+	sendNormalResponse(w, attrVOs)
 }
 
 func (h *CMSHandler) GetSpecificationAttr(w http.ResponseWriter, r *http.Request) {
@@ -109,9 +117,14 @@ func (h *CMSHandler) GetSpecificationAttr(w http.ResponseWriter, r *http.Request
 	id, _ := strconv.Atoi(vars["id"])
 	spec := h.service.SpecificationService.GetSpecificationAttrById(id)
 	if spec.Id == 0 {
-		panic(errs.ErrorSpecification)
+		panic(errs.ErrorSpecificationAttr)
 	}
-	sendNormalResponse(w, spec)
+	attrVO := defs.SpecificationAttrVO{}
+	attrVO.Id = spec.Id
+	attrVO.SpecId = spec.SpecId
+	attrVO.Value = spec.Value
+	attrVO.Extend = spec.Extend
+	sendNormalResponse(w, attrVO)
 }
 
 func (h *CMSHandler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Request) {
@@ -120,10 +133,14 @@ func (h *CMSHandler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		panic(errs.ErrorParameterValidate)
 	}
+	spec := h.service.SpecificationService.GetSpecificationById(req.SpecId)
+	if spec.Id == 0 {
+		panic(errs.ErrorSpecificationAttr)
+	}
 	if req.Id == 0 {
 		spec := h.service.SpecificationService.GetSpecificationAttrByValue(req.Value)
 		if spec.Id != 0 {
-			panic(errs.NewSpecificationError("The name already exists"))
+			panic(errs.NewSpecificationAttr("The value already exists"))
 		}
 		spec.SpecId = req.SpecId
 		spec.Value = req.Value
@@ -131,8 +148,12 @@ func (h *CMSHandler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Requ
 		h.service.SpecificationService.AddSpecificationAttr(spec)
 	} else {
 		spec := h.service.SpecificationService.GetSpecificationAttrByValue(req.Value)
-		if spec.Id != req.Id {
+		if spec.Id != 0 && spec.Id != req.Id {
 			panic(errs.NewSpecificationError("The name already exists"))
+		}
+		spec = h.service.SpecificationService.GetSpecificationAttrById(req.Id)
+		if spec.Id == 0 {
+			panic(errs.ErrorSpecificationAttr)
 		}
 		spec = h.service.SpecificationService.GetSpecificationAttrById(req.Id)
 		spec.SpecId = req.SpecId
@@ -140,6 +161,7 @@ func (h *CMSHandler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Requ
 		spec.Extend = req.Extend
 		h.service.SpecificationService.UpdateSpecificationAttrById(spec)
 	}
+	sendNormalResponse(w, "ok")
 }
 
 func (h *CMSHandler) DoDeleteSpecificationAttr(w http.ResponseWriter, r *http.Request) {
@@ -147,7 +169,7 @@ func (h *CMSHandler) DoDeleteSpecificationAttr(w http.ResponseWriter, r *http.Re
 	id, _ := strconv.Atoi(vars["id"])
 	spec := h.service.SpecificationService.GetSpecificationAttrById(id)
 	if spec.Id == 0 {
-		panic(errs.ErrorSpecification)
+		panic(errs.ErrorSpecificationAttr)
 	}
 	spec.Del = 1
 	h.service.SpecificationService.UpdateSpecificationAttrById(spec)

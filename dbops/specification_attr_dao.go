@@ -10,13 +10,9 @@ const specAttrColumnList = `
 id, spec_id, value, extend, is_del, create_time, update_time
 `
 
-func QuerySpecificationAttrList(page, size int) (*[]model.SpecificationAttr, error) {
-	sql := "SELECT " + specAttrColumnList + " FROM wxapp_mall_specification_attr WHERE is_del = 0 LIMIT ?, ?"
-	stmt, err := dbConn.Prepare(sql)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := stmt.Query((page-1)*size, size)
+func QuerySpecificationAttrList(specId int) (*[]model.SpecificationAttr, error) {
+	sql := "SELECT " + specAttrColumnList + " FROM wxapp_mall_specification_attr WHERE is_del = 0 AND spec_id = " + strconv.Itoa(specId)
+	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -32,29 +28,13 @@ func QuerySpecificationAttrList(page, size int) (*[]model.SpecificationAttr, err
 	return &attrList, nil
 }
 
-func CountSpecificationAttr() (int, error) {
-	sql := "SELECT COUNT(*) FROM wxapp_mall_specification_attr WHERE is_del = 0"
-	rows, err := dbConn.Query(sql)
-	if err != nil {
-		return 0, err
-	}
-	total := 0
-	if rows.Next() {
-		err := rows.Scan(&total)
-		if err != nil {
-			return 0, err
-		}
-	}
-	return total, nil
-}
-
 func AddSpecificationAttr(spec *model.SpecificationAttr) error {
 	sql := "INSERT INTO wxapp_mall_specification_attr ( " + specAttrColumnList[4:] + " ) VALUES(?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(sql, spec.SpecId, spec.Value, spec.Extend, 0, time.Now(), time.Now())
+	_, err = stmt.Exec(spec.SpecId, spec.Value, spec.Extend, 0, time.Now(), time.Now())
 	if err != nil {
 		return err
 	}
@@ -78,7 +58,7 @@ func QuerySpecificationAttrById(id int) (*model.SpecificationAttr, error) {
 }
 
 func QuerySpecificationAttrByValue(name string) (*model.SpecificationAttr, error) {
-	sql := "SELECT " + specAttrColumnList + " FROM wxapp_mall_specification_attr WHERE is_del = 0 AND value = " + name
+	sql := "SELECT " + specAttrColumnList + " FROM wxapp_mall_specification_attr WHERE is_del = 0 AND value = '" + name + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -103,7 +83,7 @@ WHERE id = ?
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(attr.SpecId, attr.Value, attr.Extend, attr.Del, time.Now())
+	_, err = stmt.Exec(attr.SpecId, attr.Value, attr.Extend, attr.Del, time.Now(), attr.Id)
 	if err != nil {
 		return err
 	}

@@ -6,7 +6,9 @@ import (
 	"wechat-mall-backend/model"
 )
 
-const spuSpecColumnList = `id spu_id, spec_id, is_del, create_time, update_time`
+const spuSpecColumnList = `
+id, spu_id, spec_id, is_del, create_time, update_time
+`
 
 func GetSPUSpecList(spuId int) (*[]model.SPUSpec, error) {
 	sql := "SELECT " + spuSpecColumnList + " FROM wxapp_mall_spu_spec WHERE is_del = 0 AND spu_id = " + strconv.Itoa(spuId)
@@ -27,7 +29,7 @@ func GetSPUSpecList(spuId int) (*[]model.SPUSpec, error) {
 }
 
 func DeleteSPUSpec(spuId int) error {
-	sql := "UPDATE SET is_del = 1 WHERE spu_id = " + strconv.Itoa(spuId)
+	sql := "UPDATE wxapp_mall_spu_spec SET is_del = 1 WHERE spu_id = " + strconv.Itoa(spuId)
 	_, err := dbConn.Exec(sql)
 	if err != nil {
 		return err

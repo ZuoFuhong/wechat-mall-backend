@@ -11,7 +11,7 @@ type ISpecificationService interface {
 	GetSpecificationByName(name string) *model.Specification
 	UpdateSpecificationById(spec *model.Specification)
 	AddSpecification(spec *model.Specification)
-	GetSpecificationAttrList(page, size int) (*[]model.SpecificationAttr, int)
+	GetSpecificationAttrList(specId int) *[]model.SpecificationAttr
 	GetSpecificationAttrById(id int) *model.SpecificationAttr
 	GetSpecificationAttrByValue(value string) *model.SpecificationAttr
 	UpdateSpecificationAttrById(spec *model.SpecificationAttr)
@@ -68,16 +68,12 @@ func (ss *specificationService) AddSpecification(spec *model.Specification) {
 	}
 }
 
-func (ss *specificationService) GetSpecificationAttrList(page, size int) (*[]model.SpecificationAttr, int) {
-	attrList, err := dbops.QuerySpecificationAttrList(page, size)
+func (ss *specificationService) GetSpecificationAttrList(specId int) *[]model.SpecificationAttr {
+	attrList, err := dbops.QuerySpecificationAttrList(specId)
 	if err != nil {
 		panic(err)
 	}
-	total, err := dbops.CountSpecificationAttr()
-	if err != nil {
-		panic(err)
-	}
-	return attrList, total
+	return attrList
 }
 
 func (ss *specificationService) GetSpecificationAttrById(id int) *model.SpecificationAttr {

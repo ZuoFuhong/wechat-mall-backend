@@ -103,7 +103,7 @@ CREATE TABLE `wxapp_mall_specification` (
 -- 商城-规格属性表
 CREATE TABLE `wxapp_mall_specification_attr` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `spec_id` int(11) NOT NULL DEFAULT '' COMMENT '规格ID',
+    `spec_id` int(11) NOT NULL DEFAULT '0' COMMENT '规格ID',
     `value` varchar(10) NOT NULL DEFAULT '' COMMENT '属性值',
     `extend` varchar(30) NOT NULL DEFAULT '' COMMENT '扩展',
     `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',

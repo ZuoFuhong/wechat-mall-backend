@@ -20,11 +20,7 @@ func QueryBannerList(name string, page, size int) (*[]model.Banner, error) {
 		sql += " AND name = " + name
 	}
 	sql += " LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
-	stmt, err := dbConn.Prepare(sql)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := stmt.Query(sql)
+	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
 	}

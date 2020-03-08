@@ -73,11 +73,11 @@ func (h *CMSHandler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) 
 		h.service.GridCategoryService.AddGridCategory(gridC)
 	} else {
 		gridC := h.service.GridCategoryService.GetGridCategoryByName(req.Name)
-		if gridC.Id != req.Id {
+		if gridC.Id != 0 && gridC.Id != req.Id {
 			panic(errs.NewGridCategoryError("The name already exists"))
 		}
 		gridC = h.service.GridCategoryService.GetGridCategoryById(req.Id)
-		if gridC.Id != 0 {
+		if gridC.Id == 0 {
 			panic(errs.ErrorGridCategory)
 		}
 		gridC.Title = req.Title

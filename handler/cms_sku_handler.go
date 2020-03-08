@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
-	"wechat-mall-backend/model"
 )
 
 func (h *CMSHandler) GetSKUList(w http.ResponseWriter, r *http.Request) {
@@ -16,11 +15,10 @@ func (h *CMSHandler) GetSKUList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
+	skuVOs := []defs.SKUVO{}
 	skuList, total := h.service.SKUService.GetSKUList(page, size)
-
-	var skuVOs []model.SKU
 	for _, v := range *skuList {
-		skuVO := model.SKU{}
+		skuVO := defs.SKUVO{}
 		skuVO.Id = v.Id
 		skuVO.Title = v.Title
 		skuVO.Price = v.Price
@@ -45,7 +43,7 @@ func (h *CMSHandler) GetSKU(w http.ResponseWriter, r *http.Request) {
 	if sku.Id == 0 {
 		panic(errs.ErrorSKU)
 	}
-	skuVO := model.SKU{}
+	skuVO := defs.SKUVO{}
 	skuVO.Id = sku.Id
 	skuVO.Title = sku.Title
 	skuVO.Price = sku.Price
@@ -68,6 +66,10 @@ func (h *CMSHandler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 	if err = validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
+	spu := h.service.SPUService.GetSPUById(req.SpuId)
+	if spu.Id == 0 {
+		panic(errs.ErrorSPU)
+	}
 	if req.Id == 0 {
 		sku := h.service.SKUService.GetSKUByCode(req.Code)
 		if sku.Id != 0 {
@@ -84,7 +86,7 @@ func (h *CMSHandler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 		h.service.SKUService.AddSKU(sku)
 	} else {
 		sku := h.service.SKUService.GetSKUByCode(req.Code)
-		if sku.Id != req.Id {
+		if sku.Id != 0 && sku.Id != req.Id {
 			panic(errs.NewErrorSKU("The code already exists"))
 		}
 		sku = h.service.SKUService.GetSKUById(req.Id)
@@ -101,6 +103,7 @@ func (h *CMSHandler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 		sku.Specs = req.Specs
 		h.service.SKUService.UpdateSKUById(sku)
 	}
+	sendNormalResponse(w, "ok")
 }
 
 func (h *CMSHandler) DoDeleteSKU(w http.ResponseWriter, r *http.Request) {

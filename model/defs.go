@@ -143,7 +143,7 @@ type Activity struct {
 	Title              string
 	Name               string
 	Remark             string
-	Online             string
+	Online             int
 	StartTime          string
 	EndTime            string
 	Description        string

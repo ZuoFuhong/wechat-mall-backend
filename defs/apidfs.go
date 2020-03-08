@@ -84,7 +84,7 @@ type GridCategoryReq struct {
 	Id         int    `json:"id"`
 	Title      string `json:"title" validate:"required"`
 	Name       string `json:"name" validate:"required"`
-	CategoryId int    `json:"category" validate:"required"`
+	CategoryId int    `json:"category_id" validate:"required"`
 	Picture    string `json:"picture" validate:"required"`
 }
 
@@ -194,7 +194,7 @@ type ActivityReq struct {
 	Title              string `json:"title" validate:"required"`
 	Name               string `json:"name" validate:"required"`
 	Remark             string `json:"remark" validate:"required"`
-	Online             string `json:"online" validate:"required"`
+	Online             int    `json:"online" validate:"required"`
 	StartTime          string `json:"start_time" validate:"required"`
 	EndTime            string `json:"end_time" validate:"required"`
 	Description        string `json:"description" validate:"required"`
@@ -207,7 +207,7 @@ type ActivityVO struct {
 	Title              string `json:"title"`
 	Name               string `json:"name"`
 	Remark             string `json:"remark"`
-	Online             string `json:"online"`
+	Online             int    `json:"online"`
 	StartTime          string `json:"start_time"`
 	EndTime            string `json:"end_time"`
 	Description        string `json:"description"`

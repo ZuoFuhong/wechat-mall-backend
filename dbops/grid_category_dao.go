@@ -16,7 +16,7 @@ func QueryGridCategoryList(page, size int) (*[]model.GridCategory, error) {
 	if err != nil {
 		return nil, err
 	}
-	rows, err := stmt.Query(page, size)
+	rows, err := stmt.Query((page-1)*size, size)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func CountGridCategory() (int, error) {
 }
 
 func InsertGridCategory(gridC *model.GridCategory) error {
-	sql := "INSERT INTO wxapp_mall_grid_category( " + gridCategoryColumnList[4:] + " ) VALUES(?, ?, ?, ?, ?, ?)"
+	sql := "INSERT INTO wxapp_mall_grid_category( " + gridCategoryColumnList[4:] + " ) VALUES(?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func QueryGridCategoryById(id int) (*model.GridCategory, error) {
 }
 
 func QueryGridCategoryByName(name string) (*model.GridCategory, error) {
-	sql := "SELECT " + gridCategoryColumnList + " FROM wxapp_mall_grid_category WHERE is_del = 0 AND name = " + name
+	sql := "SELECT " + gridCategoryColumnList + " FROM wxapp_mall_grid_category WHERE is_del = 0 AND name = '" + name + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
