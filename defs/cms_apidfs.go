@@ -170,6 +170,7 @@ type CMSCouponReq struct {
 	StartTime   string `json:"start_time" validate:"required"`
 	EndTime     string `json:"end_time" validate:"required"`
 	Description string `json:"description"`
+	Online      int    `json:"online"`
 }
 
 type CMSCouponVO struct {
@@ -182,4 +183,5 @@ type CMSCouponVO struct {
 	StartTime   string `json:"start_time"`
 	EndTime     string `json:"end_time"`
 	Description string `json:"description"`
+	Online      int    `json:"online"`
 }

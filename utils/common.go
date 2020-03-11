@@ -22,6 +22,17 @@ func RandomStr(lenth int) string {
 	return string(tmpArr)
 }
 
+func RandomNumberStr(lenth int) string {
+	chars := [...]byte{'1', '2', '3', '4', '5', '6', '7', '8', '9', '0'}
+	tmpArr := make([]byte, 0, lenth)
+	rand.Seed(time.Now().Unix())
+	for i := 0; i < lenth; i++ {
+		n := rand.Intn(len(chars))
+		tmpArr = append(tmpArr, chars[n])
+	}
+	return string(tmpArr)
+}
+
 func Md5Encrpyt(passwd string) string {
 	ctx := md5.New()
 	ctx.Write([]byte(passwd))

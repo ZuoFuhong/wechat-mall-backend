@@ -17,7 +17,7 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	size, _ := strconv.Atoi(vars["size"])
 
 	couponVOList := []defs.CMSCouponVO{}
-	couponList := h.service.CouponService.GetCouponList(page, size)
+	couponList, total := h.service.CouponService.GetCouponList(page, size, 0)
 	for _, v := range *couponList {
 		couponVO := defs.CMSCouponVO{}
 		couponVO.Id = v.Id
@@ -31,7 +31,10 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 		couponVO.Description = v.Description
 		couponVOList = append(couponVOList, couponVO)
 	}
-	defs.SendNormalResponse(w, couponVOList)
+	resp := make(map[string]interface{})
+	resp["list"] = couponVOList
+	resp["total"] = total
+	defs.SendNormalResponse(w, resp)
 }
 
 func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {

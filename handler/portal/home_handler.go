@@ -45,7 +45,3 @@ func (h *Handler) GetGridCategoryList(w http.ResponseWriter, r *http.Request) {
 	resp["total"] = total
 	defs.SendNormalResponse(w, resp)
 }
-
-func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
-
-}

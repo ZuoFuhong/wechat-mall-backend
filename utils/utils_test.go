@@ -59,3 +59,13 @@ func Test_Map(t *testing.T) {
 	fmt.Println(resp)
 	fmt.Println(len(resp))
 }
+
+func Test_switch(t *testing.T) {
+	a := 1
+	switch a {
+	case 1:
+		fmt.Println("1")
+	case 2, 3:
+		fmt.Println("2")
+	}
+}

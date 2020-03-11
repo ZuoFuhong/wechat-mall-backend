@@ -32,8 +32,10 @@ func QueryCouponLog(userId, couponId int) (*model.WechatMallCouponLogDO, error) 
 	return &couponLog, nil
 }
 
-func QueryCouponLogList(userId, page, size int) (*[]model.WechatMallCouponLogDO, error) {
-	sql := "SELECT " + couponLogColumnList + " FROM wechat_mall_coupon_log WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
+func QueryCouponLogList(userId, status, page, size int) (*[]model.WechatMallCouponLogDO, error) {
+	sql := "SELECT " + couponLogColumnList + " FROM wechat_mall_coupon_log WHERE is_del = 0"
+	sql += " AND user_id = " + strconv.Itoa(userId)
+	sql += " AND status = " + strconv.Itoa(status)
 	if page > 0 && size > 0 {
 		sql += " LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
 	}
@@ -53,6 +55,24 @@ func QueryCouponLogList(userId, page, size int) (*[]model.WechatMallCouponLogDO,
 		couponLogList = append(couponLogList, couponLog)
 	}
 	return &couponLogList, nil
+}
+
+func CountUserCouponLog(userId, status int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_coupon_log WHERE is_del = 0"
+	sql += " AND user_id = " + strconv.Itoa(userId)
+	sql += " AND status = " + strconv.Itoa(status)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	if rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total, nil
 }
 
 func UpdateCouponLogById(couponLog *model.WechatMallCouponLogDO) error {

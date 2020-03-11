@@ -147,6 +147,7 @@ type WechatMallCouponDO struct {
 	StartTime   string // 开始时间
 	EndTime     string // 截止时间
 	Description string // 规则描述
+	Online      int    // 是否上线
 	Del         int
 	CreateTime  string
 	UpdateTime  string
