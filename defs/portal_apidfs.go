@@ -31,7 +31,6 @@ type PortalCouponVO struct {
 }
 
 type PortalTakeCouponReq struct {
-	UserId   int `json:"userId" validate:"required"`
 	CouponId int `json:"couponId" validate:"required"`
 }
 
@@ -92,4 +91,22 @@ type PortalSkuVO struct {
 	Code  string `json:"code"`  // 编码
 	Stock int    `json:"stock"` // 库存量
 	Specs string `json:"specs"` // 多规格属性
+}
+
+type PortalCartGoodsReq struct {
+	GoodsId int `json:"goodsId" validate:"required"` // 商品ID
+	SkuId   int `json:"skuId" validate:"required"`   // skuId
+	Num     int `json:"num" validate:"required"`     // 数量
+}
+
+type PortalCartGoodsVO struct {
+	GoodsId       int        `json:"goodsId"`       // 商品ID
+	Title         string     `json:"title"`         // 标题
+	Price         string     `json:"price"`         // 价格
+	DiscountPrice string     `json:"discountPrice"` // 折扣
+	Picture       string     `json:"picture"`       // 图片
+	Tags          string     `json:"tags"`          // 标签
+	SkuId         int        `json:"skuId"`         // skuId
+	SkuSpecs      []SkuSpecs `json:"skuSpecs"`      // sku值
+	Num           int        `json:"num"`           // 数量
 }

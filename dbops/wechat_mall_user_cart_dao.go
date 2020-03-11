@@ -31,6 +31,22 @@ func QueryCartList(userId, page, size int) (*[]model.WechatMallUserCartDO, error
 	return &cartList, nil
 }
 
+func CountCartGoods(userId int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_user_cart WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	if rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, nil
+		}
+	}
+	return total, nil
+}
+
 func AddUserCart(cartDO *model.WechatMallUserCartDO) error {
 	sql := "INSERT INTO wechat_mall_user_cart ( " + cartColumnList[4:] + " ) VALUES (?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)

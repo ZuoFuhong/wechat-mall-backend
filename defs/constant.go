@@ -7,6 +7,7 @@ const (
 	MiniappTokenExpire = 2 * 3600
 	CMSCodePrefix      = "cmscode:"
 	CMSCodeExpire      = 300
+	ContextKey         = "uid"
 )
 
 type SkuSpecs struct {

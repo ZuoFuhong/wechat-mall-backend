@@ -14,7 +14,7 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
-	userId, _ := strconv.Atoi(vars["userId"])
+	userId := r.Context().Value(defs.ContextKey).(int)
 
 	couponList, total := h.service.CouponService.GetCouponList(page, size, 1)
 	voList := []defs.PortalCouponVO{}
@@ -50,15 +50,18 @@ func (h *Handler) TakeCoupon(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(errs.ErrorParameterValidate)
 	}
-	coupon := h.service.CouponService.GetCouponById(req.CouponId)
+	couponId := req.CouponId
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	coupon := h.service.CouponService.GetCouponById(couponId)
 	if coupon.Id == 0 {
 		panic(errs.ErrorCoupon)
 	}
-	couponLog := h.service.CouponService.QueryCouponLog(req.UserId, req.CouponId)
+	couponLog := h.service.CouponService.QueryCouponLog(userId, couponId)
 	if couponLog.Id == 0 {
 		panic(errs.NewErrorCoupon("请勿重复领取！"))
 	}
-	h.service.CouponService.RecordCouponLog(req.UserId, req.CouponId)
+	h.service.CouponService.RecordCouponLog(userId, couponId)
 	defs.SendNormalResponse(w, "ok")
 }
 
@@ -66,10 +69,10 @@ func (h *Handler) TakeCoupon(w http.ResponseWriter, r *http.Request) {
 // status: 0-未使用 1-已使用 2-已过期
 func (h *Handler) GetUserCouponList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userId, _ := strconv.Atoi(vars["userId"])
 	status, _ := strconv.Atoi(vars["status"])
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
+	userId := r.Context().Value(defs.ContextKey).(int)
 
 	voList, total := h.service.CouponService.QueryUserCoupon(userId, status, page, size)
 	resp := make(map[string]interface{})
@@ -81,8 +84,9 @@ func (h *Handler) GetUserCouponList(w http.ResponseWriter, r *http.Request) {
 // 删除领取的优惠券
 func (h *Handler) DoDeleteCouponLog(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	userId, _ := strconv.Atoi(vars["userId"])
 	couponLogId, _ := strconv.Atoi(vars["id"])
+	userId := r.Context().Value(defs.ContextKey).(int)
+
 	couponLog := h.service.CouponService.QueryCouponLog(userId, couponLogId)
 	if couponLog.Id == 0 {
 		panic(errs.NewErrorCoupon("未知的记录！"))

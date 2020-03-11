@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
 	"wechat-mall-backend/utils"
 )
@@ -42,10 +44,17 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			if len(tmpArr) != 2 {
 				panic(errs.ErrorTokenInvalid)
 			}
-			refreshToken := tmpArr[1]
-			if !utils.ValidateToken(refreshToken) {
+			accessToken := tmpArr[1]
+			if !utils.ValidateToken(accessToken) {
 				panic(errs.ErrorTokenInvalid)
 			}
+			payload, err := utils.ParseToken(accessToken)
+			if err != nil {
+				panic(errs.ErrorTokenInvalid)
+			}
+			// Inject the uid into the context
+			ctx := context.WithValue(r.Context(), defs.ContextKey, payload.Uid)
+			r = r.WithContext(ctx)
 		}
 	nextHandler:
 		next.ServeHTTP(w, r)
