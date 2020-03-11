@@ -28,3 +28,7 @@ func Test_MD5(t *testing.T) {
 	val := Md5Encrpyt("123456")
 	fmt.Println(val)
 }
+
+func Test_bean(t *testing.T) {
+
+}

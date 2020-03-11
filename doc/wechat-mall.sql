@@ -214,6 +214,8 @@ CREATE TABLE `wechat_mall_user_cart` (
 CREATE TABLE `wechat_mall_user_address` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `contacts` varchar(15) NOT NULL DEFAULT '' COMMENT '联系人',
+    `mobile` varchar(11) NOT NULL DEFAULT '' COMMENT '手机号',
     `province_id` varchar(10) NOT NULL DEFAULT '' COMMENT '省份编码',
     `city_id` varchar(10) NOT NULL DEFAULT '' COMMENT '城市编码',
     `area_id` varchar(10) NOT NULL DEFAULT '' COMMENT '地区编码',

@@ -7,18 +7,19 @@ import (
 )
 
 const userAddressColumnList = `
-id, user_id, province_id, city_id, area_id, province_str, city_str, area_str, address, is_default, 
+id, user_id, contacts, mobile, province_id, city_id, area_id, province_str, city_str, area_str, address, is_default, 
 is_del, create_time, update_time
 `
 
 func AddUserAddress(address *model.WechatMallUserAddressDO) error {
-	sql := "INSERT INTO wechat_mall_user_address ( " + userAddressColumnList[4:] + " ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql := "INSERT INTO wechat_mall_user_address ( " + userAddressColumnList[4:] + " ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(address.UserId, address.ProvinceId, address.CityId, address.AreaId, address.ProvinceStr,
-		address.CityStr, address.AreaStr, address.Address, address.IsDefault, 0, time.Now(), time.Now())
+	_, err = stmt.Exec(address.UserId, address.Contacts, address.Mobile, address.ProvinceId, address.CityId,
+		address.AreaId, address.ProvinceStr, address.CityStr, address.AreaStr, address.Address, address.IsDefault,
+		0, time.Now(), time.Now())
 	return err
 }
 
@@ -34,15 +35,31 @@ func ListUserAddress(userId, page, size int) (*[]model.WechatMallUserAddressDO, 
 	addressList := []model.WechatMallUserAddressDO{}
 	for rows.Next() {
 		address := model.WechatMallUserAddressDO{}
-		err := rows.Scan(&address.Id, &address.UserId, &address.ProvinceId, &address.CityId, &address.AreaId,
-			&address.ProvinceStr, &address.CityStr, &address.AreaStr, &address.Address, &address.IsDefault,
-			&address.Del, &address.CreateTime, &address.UpdateTime)
+		err := rows.Scan(&address.Id, &address.UserId, &address.Contacts, &address.Mobile, &address.ProvinceId,
+			&address.CityId, &address.AreaId, &address.ProvinceStr, &address.CityStr, &address.AreaStr,
+			&address.Address, &address.IsDefault, &address.Del, &address.CreateTime, &address.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
 		addressList = append(addressList, address)
 	}
 	return &addressList, nil
+}
+
+func CountUserAddress(userId int) (int, error) {
+	sql := "SELECT " + userAddressColumnList + " FROM wechat_mall_user_address WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	if rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total, nil
 }
 
 func QueryUserAddressById(id int) (*model.WechatMallUserAddressDO, error) {
@@ -53,9 +70,9 @@ func QueryUserAddressById(id int) (*model.WechatMallUserAddressDO, error) {
 	}
 	address := model.WechatMallUserAddressDO{}
 	if rows.Next() {
-		err := rows.Scan(&address.Id, &address.UserId, &address.ProvinceId, &address.CityId, &address.AreaId,
-			&address.ProvinceStr, &address.CityStr, &address.AreaStr, &address.Address, &address.IsDefault,
-			&address.Del, &address.CreateTime, &address.UpdateTime)
+		err := rows.Scan(&address.Id, &address.UserId, &address.Contacts, &address.Mobile, &address.ProvinceId,
+			&address.CityId, &address.AreaId, &address.ProvinceStr, &address.CityStr, &address.AreaStr,
+			&address.Address, &address.IsDefault, &address.Del, &address.CreateTime, &address.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -66,15 +83,34 @@ func QueryUserAddressById(id int) (*model.WechatMallUserAddressDO, error) {
 func UpdateUserAddress(address *model.WechatMallUserAddressDO) error {
 	sql := `
 UPDATE wechat_mall_user_address
-SET user_id = ?, province_id = ?, city_id = ?, area_id = ?, province_str = ?, city_str = ?, area_str = ?, 
-address = ?, is_default = ?, is_del = ?, update_time = ?
+SET user_id = ?, contacts = ?, mobile = ?, province_id = ?, city_id = ?, area_id = ?, province_str = ?, 
+    city_str = ?, area_str = ?, address = ?, is_default = ?, is_del = ?, update_time = ?
 WHERE id = ?
 `
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(address.UserId, address.ProvinceId, address.CityId, address.AreaId, address.ProvinceStr,
-		address.CityStr, address.AreaStr, address.Address, address.IsDefault, 0, time.Now(), time.Now())
+	_, err = stmt.Exec(address.UserId, address.Contacts, address.Mobile, address.ProvinceId, address.CityId,
+		address.AreaId, address.ProvinceStr, address.CityStr, address.AreaStr, address.Address, address.IsDefault,
+		0, time.Now(), time.Now())
 	return err
+}
+
+func QueryDefaultAddress(userId int) (*model.WechatMallUserAddressDO, error) {
+	sql := "SELECT " + userAddressColumnList + " FROM wechat_mall_user_address WHERE is_del = 0 AND is_default = 1 AND user_id = " + strconv.Itoa(userId)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	address := model.WechatMallUserAddressDO{}
+	if rows.Next() {
+		err := rows.Scan(&address.Id, &address.UserId, &address.Contacts, &address.Mobile, &address.ProvinceId,
+			&address.CityId, &address.AreaId, &address.ProvinceStr, &address.CityStr, &address.AreaStr,
+			&address.Address, &address.IsDefault, &address.Del, &address.CreateTime, &address.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &address, nil
 }
