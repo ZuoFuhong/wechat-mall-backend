@@ -6,7 +6,7 @@ import (
 )
 
 type ICouponService interface {
-	GetCouponList(activityId int) *[]model.WechatMallCouponDO
+	GetCouponList(page, size int) *[]model.WechatMallCouponDO
 	GetCouponById(id int) *model.WechatMallCouponDO
 	AddCoupon(coupon *model.WechatMallCouponDO)
 	UpdateCouponById(coupon *model.WechatMallCouponDO)
@@ -20,8 +20,8 @@ func NewCouponService() ICouponService {
 	return &service
 }
 
-func (cs *couponService) GetCouponList(activityId int) *[]model.WechatMallCouponDO {
-	couponList, err := dbops.QueryCouponList(activityId, 0, 0)
+func (cs *couponService) GetCouponList(page, size int) *[]model.WechatMallCouponDO {
+	couponList, err := dbops.QueryCouponList(page, size)
 	if err != nil {
 		panic(err)
 	}

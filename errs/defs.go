@@ -32,7 +32,6 @@ var (
 	ErrorSpecificationAttr      = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10015, ErrMsg: "Specification attr does not exist"}}
 	ErrorGoods                  = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: "Goods does not exist"}}
 	ErrorSKU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: "SKU does not exist"}}
-	ErrorActivity               = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10018, ErrMsg: "Activity does not exist"}}
 	ErrorCoupon                 = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10019, ErrMsg: "Coupon does not exist"}}
 )
 
@@ -66,10 +65,6 @@ func NewErrorGoods(errMsg string) HttpErr {
 
 func NewErrorSKU(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: errMsg}}
-}
-
-func NewErrorActivity(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10018, ErrMsg: errMsg}}
 }
 
 func NewErrorCoupon(errMsg string) HttpErr {

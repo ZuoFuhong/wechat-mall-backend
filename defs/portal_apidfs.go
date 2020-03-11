@@ -16,11 +16,3 @@ type PortalGridCategoryVO struct {
 	CategoryId int    `json:"category"`
 	Picture    string `json:"picture"`
 }
-
-type PortalActivityVO struct {
-	Id              int    `json:"id"`
-	Online          int    `json:"online"`
-	StartTime       string `json:"start_time"`
-	EndTime         string `json:"end_time"`
-	EntrancePicture string `json:"entrance_picture"`
-}

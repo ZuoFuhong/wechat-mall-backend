@@ -13,14 +13,14 @@ import (
 
 func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	activityId, _ := strconv.Atoi(vars["activityId"])
+	page, _ := strconv.Atoi(vars["page"])
+	size, _ := strconv.Atoi(vars["size"])
 
 	couponVOList := []defs.CMSCouponVO{}
-	couponList := h.service.CouponService.GetCouponList(activityId)
+	couponList := h.service.CouponService.GetCouponList(page, size)
 	for _, v := range *couponList {
 		couponVO := defs.CMSCouponVO{}
 		couponVO.Id = v.Id
-		couponVO.ActivityId = v.ActivityId
 		couponVO.Title = v.Title
 		couponVO.FullMoney = v.FullMoney
 		couponVO.Minus = v.Minus
@@ -43,7 +43,6 @@ func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	}
 	couponVO := defs.CMSCouponVO{}
 	couponVO.Id = coupon.Id
-	couponVO.ActivityId = coupon.ActivityId
 	couponVO.Title = coupon.Title
 	couponVO.FullMoney = coupon.FullMoney
 	couponVO.Minus = coupon.Minus
@@ -65,13 +64,8 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 	if err := validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
-	activity := h.service.ActivityService.GetActivityById(req.ActivityId)
-	if activity.Id == 0 {
-		panic(errs.ErrorActivity)
-	}
 	if req.Id == 0 {
 		coupon := model.WechatMallCouponDO{}
-		coupon.ActivityId = req.ActivityId
 		coupon.Title = req.Title
 		coupon.FullMoney = req.FullMoney
 		coupon.Minus = req.Minus
@@ -86,7 +80,6 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 		if coupon.Id == 0 {
 			panic(errs.ErrorCoupon)
 		}
-		coupon.ActivityId = req.ActivityId
 		coupon.Title = req.Title
 		coupon.FullMoney = req.FullMoney
 		coupon.Minus = req.Minus

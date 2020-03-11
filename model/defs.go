@@ -136,26 +136,9 @@ type WechatMallSkuDO struct {
 	UpdateTime string
 }
 
-// 商城-活动
-type WechatMallActivityDO struct {
-	Id              ID
-	Title           string // 标题
-	Name            string // 活动名称
-	Remark          string // 提示
-	Online          int    // 是否上线
-	StartTime       string // 开始时间
-	EndTime         string // 结束时间
-	Description     string // 描述
-	EntrancePicture string // 入口图
-	Del             int
-	CreateTime      string
-	UpdateTime      string
-}
-
-// 商城-活动优惠券
+// 商城-优惠券
 type WechatMallCouponDO struct {
 	Id          ID
-	ActivityId  ID     // 活动ID
 	Title       string // 标题
 	FullMoney   string // 满减额
 	Minus       string // 优惠金额

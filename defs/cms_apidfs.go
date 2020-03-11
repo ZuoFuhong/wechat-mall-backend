@@ -160,33 +160,8 @@ type CMSSKUVO struct {
 	Specs   string `json:"specs"`
 }
 
-type CMSActivityReq struct {
-	Id              int    `json:"id"`
-	Title           string `json:"title" validate:"required"`
-	Name            string `json:"name" validate:"required"`
-	Remark          string `json:"remark" validate:"required"`
-	Online          int    `json:"online" validate:"required"`
-	StartTime       string `json:"start_time" validate:"required"`
-	EndTime         string `json:"end_time" validate:"required"`
-	Description     string `json:"description" validate:"required"`
-	EntrancePicture string `json:"entrance_picture" validate:"required"`
-}
-
-type CMSActivityVO struct {
-	Id              int    `json:"id"`
-	Title           string `json:"title"`
-	Name            string `json:"name"`
-	Remark          string `json:"remark"`
-	Online          int    `json:"online"`
-	StartTime       string `json:"start_time"`
-	EndTime         string `json:"end_time"`
-	Description     string `json:"description"`
-	EntrancePicture string `json:"entrance_picture"`
-}
-
 type CMSCouponReq struct {
 	Id          int    `json:"id"`
-	ActivityId  int    `json:"activity_id" validate:"required"`
 	Title       string `json:"title" validate:"required"`
 	FullMoney   string `json:"full_money" validate:"required"`
 	Minus       string `json:"minus" validate:"required"`
@@ -199,7 +174,6 @@ type CMSCouponReq struct {
 
 type CMSCouponVO struct {
 	Id          int    `json:"id"`
-	ActivityId  int    `json:"activity_id"`
 	Title       string `json:"title"`
 	FullMoney   string `json:"full_money"`
 	Minus       string `json:"minus"`
