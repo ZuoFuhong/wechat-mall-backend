@@ -6,11 +6,11 @@ import (
 )
 
 type IGridCategoryService interface {
-	GetGridCategoryList(page, size int) (*[]model.GridCategory, int)
-	GetGridCategoryById(id int) *model.GridCategory
-	GetGridCategoryByName(name string) *model.GridCategory
-	AddGridCategory(gridC *model.GridCategory)
-	UpdateGridCategory(gridC *model.GridCategory)
+	GetGridCategoryList(page, size int) (*[]model.WechatMallGridCategoryDO, int)
+	GetGridCategoryById(id int) *model.WechatMallGridCategoryDO
+	GetGridCategoryByName(name string) *model.WechatMallGridCategoryDO
+	AddGridCategory(gridC *model.WechatMallGridCategoryDO)
+	UpdateGridCategory(gridC *model.WechatMallGridCategoryDO)
 }
 
 type gridCategoryService struct {
@@ -21,7 +21,7 @@ func NewGridCategoryService() IGridCategoryService {
 	return &service
 }
 
-func (g *gridCategoryService) GetGridCategoryList(page, size int) (*[]model.GridCategory, int) {
+func (g *gridCategoryService) GetGridCategoryList(page, size int) (*[]model.WechatMallGridCategoryDO, int) {
 	gridCList, err := dbops.QueryGridCategoryList(page, size)
 	if err != nil {
 		panic(err)
@@ -33,7 +33,7 @@ func (g *gridCategoryService) GetGridCategoryList(page, size int) (*[]model.Grid
 	return gridCList, total
 }
 
-func (g *gridCategoryService) GetGridCategoryById(id int) *model.GridCategory {
+func (g *gridCategoryService) GetGridCategoryById(id int) *model.WechatMallGridCategoryDO {
 	gridC, err := dbops.QueryGridCategoryById(id)
 	if err != nil {
 		panic(err)
@@ -41,7 +41,7 @@ func (g *gridCategoryService) GetGridCategoryById(id int) *model.GridCategory {
 	return gridC
 }
 
-func (g *gridCategoryService) GetGridCategoryByName(name string) *model.GridCategory {
+func (g *gridCategoryService) GetGridCategoryByName(name string) *model.WechatMallGridCategoryDO {
 	gridC, err := dbops.QueryGridCategoryByName(name)
 	if err != nil {
 		panic(err)
@@ -49,14 +49,14 @@ func (g *gridCategoryService) GetGridCategoryByName(name string) *model.GridCate
 	return gridC
 }
 
-func (g *gridCategoryService) AddGridCategory(gridC *model.GridCategory) {
+func (g *gridCategoryService) AddGridCategory(gridC *model.WechatMallGridCategoryDO) {
 	err := dbops.InsertGridCategory(gridC)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (g *gridCategoryService) UpdateGridCategory(gridC *model.GridCategory) {
+func (g *gridCategoryService) UpdateGridCategory(gridC *model.WechatMallGridCategoryDO) {
 	err := dbops.UpdateGridCategoryById(gridC)
 	if err != nil {
 		panic(err)

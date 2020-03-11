@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/prometheus/common/log"
 	"wechat-mall-backend/dbops"
+	"wechat-mall-backend/dbops/redis"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/env"
 	"wechat-mall-backend/errs"
+	"wechat-mall-backend/model"
 	"wechat-mall-backend/utils"
 )
 
@@ -44,13 +46,13 @@ func (service *UserService) LoginCodeAuth(code string) (defs.WxappLoginResp, err
 
 	// {"session_key":"TppZM2zEd6\/dGzkqbbrriQ==","expires_in":7200,"openid":"oQOru0EUuLdidBZH0r_F8fDURPjI"}
 	token := utils.RandomStr(32)
-	err = dbops.SetStr(dbops.MiniappTokenPrefix+token, tmpVal, dbops.MiniappTokenExpire)
+	err = redis.SetStr(defs.MiniappTokenPrefix+token, tmpVal, defs.MiniappTokenExpire)
 	if err != nil {
 		panic(errs.ErrorRedisError)
 	}
 	registerUser(result["openid"].(string))
 
-	resp := defs.WxappLoginResp{Token: token, ExpirationInMinutes: dbops.MiniappTokenExpire}
+	resp := defs.WxappLoginResp{Token: token, ExpirationInMinutes: defs.MiniappTokenExpire}
 	return resp, nil
 }
 
@@ -60,8 +62,8 @@ func registerUser(openid string) {
 		panic(err)
 	}
 	if user.Id == 0 {
-		newUser := &WxappUser{Openid: openid, Nickname: "", Avatar: "", Mobile: "", City: ""}
-		_, err := dbops.AddMiniappUser((*dbops.WxappUser)(newUser))
+		user := model.WechatMallUserDO{Openid: openid}
+		_, err := dbops.AddMiniappUser(&user)
 		if err != nil {
 			panic(err)
 		}

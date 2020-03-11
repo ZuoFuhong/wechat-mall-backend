@@ -7,8 +7,6 @@ import (
 )
 
 type ID model.ID
-type WxappUser model.WxappUser
-type CMSUser model.CMSUser
 
 var dbConn *sql.DB
 

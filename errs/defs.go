@@ -30,7 +30,7 @@ var (
 	ErrorGridCategory           = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10013, ErrMsg: "GridCategory does not exist"}}
 	ErrorSpecification          = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10014, ErrMsg: "Specification does not exist"}}
 	ErrorSpecificationAttr      = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10015, ErrMsg: "Specification attr does not exist"}}
-	ErrorSPU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: "SPU does not exist"}}
+	ErrorGoods                  = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: "Goods does not exist"}}
 	ErrorSKU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: "SKU does not exist"}}
 	ErrorActivity               = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10018, ErrMsg: "Activity does not exist"}}
 	ErrorCoupon                 = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10019, ErrMsg: "Coupon does not exist"}}
@@ -60,7 +60,7 @@ func NewSpecificationAttr(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10015, ErrMsg: errMsg}}
 }
 
-func NewErrorSPU(errMsg string) HttpErr {
+func NewErrorGoods(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: errMsg}}
 }
 

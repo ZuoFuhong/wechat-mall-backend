@@ -6,11 +6,11 @@ import (
 )
 
 type ISKUService interface {
-	GetSKUList(page, size int) (*[]model.SKU, int)
-	GetSKUById(id int) *model.SKU
-	GetSKUByCode(code string) *model.SKU
-	AddSKU(sku *model.SKU)
-	UpdateSKUById(sku *model.SKU)
+	GetSKUList(page, size int) (*[]model.WechatMallSkuDO, int)
+	GetSKUById(id int) *model.WechatMallSkuDO
+	GetSKUByCode(code string) *model.WechatMallSkuDO
+	AddSKU(sku *model.WechatMallSkuDO)
+	UpdateSKUById(sku *model.WechatMallSkuDO)
 }
 
 type sKUService struct {
@@ -21,7 +21,7 @@ func NewSKUService() ISKUService {
 	return &service
 }
 
-func (s *sKUService) GetSKUList(page, size int) (*[]model.SKU, int) {
+func (s *sKUService) GetSKUList(page, size int) (*[]model.WechatMallSkuDO, int) {
 	skuList, err := dbops.GetSKUList(page, size)
 	if err != nil {
 		panic(err)
@@ -33,7 +33,7 @@ func (s *sKUService) GetSKUList(page, size int) (*[]model.SKU, int) {
 	return skuList, total
 }
 
-func (s *sKUService) GetSKUById(id int) *model.SKU {
+func (s *sKUService) GetSKUById(id int) *model.WechatMallSkuDO {
 	sku, err := dbops.GetSKUById(id)
 	if err != nil {
 		panic(err)
@@ -41,7 +41,7 @@ func (s *sKUService) GetSKUById(id int) *model.SKU {
 	return sku
 }
 
-func (s *sKUService) GetSKUByCode(code string) *model.SKU {
+func (s *sKUService) GetSKUByCode(code string) *model.WechatMallSkuDO {
 	sku, err := dbops.GetSKUByCode(code)
 	if err != nil {
 		panic(err)
@@ -49,14 +49,14 @@ func (s *sKUService) GetSKUByCode(code string) *model.SKU {
 	return sku
 }
 
-func (s *sKUService) AddSKU(sku *model.SKU) {
+func (s *sKUService) AddSKU(sku *model.WechatMallSkuDO) {
 	err := dbops.AddSKU(sku)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (s *sKUService) UpdateSKUById(sku *model.SKU) {
+func (s *sKUService) UpdateSKUById(sku *model.WechatMallSkuDO) {
 	err := dbops.UpdateSKUById(sku)
 	if err != nil {
 		panic(err)

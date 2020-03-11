@@ -6,11 +6,11 @@ import (
 )
 
 type IActivityService interface {
-	GetActivityList(page, size int) (*[]model.Activity, int)
-	GetActivityById(id int) (activity *model.Activity)
-	GetActivityByName(name string) (activity *model.Activity)
-	AddActivity(service *model.Activity)
-	UpdateActivity(activity *model.Activity)
+	GetActivityList(page, size, online int) (*[]model.WechatMallActivityDO, int)
+	GetActivityById(id int) (activity *model.WechatMallActivityDO)
+	GetActivityByName(name string) (activity *model.WechatMallActivityDO)
+	AddActivity(service *model.WechatMallActivityDO)
+	UpdateActivity(activity *model.WechatMallActivityDO)
 }
 
 type activityService struct {
@@ -21,8 +21,8 @@ func NewActivityService() IActivityService {
 	return &service
 }
 
-func (as *activityService) GetActivityList(page, size int) (*[]model.Activity, int) {
-	activityList, err := dbops.QueryActivityList(page, size)
+func (as *activityService) GetActivityList(page, size, online int) (*[]model.WechatMallActivityDO, int) {
+	activityList, err := dbops.QueryActivityList(page, size, online)
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +33,7 @@ func (as *activityService) GetActivityList(page, size int) (*[]model.Activity, i
 	return activityList, total
 }
 
-func (as *activityService) GetActivityById(id int) (activity *model.Activity) {
+func (as *activityService) GetActivityById(id int) (activity *model.WechatMallActivityDO) {
 	activity, err := dbops.QueryActivityById(id)
 	if err != nil {
 		panic(err)
@@ -41,7 +41,7 @@ func (as *activityService) GetActivityById(id int) (activity *model.Activity) {
 	return activity
 }
 
-func (as *activityService) GetActivityByName(name string) (activity *model.Activity) {
+func (as *activityService) GetActivityByName(name string) (activity *model.WechatMallActivityDO) {
 	activity, err := dbops.QueryActivityByName(name)
 	if err != nil {
 		panic(err)
@@ -49,14 +49,14 @@ func (as *activityService) GetActivityByName(name string) (activity *model.Activ
 	return activity
 }
 
-func (as *activityService) AddActivity(activity *model.Activity) {
+func (as *activityService) AddActivity(activity *model.WechatMallActivityDO) {
 	err := dbops.InsertActivity(activity)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (as *activityService) UpdateActivity(activity *model.Activity) {
+func (as *activityService) UpdateActivity(activity *model.WechatMallActivityDO) {
 	err := dbops.UpdateActivityById(activity)
 	if err != nil {
 		panic(err)

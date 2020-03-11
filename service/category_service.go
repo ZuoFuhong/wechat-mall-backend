@@ -6,11 +6,11 @@ import (
 )
 
 type ICategoryService interface {
-	GetCategoryList(page, size int) (*[]model.Category, int)
-	GetCategoryById(id int) *Category
-	GetCategoryByName(name string) *Category
-	AddCategory(category *model.Category)
-	UpdateCategory(category *model.Category)
+	GetCategoryList(page, size int) (*[]model.WechatMallCategoryDO, int)
+	GetCategoryById(id int) *model.WechatMallCategoryDO
+	GetCategoryByName(name string) *model.WechatMallCategoryDO
+	AddCategory(category *model.WechatMallCategoryDO)
+	UpdateCategory(category *model.WechatMallCategoryDO)
 }
 
 type categoryService struct {
@@ -21,7 +21,7 @@ func NewCategoryService() ICategoryService {
 	return service
 }
 
-func (cs *categoryService) GetCategoryList(page, size int) (*[]model.Category, int) {
+func (cs *categoryService) GetCategoryList(page, size int) (*[]model.WechatMallCategoryDO, int) {
 	cateList, err := dbops.QueryCategoryList(page, size)
 	if err != nil {
 		panic(err)
@@ -33,30 +33,30 @@ func (cs *categoryService) GetCategoryList(page, size int) (*[]model.Category, i
 	return cateList, total
 }
 
-func (cs *categoryService) GetCategoryById(id int) *Category {
+func (cs *categoryService) GetCategoryById(id int) *model.WechatMallCategoryDO {
 	category, err := dbops.QueryCategoryById(id)
 	if err != nil {
 		panic(err)
 	}
-	return (*Category)(category)
+	return category
 }
 
-func (cs *categoryService) GetCategoryByName(name string) *Category {
+func (cs *categoryService) GetCategoryByName(name string) *model.WechatMallCategoryDO {
 	category, err := dbops.QueryCategoryByName(name)
 	if err != nil {
 		panic(err)
 	}
-	return (*Category)(category)
+	return category
 }
 
-func (cs *categoryService) AddCategory(category *model.Category) {
+func (cs *categoryService) AddCategory(category *model.WechatMallCategoryDO) {
 	err := dbops.InsertCategory(category)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (cs *categoryService) UpdateCategory(category *model.Category) {
+func (cs *categoryService) UpdateCategory(category *model.WechatMallCategoryDO) {
 	err := dbops.UpdateCategoryById(category)
 	if err != nil {
 		panic(err)

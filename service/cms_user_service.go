@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"wechat-mall-backend/dbops"
+	"wechat-mall-backend/dbops/redis"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
+	"wechat-mall-backend/model"
 	"wechat-mall-backend/utils"
 )
 
 type ICMSUserService interface {
-	CMSLoginValidate(username, password string) *CMSUser
+	CMSLoginValidate(username, password string) *model.WechatMallCMSUserDO
 	CMSUserRegister(registerReq *defs.CMSRegisterReq)
 	AddCMSUser(username, password, email string) error
 }
@@ -23,7 +25,7 @@ func NewCMSUserService() ICMSUserService {
 	return service
 }
 
-func (cus *CMSUserService) CMSLoginValidate(username, password string) *CMSUser {
+func (cus *CMSUserService) CMSLoginValidate(username, password string) *model.WechatMallCMSUserDO {
 	user, err := dbops.GetCMSUserByUsername(username)
 	if err != nil {
 		panic(err)
@@ -35,7 +37,7 @@ func (cus *CMSUserService) CMSLoginValidate(username, password string) *CMSUser 
 	if user.Password != encrpytStr {
 		panic(errs.NewAuthUserError("密码错误！"))
 	}
-	return (*CMSUser)(user)
+	return user
 }
 
 func (cus *CMSUserService) CMSUserRegister(registerReq *defs.CMSRegisterReq) {
@@ -55,7 +57,7 @@ func (cus *CMSUserService) CMSUserRegister(registerReq *defs.CMSRegisterReq) {
 	}
 	code := utils.RandomStr(32)
 	data, _ := json.Marshal(registerReq)
-	_ = dbops.SetStr(dbops.CMSCodePrefix+code, string(data), dbops.CMSCodeExpire)
+	_ = redis.SetStr(defs.CMSCodePrefix+code, string(data), defs.CMSCodeExpire)
 
 	go sendEmailValidate(registerReq.Email, code)
 }
@@ -67,6 +69,6 @@ func sendEmailValidate(email, code string) {
 
 func (cus *CMSUserService) AddCMSUser(username, password, email string) error {
 	encrpytStr := utils.Md5Encrpyt(password)
-	user := CMSUser{Username: username, Password: encrpytStr, Email: email}
-	return dbops.AddCMSUser((*dbops.CMSUser)(&user))
+	user := model.WechatMallCMSUserDO{Username: username, Password: encrpytStr, Email: email}
+	return dbops.AddCMSUser(&user)
 }

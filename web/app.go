@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"wechat-mall-backend/dbops"
+	"wechat-mall-backend/dbops/redis"
 	"wechat-mall-backend/env"
 )
 
@@ -18,7 +19,7 @@ func (app *App) Initialize() {
 	conf := env.LoadConf()
 	app.Conf = conf
 	dbops.InitDbConn(conf.Mysql.Username, conf.Mysql.Password, conf.Mysql.Addr)
-	dbops.InitRedisCli(conf.Redis.Addr, conf.Redis.Passwd, conf.Redis.Db)
+	redis.InitRedisCli(conf.Redis.Addr, conf.Redis.Passwd, conf.Redis.Db)
 	app.Router = NewRouter(app)
 }
 
