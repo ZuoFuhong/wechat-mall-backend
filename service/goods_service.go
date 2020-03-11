@@ -223,6 +223,7 @@ func extraceSpecAttrVOList(skuDOList *[]model.WechatMallSkuDO) map[int][]defs.Po
 				attrVO.Value = item.Value
 				attrVOList = append(attrVOList, attrVO)
 			}
+			specVOMap[item.KeyId] = attrVOList
 		}
 	}
 	return specVOMap
