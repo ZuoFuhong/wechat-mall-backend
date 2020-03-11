@@ -22,7 +22,7 @@ func NewSKUService() ISKUService {
 }
 
 func (s *sKUService) GetSKUList(page, size int) (*[]model.WechatMallSkuDO, int) {
-	skuList, err := dbops.GetSKUList(page, size)
+	skuList, err := dbops.GetSKUList(0, page, size)
 	if err != nil {
 		panic(err)
 	}

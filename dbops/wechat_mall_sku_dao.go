@@ -10,13 +10,15 @@ const skuColumnList = `
 id, title, price, code, stock, goods_id, online, picture, specs, is_del, create_time, update_time
 `
 
-func GetSKUList(page, size int) (*[]model.WechatMallSkuDO, error) {
-	sql := "SELECT " + skuColumnList + " FROM wechat_mall_sku WHERE is_del = 0 LIMIT ?, ?"
-	stmt, err := dbConn.Prepare(sql)
-	if err != nil {
-		return nil, err
+func GetSKUList(goodsId, page, size int) (*[]model.WechatMallSkuDO, error) {
+	sql := "SELECT " + skuColumnList + " FROM wechat_mall_sku WHERE is_del = 0"
+	if goodsId != 0 {
+		sql += " AND goods_id = " + strconv.Itoa(goodsId)
 	}
-	rows, err := stmt.Query((page-1)*size, size)
+	if page > 0 && size > 0 {
+		sql += " LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
+	}
+	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
 	}

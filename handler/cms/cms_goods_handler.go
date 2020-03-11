@@ -22,17 +22,14 @@ func (h *Handler) GetGoodsList(w http.ResponseWriter, r *http.Request) {
 		goodsVO.Id = v.Id
 		goodsVO.BrandName = v.BrandName
 		goodsVO.Title = v.Title
-		goodsVO.SubTitle = v.SubTitle
 		goodsVO.Price = v.Price
 		goodsVO.DiscountPrice = v.DiscountPrice
 		goodsVO.CategoryId = v.CategoryId
-		goodsVO.DefaultSkuId = v.DefaultSkuId
 		goodsVO.Online = v.Online
 		goodsVO.Picture = v.Picture
 		goodsVO.BannerPicture = v.BannerPicture
 		goodsVO.DetailPicture = v.DetailPicture
 		goodsVO.Tags = v.Tags
-		goodsVO.SketchSpecId = v.SketchSpecId
 		goodsVO.Description = v.Description
 		goodsVOList = append(goodsVOList, goodsVO)
 	}
@@ -53,17 +50,14 @@ func (h *Handler) GetGoods(w http.ResponseWriter, r *http.Request) {
 	goodsVO.Id = goodsDO.Id
 	goodsVO.BrandName = goodsDO.BrandName
 	goodsVO.Title = goodsDO.Title
-	goodsVO.SubTitle = goodsDO.SubTitle
 	goodsVO.Price = goodsDO.Price
 	goodsVO.DiscountPrice = goodsDO.DiscountPrice
 	goodsVO.CategoryId = goodsDO.CategoryId
-	goodsVO.DefaultSkuId = goodsDO.DefaultSkuId
 	goodsVO.Online = goodsDO.Online
 	goodsVO.Picture = goodsDO.Picture
 	goodsVO.BannerPicture = goodsDO.BannerPicture
 	goodsVO.DetailPicture = goodsDO.DetailPicture
 	goodsVO.Tags = goodsDO.Tags
-	goodsVO.SketchSpecId = goodsDO.SketchSpecId
 	goodsVO.Description = goodsDO.Description
 	defs.SendNormalResponse(w, goodsVO)
 }
@@ -82,17 +76,14 @@ func (h *Handler) DoEditGoods(w http.ResponseWriter, r *http.Request) {
 		goodsDO := model.WechatMallGoodsDO{}
 		goodsDO.BrandName = req.BrandName
 		goodsDO.Title = req.Title
-		goodsDO.SubTitle = req.SubTitle
 		goodsDO.Price = req.Price
 		goodsDO.DiscountPrice = req.DiscountPrice
 		goodsDO.CategoryId = req.CategoryId
-		goodsDO.DefaultSkuId = req.DefaultSkuId
 		goodsDO.Online = req.Online
 		goodsDO.Picture = req.Picture
 		goodsDO.BannerPicture = req.BannerPicture
 		goodsDO.DetailPicture = req.DetailPicture
 		goodsDO.Tags = req.Tags
-		goodsDO.SketchSpecId = req.SketchSpecId
 		goodsDO.Description = req.Description
 		goodsId := h.service.GoodsService.AddGoods(&goodsDO)
 		h.service.GoodsService.AddGoodsSpec(goodsId, req.SpecList)
@@ -103,17 +94,14 @@ func (h *Handler) DoEditGoods(w http.ResponseWriter, r *http.Request) {
 		}
 		goodsDO.BrandName = req.BrandName
 		goodsDO.Title = req.Title
-		goodsDO.SubTitle = req.SubTitle
 		goodsDO.Price = req.Price
 		goodsDO.DiscountPrice = req.DiscountPrice
 		goodsDO.CategoryId = req.CategoryId
-		goodsDO.DefaultSkuId = req.DefaultSkuId
 		goodsDO.Online = req.Online
 		goodsDO.Picture = req.Picture
 		goodsDO.BannerPicture = req.BannerPicture
 		goodsDO.DetailPicture = req.DetailPicture
 		goodsDO.Tags = req.Tags
-		goodsDO.SketchSpecId = req.SketchSpecId
 		goodsDO.Description = req.Description
 		h.service.GoodsService.UpdateGoodsById(goodsDO)
 		h.service.GoodsService.AddGoodsSpec(req.Id, req.SpecList)

@@ -8,3 +8,10 @@ const (
 	CMSCodePrefix      = "cmscode:"
 	CMSCodeExpire      = 300
 )
+
+type SkuSpecs struct {
+	Key     string `json:"key"`
+	Value   string `json:"value"`
+	KeyId   int    `json:"key_id"`
+	ValueId int    `json:"value_id"`
+}

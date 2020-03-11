@@ -45,7 +45,7 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 
 // 领取优惠券
 func (h *Handler) TakeCoupon(w http.ResponseWriter, r *http.Request) {
-	req := defs.TakeCouponReq{}
+	req := defs.PortalTakeCouponReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		panic(errs.ErrorParameterValidate)

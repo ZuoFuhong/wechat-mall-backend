@@ -93,17 +93,14 @@ type WechatMallGoodsDO struct {
 	Id            ID
 	BrandName     string // 品牌
 	Title         string // 标题
-	SubTitle      string // 副标题
 	Price         string // 价格
 	DiscountPrice string // 折扣
 	CategoryId    int    // 分类ID
-	DefaultSkuId  int    // 默认Sku
 	Online        int    // 是否上线
 	Picture       string // 主图
 	BannerPicture string // 详情图
 	DetailPicture string // 轮播图
 	Tags          string // 标签
-	SketchSpecId  int    // 可视规格
 	Description   string // 详情
 	Del           int
 	CreateTime    string
@@ -226,6 +223,7 @@ type WechatMallOrderGoodsDO struct {
 	Price      string // 价格
 	Specs      string // sku属性
 	Num        int    // 数量
+	LockStatus int    // 锁定状态：0-预定 1-付款 2-取消
 	CreateTime string
 	UpdateTime string
 }

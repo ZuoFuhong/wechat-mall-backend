@@ -102,18 +102,15 @@ type CMSGoodsReq struct {
 	Id              int    `json:"id"`
 	BrandName       string `json:"brand_name"`
 	Title           string `json:"title" validate:"required"`
-	SubTitle        string `json:"sub_title" validate:"required"`
 	Price           string `json:"price" validate:"required"`
 	DiscountPrice   string `json:"discount_price" validate:"required"`
 	CategoryId      int    `json:"category_id" validate:"required"`
-	DefaultSkuId    int    `json:"default_sku_id"`
 	Online          int    `json:"online"`
 	Picture         string `json:"picture" validate:"required"`
 	ForThemePicture string `json:"for_theme_picture" validate:"required"`
 	BannerPicture   string `json:"banner_picture" validate:"required"`
 	DetailPicture   string `json:"detail_picture" validate:"required"`
 	Tags            string `json:"tags" validate:"required"`
-	SketchSpecId    int    `json:"sketch_spec_id" validate:"required"`
 	Description     string `json:"description"`
 	SpecList        string `json:"spec_list" validate:"required"`
 }
@@ -122,17 +119,14 @@ type CMSGoodsVO struct {
 	Id            int    `json:"id"`
 	BrandName     string `json:"brand_name"`
 	Title         string `json:"title"`
-	SubTitle      string `json:"sub_title"`
 	Price         string `json:"price"`
 	DiscountPrice string `json:"discount_price"`
 	CategoryId    int    `json:"category_id"`
-	DefaultSkuId  int    `json:"default_sku_id"`
 	Online        int    `json:"online"`
 	Picture       string `json:"picture"`
 	BannerPicture string `json:"banner_picture"`
 	DetailPicture string `json:"detail_picture"`
 	Tags          string `json:"tags"`
-	SketchSpecId  int    `json:"sketch_spec_id"`
 	Description   string `json:"description"`
 }
 
