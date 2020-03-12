@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/shopspring/decimal"
 	"testing"
 )
 
@@ -29,6 +30,9 @@ func Test_MD5(t *testing.T) {
 	fmt.Println(val)
 }
 
-func Test_bean(t *testing.T) {
-
+func Test_decimal(t *testing.T) {
+	val, _ := decimal.NewFromString("1.99")
+	val2 := decimal.NewFromFloat(1.2)
+	val3 := val.Mul(val2)
+	fmt.Println(val3.Round(2).Sub(decimal.NewFromFloat(1.1)))
 }

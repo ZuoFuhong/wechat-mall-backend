@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
@@ -70,6 +69,18 @@ func (s *cartService) GetCartGoods(userId, page, size int) (*[]defs.PortalCartGo
 		if err != nil {
 			panic(err)
 		}
+		skuDO, err := dbops.GetSKUById(v.SkuId)
+		if err != nil {
+			panic(err)
+		}
+		status := 0
+		if goodsDO.Id == 0 || goodsDO.Online == 0 || skuDO.Id == 0 || skuDO.Online == 0 {
+			status = 2
+		} else {
+			if skuDO.Stock < v.Num {
+				status = 1
+			}
+		}
 		cartGoodsVO := defs.PortalCartGoodsVO{}
 		cartGoodsVO.GoodsId = v.Id
 		cartGoodsVO.Title = goodsDO.Title
@@ -78,22 +89,10 @@ func (s *cartService) GetCartGoods(userId, page, size int) (*[]defs.PortalCartGo
 		cartGoodsVO.Picture = goodsDO.Picture
 		cartGoodsVO.Tags = goodsDO.Tags
 		cartGoodsVO.SkuId = v.SkuId
-		cartGoodsVO.SkuSpecs = extractSkuSpecs(v.SkuId)
+		cartGoodsVO.Specs = skuDO.Specs
 		cartGoodsVO.Num = v.Num
+		cartGoodsVO.Status = status
 		cartGoodsVOList = append(cartGoodsVOList, cartGoodsVO)
 	}
 	return &cartGoodsVOList, total
-}
-
-func extractSkuSpecs(skuId int) []defs.SkuSpecs {
-	skuDO, err := dbops.GetSKUById(skuId)
-	if err != nil {
-		panic(err)
-	}
-	skuSpecs := []defs.SkuSpecs{}
-	err = json.Unmarshal([]byte(skuDO.Specs), &skuSpecs)
-	if err != nil {
-		panic(err)
-	}
-	return skuSpecs
 }

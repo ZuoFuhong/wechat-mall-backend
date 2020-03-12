@@ -34,6 +34,7 @@ var (
 	ErrorSKU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: "SKU does not exist"}}
 	ErrorCoupon                 = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10019, ErrMsg: "Coupon does not exist"}}
 	ErrorAddress                = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10020, ErrMsg: "Address does not exist"}}
+	ErrorOrder                  = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10021, ErrMsg: "Order does not exist"}}
 )
 
 func NewAuthUserError(errMsg string) HttpErr {
@@ -74,4 +75,8 @@ func NewErrorCoupon(errMsg string) HttpErr {
 
 func NewErrorAddress(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10020, ErrMsg: errMsg}}
+}
+
+func NewErrorOrder(errMsg string) HttpErr {
+	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10021, ErrMsg: errMsg}}
 }

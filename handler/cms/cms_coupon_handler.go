@@ -41,7 +41,7 @@ func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	coupon := h.service.CouponService.GetCouponById(id)
-	if coupon.Id == 0 {
+	if coupon.Id == 0 || coupon.Id == 1 {
 		panic(errs.ErrorCoupon)
 	}
 	couponVO := defs.CMSCouponVO{}
@@ -80,7 +80,7 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 		h.service.CouponService.AddCoupon(&coupon)
 	} else {
 		coupon := h.service.CouponService.GetCouponById(req.Id)
-		if coupon.Id == 0 {
+		if coupon.Id == 0 || coupon.Del == 1 {
 			panic(errs.ErrorCoupon)
 		}
 		coupon.Title = req.Title
@@ -100,7 +100,7 @@ func (h *Handler) DoDeleteCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	coupon := h.service.CouponService.GetCouponById(id)
-	if coupon.Id == 0 {
+	if coupon.Id == 0 || coupon.Del == 1 {
 		panic(errs.ErrorCoupon)
 	}
 	coupon.Del = 1

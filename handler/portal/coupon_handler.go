@@ -54,7 +54,7 @@ func (h *Handler) TakeCoupon(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(defs.ContextKey).(int)
 
 	coupon := h.service.CouponService.GetCouponById(couponId)
-	if coupon.Id == 0 {
+	if coupon.Id == 0 || coupon.Del == 1 {
 		panic(errs.ErrorCoupon)
 	}
 	couponLog := h.service.CouponService.QueryCouponLog(userId, couponId)

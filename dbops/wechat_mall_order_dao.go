@@ -29,9 +29,29 @@ func QueryOrderByOrderNo(orderNo string) (*model.WechatMallOrderDO, error) {
 	return &order, nil
 }
 
+func QueryOrderById(id int) (*model.WechatMallOrderDO, error) {
+	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order WHERE order_no = " + strconv.Itoa(id)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	order := model.WechatMallOrderDO{}
+	if rows.Next() {
+		err := rows.Scan(&order.Id, &order.OrderNo, &order.UserId, &order.PayAmount, &order.GoodsAmount,
+			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.Status, &order.AddressId,
+			&order.AddressSnapshot, &order.WxappPrePayId, &order.Del, &order.CreateTime, &order.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &order, nil
+}
+
 func ListOrderByParams(userId, status, page, size int) (*[]model.WechatMallOrderDO, error) {
-	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order WHERE is_del = 0 AND user_id = " +
-		strconv.Itoa(userId) + " AND status = " + strconv.Itoa(status)
+	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
+	if status != 999 {
+		sql += " AND status = " + strconv.Itoa(status)
+	}
 	if page > 0 && size > 0 {
 		sql += " LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
 	}
@@ -51,6 +71,25 @@ func ListOrderByParams(userId, status, page, size int) (*[]model.WechatMallOrder
 		orderList = append(orderList, order)
 	}
 	return &orderList, nil
+}
+
+func CountOrderByParams(userId, status int) (int, error) {
+	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
+	if status != 999 {
+		sql += " AND status = " + strconv.Itoa(status)
+	}
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	if rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total, nil
 }
 
 func AddOrder(order *model.WechatMallOrderDO) error {

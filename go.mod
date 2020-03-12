@@ -15,6 +15,7 @@ require (
 	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/pkg/errors v0.8.0
 	github.com/prometheus/common v0.4.0
+	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc
 	github.com/spf13/viper v1.6.2
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )

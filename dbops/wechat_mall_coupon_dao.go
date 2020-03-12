@@ -56,7 +56,7 @@ func CountCoupon(online int) (int, error) {
 }
 
 func QueryCouponById(id int) (*model.WechatMallCouponDO, error) {
-	sql := "SELECT " + couponColumnList + " FROM wechat_mall_coupon WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + couponColumnList + " FROM wechat_mall_coupon WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
