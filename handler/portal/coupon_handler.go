@@ -58,7 +58,7 @@ func (h *Handler) TakeCoupon(w http.ResponseWriter, r *http.Request) {
 		panic(errs.ErrorCoupon)
 	}
 	couponLog := h.service.CouponService.QueryCouponLog(userId, couponId)
-	if couponLog.Id == 0 {
+	if couponLog.Id != 0 {
 		panic(errs.NewErrorCoupon("请勿重复领取！"))
 	}
 	h.service.CouponService.RecordCouponLog(userId, couponId)
@@ -87,10 +87,11 @@ func (h *Handler) DoDeleteCouponLog(w http.ResponseWriter, r *http.Request) {
 	couponLogId, _ := strconv.Atoi(vars["id"])
 	userId := r.Context().Value(defs.ContextKey).(int)
 
-	couponLog := h.service.CouponService.QueryCouponLog(userId, couponLogId)
-	if couponLog.Id == 0 {
+	couponLog := h.service.CouponService.QueryCouponLogById(couponLogId)
+	if couponLog.Id == 0 || couponLog.UserId != userId {
 		panic(errs.NewErrorCoupon("未知的记录！"))
 	}
-	h.service.CouponService.DoDeleteCouponLog(couponLogId)
+
+	h.service.CouponService.DoDeleteCouponLog(couponLog)
 	defs.SendNormalResponse(w, "ok")
 }

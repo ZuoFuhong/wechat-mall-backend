@@ -3,6 +3,7 @@ package service
 import (
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
+	"wechat-mall-backend/errs"
 	"wechat-mall-backend/model"
 )
 
@@ -41,7 +42,7 @@ func (s *cartService) DoEditCart(userId, goodsId, skuId, num int) {
 		}
 	} else {
 		if cartDO.Id == 0 {
-			return
+			panic(errs.ErrorGoodsCart)
 		}
 		if cartDO.Num+num > 0 {
 			cartDO.Num += num
@@ -51,7 +52,9 @@ func (s *cartService) DoEditCart(userId, goodsId, skuId, num int) {
 			err = dbops.UpdateCartById(cartDO)
 		}
 	}
-	panic(err)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (s *cartService) GetCartGoods(userId, page, size int) (*[]defs.PortalCartGoodsVO, int) {

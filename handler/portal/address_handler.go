@@ -18,9 +18,9 @@ func (h *Handler) GetAddressList(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(defs.ContextKey).(int)
 
 	addressList, total := h.service.AddressService.GetAddressList(userId, page, size)
-	addressVOList := []model.WechatMallUserAddressDO{}
+	addressVOList := []defs.PortalAddressVO{}
 	for _, v := range *addressList {
-		addressVO := model.WechatMallUserAddressDO{}
+		addressVO := defs.PortalAddressVO{}
 		addressVO.Id = v.Id
 		addressVO.Contacts = v.Contacts
 		addressVO.Mobile = v.Mobile
@@ -47,8 +47,10 @@ func (h *Handler) EditAddress(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(errs.ErrorParameterValidate)
 	}
+	userId := r.Context().Value(defs.ContextKey).(int)
 	if req.Id == 0 {
 		address := model.WechatMallUserAddressDO{}
+		address.UserId = userId
 		address.Contacts = req.Contacts
 		address.Mobile = req.Mobile
 		address.ProvinceId = req.ProvinceId
@@ -65,6 +67,7 @@ func (h *Handler) EditAddress(w http.ResponseWriter, r *http.Request) {
 		if address.Id == 0 {
 			panic(errs.ErrorAddress)
 		}
+		address.UserId = userId
 		address.Contacts = req.Contacts
 		address.Mobile = req.Mobile
 		address.ProvinceId = req.ProvinceId
@@ -83,13 +86,13 @@ func (h *Handler) EditAddress(w http.ResponseWriter, r *http.Request) {
 // 删除-收货地址
 func (h *Handler) DoDeleteAddress(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	addreddId, _ := strconv.Atoi(vars["id"])
+	addressId, _ := strconv.Atoi(vars["id"])
 
-	address := h.service.AddressService.GetAddress(addreddId)
+	address := h.service.AddressService.GetAddress(addressId)
 	if address.Id == 0 {
 		panic(errs.ErrorAddress)
 	}
-	address.Del = 0
+	address.Del = 1
 	h.service.AddressService.UpdateAddress(address)
 	defs.SendNormalResponse(w, "ok")
 }

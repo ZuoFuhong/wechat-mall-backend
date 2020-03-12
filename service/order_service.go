@@ -40,6 +40,7 @@ func (s *orderService) GenerateOrder(userId, addressId, couponLogId int, dispatc
 
 	orderDO := model.WechatMallOrderDO{}
 	orderDO.OrderNo = orderNo
+	orderDO.UserId = userId
 	orderDO.PayAmount = goodsAmount.Sub(discountAmount).Add(dispatchAmount).String()
 	orderDO.GoodsAmount = goodsAmount.String()
 	orderDO.DiscountAmount = discountAmount.String()
@@ -83,6 +84,9 @@ func checkGoodsStock(goodsList []defs.PortalOrderGoods) decimal.Decimal {
 }
 
 func calcGoodsDiscountAmount(goodsAmount decimal.Decimal, userId, couponLogId int) decimal.Decimal {
+	if couponLogId == 0 {
+		return decimal.NewFromInt(0)
+	}
 	couponLog, err := dbops.QueryCouponLog(userId, couponLogId)
 	if err != nil {
 		panic(err)
@@ -219,6 +223,7 @@ func couponCannel(couponLogId int) {
 	couponLog := model.WechatMallCouponLogDO{}
 	couponLog.Id = couponLogId
 	couponLog.Del = 1
+	couponLog.UseTime = time.Now().Format("2006-01-02 15:04:05")
 	err := dbops.UpdateCouponLogById(&couponLog)
 	if err != nil {
 		panic(err)

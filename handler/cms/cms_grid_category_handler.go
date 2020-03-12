@@ -16,7 +16,7 @@ func (h *Handler) GetGridCategoryList(w http.ResponseWriter, r *http.Request) {
 	size, _ := strconv.Atoi(vars["size"])
 
 	gcArr, total := h.service.GridCategoryService.GetGridCategoryList(page, size)
-	var gcVOList []defs.CMSGridCategoryVO
+	gcVOList := []defs.CMSGridCategoryVO{}
 	for _, v := range *gcArr {
 		gcVO := defs.CMSGridCategoryVO{}
 		gcVO.Id = v.Id

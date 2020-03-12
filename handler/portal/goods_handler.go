@@ -10,9 +10,9 @@ import (
 // 查询商品列表
 func (h *Handler) GetGoodsList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	keyword := vars["keyword"]
-	categoryId, _ := strconv.Atoi(vars["categoryId"])
-	order := vars["order"]
+	keyword := vars["k"]
+	categoryId, _ := strconv.Atoi(vars["c"])
+	order := vars["o"]
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 

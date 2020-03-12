@@ -116,7 +116,7 @@ WHERE id = ?
 }
 
 func UpdateSkuStockById(id, num int) error {
-	sql := "UPDATE wechat_mall_sku SET sku = stock - " + strconv.Itoa(num) + " WHERE id = " + strconv.Itoa(id)
+	sql := "UPDATE wechat_mall_sku SET stock = stock - " + strconv.Itoa(num) + " WHERE id = " + strconv.Itoa(id)
 	sql += " AND stock >= " + strconv.Itoa(num)
 	_, err := dbConn.Exec(sql)
 	return err

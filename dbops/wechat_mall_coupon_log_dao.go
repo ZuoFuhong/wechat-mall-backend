@@ -32,6 +32,24 @@ func QueryCouponLog(userId, couponId int) (*model.WechatMallCouponLogDO, error) 
 	return &couponLog, nil
 }
 
+func QueryCouponLogById(couponLogId int) (*model.WechatMallCouponLogDO, error) {
+	sql := "SELECT " + couponLogColumnList + " FROM wechat_mall_coupon_log WHERE is_del = 0 AND id = " + strconv.Itoa(couponLogId)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	couponLog := model.WechatMallCouponLogDO{}
+	if rows.Next() {
+		err := rows.Scan(&couponLog.Id, &couponLog.CouponId, &couponLog.UserId, &couponLog.UseTime,
+			&couponLog.ExpireTime, &couponLog.Status, &couponLog.Code, &couponLog.OrderNo, &couponLog.Del,
+			&couponLog.CreateTime, &couponLog.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &couponLog, nil
+}
+
 func QueryCouponLogList(userId, status, page, size int) (*[]model.WechatMallCouponLogDO, error) {
 	sql := "SELECT " + couponLogColumnList + " FROM wechat_mall_coupon_log WHERE is_del = 0"
 	sql += " AND user_id = " + strconv.Itoa(userId)
@@ -92,12 +110,12 @@ WHERE id = ?
 }
 
 func AddCouponLog(couponLog *model.WechatMallCouponLogDO) error {
-	sql := "INSERT INTO wechat_mall_coupon_log ( " + couponLogColumnList[4:] + " ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql := "INSERT INTO wechat_mall_coupon_log (" + couponLogColumnList[4:] + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
 	_, err = stmt.Exec(couponLog.CouponId, couponLog.UserId, couponLog.UseTime, couponLog.ExpireTime, couponLog.Status,
-		couponLog.Code, couponLog.OrderNo, couponLog.Del, couponLog.CreateTime, couponLog.UpdateTime)
+		couponLog.Code, "", 0, time.Now(), time.Now())
 	return err
 }

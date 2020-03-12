@@ -136,7 +136,7 @@ type CMSSKUReq struct {
 	Price   string `json:"price" validate:"required"`
 	Code    string `json:"code" validate:"required"`
 	Stock   int    `json:"stock" validate:"required"`
-	GoodsId int    `json:"goods_id" validate:"required"`
+	GoodsId int    `json:"goodsId" validate:"required"`
 	Online  int    `json:"online" validate:"required"`
 	Picture string `json:"picture" validate:"required"`
 	Specs   string `json:"specs" validate:"required"`
@@ -148,7 +148,7 @@ type CMSSKUVO struct {
 	Price   string `json:"price"`
 	Code    string `json:"code"`
 	Stock   int    `json:"stock"`
-	GoodsId int    `json:"goods_id"`
+	GoodsId int    `json:"goodsId"`
 	Online  int    `json:"online"`
 	Picture string `json:"picture"`
 	Specs   string `json:"specs"`
@@ -164,7 +164,7 @@ type CMSCouponReq struct {
 	StartTime   string `json:"start_time" validate:"required"`
 	EndTime     string `json:"end_time" validate:"required"`
 	Description string `json:"description"`
-	Online      int    `json:"online"`
+	Online      int    `json:"online" validate:"required"`
 }
 
 type CMSCouponVO struct {

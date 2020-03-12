@@ -69,7 +69,7 @@ func QueryCartByParams(userId, goodsId, skuId int) (*model.WechatMallUserCartDO,
 	}
 	cartDO := model.WechatMallUserCartDO{}
 	if rows.Next() {
-		err := rows.Scan(&cartDO.UserId, &cartDO.GoodsId, &cartDO.Num, &cartDO.Del, &cartDO.CreateTime, &cartDO.UpdateTime)
+		err := rows.Scan(&cartDO.Id, &cartDO.UserId, &cartDO.GoodsId, &cartDO.SkuId, &cartDO.Num, &cartDO.Del, &cartDO.CreateTime, &cartDO.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -85,7 +85,7 @@ func QueryCartById(id int) (*model.WechatMallUserCartDO, error) {
 	}
 	cartDO := model.WechatMallUserCartDO{}
 	if rows.Next() {
-		err := rows.Scan(&cartDO.UserId, &cartDO.GoodsId, &cartDO.Num, &cartDO.Del, &cartDO.CreateTime, &cartDO.UpdateTime)
+		err := rows.Scan(&cartDO.Id, &cartDO.UserId, &cartDO.GoodsId, &cartDO.SkuId, &cartDO.Num, &cartDO.Del, &cartDO.CreateTime, &cartDO.UpdateTime)
 		if err != nil {
 			return nil, err
 		}

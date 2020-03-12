@@ -30,7 +30,7 @@ func QueryOrderByOrderNo(orderNo string) (*model.WechatMallOrderDO, error) {
 }
 
 func QueryOrderById(id int) (*model.WechatMallOrderDO, error) {
-	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order WHERE order_no = " + strconv.Itoa(id)
+	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func ListOrderByParams(userId, status, page, size int) (*[]model.WechatMallOrder
 }
 
 func CountOrderByParams(userId, status int) (int, error) {
-	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
+	sql := "SELECT COUNT(*) FROM wechat_mall_order WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
 	if status != 999 {
 		sql += " AND status = " + strconv.Itoa(status)
 	}

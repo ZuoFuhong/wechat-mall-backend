@@ -15,7 +15,7 @@ func (h *Handler) GetCategoryList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
-	var cateVOList []defs.CMSCategoryVO
+	cateVOList := []defs.CMSCategoryVO{}
 	cateList, total := h.service.CategoryService.GetCategoryList(page, size)
 	for _, v := range *cateList {
 		cateVO := defs.CMSCategoryVO{}

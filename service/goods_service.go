@@ -214,15 +214,20 @@ func extraceSpecAttrVOList(skuDOList *[]model.WechatMallSkuDO) map[int][]defs.Po
 				attrVOList = []defs.PortalSpecAttrVO{}
 				specVOMap[item.KeyId] = attrVOList
 			}
+			flag := false
 			for _, attrVO := range attrVOList {
 				if attrVO.AttrId == item.ValueId {
+					flag = true
 					break
 				}
-				attrVO := defs.PortalSpecAttrVO{}
-				attrVO.AttrId = item.ValueId
-				attrVO.Value = item.Value
-				attrVOList = append(attrVOList, attrVO)
 			}
+			if flag {
+				continue
+			}
+			attrVO := defs.PortalSpecAttrVO{}
+			attrVO.AttrId = item.ValueId
+			attrVO.Value = item.Value
+			attrVOList = append(attrVOList, attrVO)
 			specVOMap[item.KeyId] = attrVOList
 		}
 	}

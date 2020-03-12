@@ -77,6 +77,7 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 		coupon.StartTime = req.StartTime
 		coupon.EndTime = req.EndTime
 		coupon.Description = req.Description
+		coupon.Online = req.Online
 		h.service.CouponService.AddCoupon(&coupon)
 	} else {
 		coupon := h.service.CouponService.GetCouponById(req.Id)
@@ -91,6 +92,7 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 		coupon.StartTime = req.StartTime
 		coupon.EndTime = req.EndTime
 		coupon.Description = req.Description
+		coupon.Online = req.Online
 		h.service.CouponService.UpdateCouponById(coupon)
 	}
 	defs.SendNormalResponse(w, "ok")

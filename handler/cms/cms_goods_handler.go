@@ -123,7 +123,7 @@ func (h *Handler) DoDeleteGoods(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetGoodsSpecList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := strconv.Atoi(vars["goodsId"])
-	specList := h.service.GoodsService.GetGoodsSpecList(id)
+	goodsId, _ := strconv.Atoi(vars["id"])
+	specList := h.service.GoodsService.GetGoodsSpecList(goodsId)
 	defs.SendNormalResponse(w, specList)
 }

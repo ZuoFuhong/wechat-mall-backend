@@ -11,7 +11,7 @@ id, order_no, goods_id, sku_id, picture, title, price, specs, num, lock_status, 
 `
 
 func QueryOrderGoods(orderNo string) (*[]model.WechatMallOrderGoodsDO, error) {
-	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order_goods WHERE order_no = '" + orderNo + "'"
+	sql := "SELECT " + orderGoodsColumnList + " FROM wechat_mall_order_goods WHERE order_no = '" + orderNo + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

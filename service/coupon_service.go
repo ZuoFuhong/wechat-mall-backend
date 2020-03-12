@@ -1,6 +1,7 @@
 package service
 
 import (
+	"time"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
@@ -12,10 +13,11 @@ type ICouponService interface {
 	GetCouponById(id int) *model.WechatMallCouponDO
 	AddCoupon(coupon *model.WechatMallCouponDO)
 	UpdateCouponById(coupon *model.WechatMallCouponDO)
+	QueryCouponLogById(couponLogId int) *model.WechatMallCouponLogDO
 	QueryCouponLog(userId, couponId int) *model.WechatMallCouponLogDO
 	RecordCouponLog(userId, couponId int)
 	QueryUserCoupon(userId, status, page, size int) (*[]defs.PortalUserCouponVO, int)
-	DoDeleteCouponLog(couponLogId int)
+	DoDeleteCouponLog(couponLog *model.WechatMallCouponLogDO)
 }
 
 type couponService struct {
@@ -60,6 +62,14 @@ func (cs *couponService) UpdateCouponById(coupon *model.WechatMallCouponDO) {
 	}
 }
 
+func (cs *couponService) QueryCouponLogById(couponLogId int) *model.WechatMallCouponLogDO {
+	couponLogDO, err := dbops.QueryCouponLogById(couponLogId)
+	if err != nil {
+		panic(err)
+	}
+	return couponLogDO
+}
+
 func (cs *couponService) QueryCouponLog(userId, couponId int) *model.WechatMallCouponLogDO {
 	couponLog, err := dbops.QueryCouponLog(userId, couponId)
 	if err != nil {
@@ -76,6 +86,7 @@ func (cs *couponService) RecordCouponLog(userId, couponId int) {
 	couponLog := model.WechatMallCouponLogDO{}
 	couponLog.CouponId = couponId
 	couponLog.UserId = userId
+	couponLog.UseTime = time.Now().Format("2006-01-02 15:04:05")
 	couponLog.ExpireTime = coupon.EndTime
 	couponLog.Status = 0
 	couponLog.Code = utils.RandomNumberStr(12)
@@ -116,11 +127,9 @@ func (cs *couponService) QueryUserCoupon(userId, status, page, size int) (*[]def
 	return &voList, total
 }
 
-func (cs *couponService) DoDeleteCouponLog(couponLogId int) {
-	couponLog := model.WechatMallCouponLogDO{}
-	couponLog.Id = couponLogId
+func (cs *couponService) DoDeleteCouponLog(couponLog *model.WechatMallCouponLogDO) {
 	couponLog.Del = 1
-	err := dbops.UpdateCouponLogById(&couponLog)
+	err := dbops.UpdateCouponLogById(couponLog)
 	if err != nil {
 		panic(err)
 	}

@@ -125,9 +125,9 @@ type PortalAddressVO struct {
 	Id          int    `json:"id"`          // 地址ID
 	Contacts    string `json:"contacts"`    // 联系人
 	Mobile      string `json:"mobile"`      // 手机号
-	ProvinceId  int    `json:"provinceId"`  // 省份编码
-	CityId      int    `json:"cityId"`      // 城市编码
-	AreaId      int    `json:"areaId"`      // 地区编码
+	ProvinceId  string `json:"provinceId"`  // 省份编码
+	CityId      string `json:"cityId"`      // 城市编码
+	AreaId      string `json:"areaId"`      // 地区编码
 	ProvinceStr string `json:"provinceStr"` // 省份
 	CityStr     string `json:"cityStr"`     // 城市
 	AreaStr     string `json:"areaStr"`     // 地区
@@ -139,14 +139,14 @@ type PortalAddressReq struct {
 	Id          int    `json:"id"`          // 地址ID
 	Contacts    string `json:"contacts"`    // 联系人
 	Mobile      string `json:"mobile"`      // 手机号
-	ProvinceId  int    `json:"provinceId"`  // 省份编码
-	CityId      int    `json:"cityId"`      // 城市编码
-	AreaId      int    `json:"areaId"`      // 地区编码
+	ProvinceId  string `json:"provinceId"`  // 省份编码
+	CityId      string `json:"cityId"`      // 城市编码
+	AreaId      string `json:"areaId"`      // 地区编码
 	ProvinceStr string `json:"provinceStr"` // 省份
 	CityStr     string `json:"cityStr"`     // 城市
 	AreaStr     string `json:"areaStr"`     // 地区
 	Address     string `json:"address"`     // 详细地址
-	IsDefault   int    `json:"is_default"`  // 默认收货地址：0-否 1-是
+	IsDefault   int    `json:"isDefault"`   // 默认收货地址：0-否 1-是
 }
 
 type PortalCartPlaceOrderReq struct {

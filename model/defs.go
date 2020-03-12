@@ -186,9 +186,9 @@ type WechatMallUserAddressDO struct {
 	UserId      ID     // 用户ID
 	Contacts    string // 联系人
 	Mobile      string // 手机号
-	ProvinceId  int    // 省份编码
-	CityId      int    // 城市编码
-	AreaId      int    // 地区编码
+	ProvinceId  string // 省份编码
+	CityId      string // 城市编码
+	AreaId      string // 地区编码
 	ProvinceStr string // 省份
 	CityStr     string // 城市
 	AreaStr     string // 地区

@@ -15,7 +15,7 @@ func (h *Handler) GetSpecificationList(w http.ResponseWriter, r *http.Request) {
 	size, _ := strconv.Atoi(vars["size"])
 	specList, total := h.service.SpecificationService.GetSpecificationList(page, size)
 
-	var specVOs []defs.CMSSpecificationVO
+	specVOs := []defs.CMSSpecificationVO{}
 	for _, v := range *specList {
 		specVO := defs.CMSSpecificationVO{}
 		specVO.Id = v.Id
