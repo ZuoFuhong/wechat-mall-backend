@@ -10,6 +10,9 @@ type WechatMallUserDO struct {
 	Avatar     string // 头像
 	Mobile     string // 手机号
 	City       string // 城市编码
+	Province   string // 省份
+	Country    string // 国家
+	Gender     int    // 性别 0：未知、1：男、2：女
 	CreateTime string
 	UpdateTime string
 }

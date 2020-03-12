@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/common/log"
 	"net/http"
 	"strings"
-	"wechat-mall-backend/dbops/redis"
+	"wechat-mall-backend/dbops/rediscli"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
 	"wechat-mall-backend/utils"
@@ -72,7 +72,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	code := utils.RandomStr(32)
 	data, _ := json.Marshal(registerReq)
-	err = redis.SetStr(defs.CMSCodePrefix+code, string(data), defs.CMSCodeExpire)
+	err = rediscli.SetStr(defs.CMSCodePrefix+code, string(data), defs.CMSCodeExpire)
 	if err != nil {
 		log.Error(err)
 		panic(err)
@@ -83,7 +83,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) RegisterActivate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	code := vars["code"]
-	cacheData, err := redis.GetStr(code)
+	cacheData, err := rediscli.GetStr(code)
 	if err != nil {
 		panic(errs.ErrorValidateCodeInvalid)
 	}

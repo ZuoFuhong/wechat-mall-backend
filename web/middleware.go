@@ -33,25 +33,16 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			if uri == "/cms/login" {
 				goto nextHandler
 			}
-			authorization := r.Header.Get("Authorization")
-			if authorization == "" {
-				panic(errs.ErrorTokenInvalid)
+			payload := parseTokenAndValidate(r)
+			// Inject the uid into the context
+			ctx := context.WithValue(r.Context(), defs.ContextKey, payload.Uid)
+			r = r.WithContext(ctx)
+		}
+		if strings.HasPrefix(uri, "/api") {
+			if uri == "/api/wxapp/login" {
+				goto nextHandler
 			}
-			if !strings.HasPrefix(authorization, "Bearer ") {
-				panic(errs.ErrorTokenInvalid)
-			}
-			tmpArr := strings.Split(authorization, " ")
-			if len(tmpArr) != 2 {
-				panic(errs.ErrorTokenInvalid)
-			}
-			accessToken := tmpArr[1]
-			if !utils.ValidateToken(accessToken) {
-				panic(errs.ErrorTokenInvalid)
-			}
-			payload, err := utils.ParseToken(accessToken)
-			if err != nil {
-				panic(errs.ErrorTokenInvalid)
-			}
+			payload := parseTokenAndValidate(r)
 			// Inject the uid into the context
 			ctx := context.WithValue(r.Context(), defs.ContextKey, payload.Uid)
 			r = r.WithContext(ctx)
@@ -60,6 +51,29 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(fn)
+}
+
+func parseTokenAndValidate(r *http.Request) *utils.Payload {
+	authorization := r.Header.Get("Authorization")
+	if authorization == "" {
+		panic(errs.ErrorTokenInvalid)
+	}
+	if !strings.HasPrefix(authorization, "Bearer ") {
+		panic(errs.ErrorTokenInvalid)
+	}
+	tmpArr := strings.Split(authorization, " ")
+	if len(tmpArr) != 2 {
+		panic(errs.ErrorTokenInvalid)
+	}
+	token := tmpArr[1]
+	if !utils.ValidateToken(token) {
+		panic(errs.ErrorTokenInvalid)
+	}
+	payload, err := utils.ParseToken(token)
+	if err != nil {
+		panic(errs.ErrorTokenInvalid)
+	}
+	return payload
 }
 
 func (m Middleware) RecoverPanic(next http.Handler) http.Handler {

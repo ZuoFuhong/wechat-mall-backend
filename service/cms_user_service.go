@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"wechat-mall-backend/dbops"
-	"wechat-mall-backend/dbops/redis"
+	"wechat-mall-backend/dbops/rediscli"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
 	"wechat-mall-backend/model"
@@ -57,7 +57,7 @@ func (cus *CMSUserService) CMSUserRegister(registerReq *defs.CMSRegisterReq) {
 	}
 	code := utils.RandomStr(32)
 	data, _ := json.Marshal(registerReq)
-	_ = redis.SetStr(defs.CMSCodePrefix+code, string(data), defs.CMSCodeExpire)
+	_ = rediscli.SetStr(defs.CMSCodePrefix+code, string(data), defs.CMSCodeExpire)
 
 	go sendEmailValidate(registerReq.Email, code)
 }

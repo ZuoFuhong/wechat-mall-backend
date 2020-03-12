@@ -1,8 +1,17 @@
 package defs
 
-type WxappLoginResp struct {
-	Token               string `json:"token" validate:"required"`
-	ExpirationInMinutes int    `json:"expiration_in_minutes" validate:"required"`
+type WxappAuthUserInfoReq struct {
+	NickName  string `json:"nickName" validate:"required"`
+	AvatarUrl string `jsoN:"avatarUrl" validate:"required"`
+	Gender    int    `json:"gender" validate:"required"`
+	Country   string `json:"country" validate:"required"`
+	Province  string `json:"province" validate:"required"`
+	City      string `json:"city" validate:"required"`
+}
+
+type WxappAuthPhone struct {
+	EncryptedData string `json:"encryptedData" validate:"required"`
+	Iv            string `jsoN:"iv" validate:"required"`
 }
 
 type PortalBannerVO struct {

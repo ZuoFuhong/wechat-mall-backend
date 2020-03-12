@@ -22,6 +22,8 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	mw := &Middleware{}
 	chain := alice.New(mw.LoggingHandler, mw.RecoverPanic, mw.ValidateAuthToken)
 	router.Handle("/api/wxapp/login", chain.ThenFunc(portalHandler.Login)).Methods("POST")
+	router.Handle("/api/wxapp/auth-phone", chain.ThenFunc(portalHandler.AuthPhone)).Methods("POST")
+	router.Handle("/api/wxapp/auth-info", chain.ThenFunc(portalHandler.AuthUserInfo)).Methods("POST")
 
 	router.Handle("/cms/login", chain.ThenFunc(cmsHandler.Login)).Methods("POST")
 	router.Handle("/cms/refresh", chain.ThenFunc(cmsHandler.Refresh)).Methods("GET")

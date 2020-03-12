@@ -1,8 +1,7 @@
-package redis
+package rediscli
 
 import (
 	"github.com/go-redis/redis"
-	"github.com/pkg/errors"
 	"time"
 )
 
@@ -22,7 +21,7 @@ func InitRedisCli(addr, passwd string, db int) {
 func GetStr(key string) (string, error) {
 	d, err := client.Get(key).Result()
 	if err == redis.Nil {
-		return "", errors.New("unknown short URL")
+		return "", err
 	} else if err != nil {
 		return "", err
 	}
