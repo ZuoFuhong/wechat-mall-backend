@@ -15,3 +15,8 @@ db = 0
 [wxapp]
 appid = "wxa36fea40b02677d0"
 appsecret = "4cec8431ec6eac438bab553566f4a1d8"
+
+[oss]
+accessKeyId = "LTAI32mpHYeNPlyv"
+accessKeySecret = "H7yHgJcBr5GOAVLdiPUrhy3UX6zGdw"
+bucketName = "wechat-mall-image"

@@ -11,6 +11,7 @@ type Conf struct {
 	Mysql Mysql
 	Redis Redis
 	Wxapp Wxapp
+	Oss   Oss
 }
 
 type Http struct {
@@ -33,6 +34,12 @@ type Redis struct {
 type Wxapp struct {
 	Appid     string
 	Appsecret string
+}
+
+type Oss struct {
+	AccessKeyId     string
+	AccessKeySecret string
+	BucketName      string
 }
 
 func LoadConf() *Conf {

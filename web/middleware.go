@@ -94,6 +94,8 @@ func (m Middleware) RecoverPanic(next http.Handler) http.Handler {
 				}
 
 				w.Header().Add("Content-Type", "application/json;charset=UTF-8")
+				w.Header().Add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
+				w.Header().Add("Access-Control-Allow-Origin", "*")
 				w.WriteHeader(httpErr.HttpSC)
 				resStr, _ := json.Marshal(httpErr.Err)
 				_, _ = io.WriteString(w, string(resStr))

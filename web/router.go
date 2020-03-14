@@ -10,9 +10,10 @@ import (
 
 func NewRouter(app *App) *mux.Router {
 	router := mux.NewRouter()
+	conf := app.Conf
 	s := service.NewService(app.Conf)
-	cmsHandler := cms.NewHandler(s)
-	portalHandler := portal.NewHandler(s)
+	cmsHandler := cms.NewHandler(conf, s)
+	portalHandler := portal.NewHandler(conf, s)
 
 	registerHandler(router, cmsHandler, portalHandler)
 	return router
@@ -85,4 +86,5 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	router.Handle("/cms/coupon/{id:[0-9]+}", chain.ThenFunc(cmsHandler.GetCoupon)).Methods("GET")
 	router.Handle("/cms/coupon/edit", chain.ThenFunc(cmsHandler.DoEditCoupon)).Methods("POST")
 	router.Handle("/cms/coupon/{id:[0-9]+}", chain.ThenFunc(cmsHandler.DoDeleteCoupon)).Methods("DELETE")
+	router.Handle("/cms/oss/policy-token", chain.ThenFunc(cmsHandler.GetOSSPolicyToken)).Methods("GET").Queries("dir", "{dir}")
 }
