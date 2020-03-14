@@ -39,11 +39,11 @@ func (s *CMSUserService) CMSLoginValidate(username, password string) *model.Wech
 		panic(err)
 	}
 	if user.Id == 0 {
-		panic(errs.NewAuthUserError("The username does not exists"))
+		panic(errs.NewErrorCMSUser("用户不存在！"))
 	}
 	encrpytStr := utils.Md5Encrpyt(password)
 	if user.Password != encrpytStr {
-		panic(errs.NewAuthUserError("Password mistake!"))
+		panic(errs.NewErrorCMSUser("密码错误！"))
 	}
 	return user
 }
@@ -54,7 +54,7 @@ func (s *CMSUserService) AddCMSUser(userDO *model.WechatMallCMSUserDO) {
 		panic(err)
 	}
 	if cmsUserDO.Id != 0 {
-		panic(errs.NewErrorCMSUser("The username already exists"))
+		panic(errs.NewErrorCMSUser("用户名已注册！"))
 	}
 	if userDO.Email != "" {
 		cmsUserDO, err = dbops.GetCMSUserByEmail(userDO.Email)
@@ -62,7 +62,7 @@ func (s *CMSUserService) AddCMSUser(userDO *model.WechatMallCMSUserDO) {
 			panic(err)
 		}
 		if cmsUserDO.Id != 0 {
-			panic(errs.NewErrorCMSUser("The email already exists"))
+			panic(errs.NewErrorCMSUser("邮箱已注册"))
 		}
 	}
 	groupDO, err := dbops.QueryUserGroupById(userDO.GroupId)
@@ -79,30 +79,25 @@ func (s *CMSUserService) AddCMSUser(userDO *model.WechatMallCMSUserDO) {
 }
 
 func (s *CMSUserService) UpdateCMSUser(userDO *model.WechatMallCMSUserDO) {
-	cmsUserDO, err := dbops.GetCMSUserByUsername(userDO.Username)
-	if err != nil {
-		panic(err)
-	}
-	if cmsUserDO.Id != 0 && cmsUserDO.Id != userDO.Id {
-		panic(errs.NewErrorCMSUser("The username already exists"))
-	}
 	if userDO.Email != "" {
-		cmsUserDO, err = dbops.GetCMSUserByEmail(userDO.Email)
+		cmsUserDO, err := dbops.GetCMSUserByEmail(userDO.Email)
 		if err != nil {
 			panic(err)
 		}
 		if cmsUserDO.Id != 0 && cmsUserDO.Id != userDO.Id {
-			panic(errs.NewErrorCMSUser("The email already exists"))
+			panic(errs.NewErrorCMSUser("邮箱已注册！"))
 		}
 	}
-	groupDO, err := dbops.QueryUserGroupById(userDO.GroupId)
-	if err != nil {
-		panic(err)
+	if userDO.GroupId != 0 {
+		groupDO, err := dbops.QueryUserGroupById(userDO.GroupId)
+		if err != nil {
+			panic(err)
+		}
+		if groupDO.Id == 0 {
+			panic(errs.ErrorGroup)
+		}
 	}
-	if groupDO.Id == 0 {
-		panic(errs.ErrorGroup)
-	}
-	err = dbops.UpdateCMSUserById(userDO)
+	err := dbops.UpdateCMSUserById(userDO)
 	if err != nil {
 		panic(err)
 	}

@@ -10,6 +10,7 @@ import (
 	"wechat-mall-backend/model"
 )
 
+// 查询-商品列表
 func (h *Handler) GetGoodsList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -39,6 +40,7 @@ func (h *Handler) GetGoodsList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 查询商品详情
 func (h *Handler) GetGoods(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -62,6 +64,7 @@ func (h *Handler) GetGoods(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, goodsVO)
 }
 
+// 新增/编辑商品
 func (h *Handler) DoEditGoods(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSGoodsReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -109,6 +112,7 @@ func (h *Handler) DoEditGoods(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除商品
 func (h *Handler) DoDeleteGoods(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])

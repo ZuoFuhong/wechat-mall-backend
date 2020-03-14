@@ -33,6 +33,9 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			if uri == "/cms/user/login" {
 				goto nextHandler
 			}
+			if uri == "/cms/user/refresh" {
+				goto nextHandler
+			}
 			payload := parseTokenAndValidate(r)
 			// Inject the uid into the context
 			ctx := context.WithValue(r.Context(), defs.ContextKey, payload.Uid)

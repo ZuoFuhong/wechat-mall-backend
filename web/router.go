@@ -44,7 +44,7 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	router.Handle("/cms/user/login", chain.ThenFunc(cmsHandler.Login)).Methods("POST")
 	router.Handle("/cms/user/refresh", chain.ThenFunc(cmsHandler.Refresh)).Methods("GET")
 	router.Handle("/cms/user/info", chain.ThenFunc(cmsHandler.GetUserInfo)).Methods("GET")
-	router.Handle("/cms/user/change_password", chain.ThenFunc(cmsHandler.DoChangePassword)).Methods("POST")
+	router.Handle("/cms/user/change_password", chain.ThenFunc(cmsHandler.DoChangePassword)).Methods("PUT")
 	router.Handle("/cms/admin/users", chain.ThenFunc(cmsHandler.GetUserList)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
 	router.Handle("/cms/admin/user", chain.ThenFunc(cmsHandler.DoEditUser)).Methods("POST")
 	router.Handle("/cms/admin/user", chain.ThenFunc(cmsHandler.DoDeleteCMSUser)).Methods("DELETE").Queries("id", "{id}")

@@ -9,6 +9,7 @@ import (
 	"wechat-mall-backend/errs"
 )
 
+// 查询-规格列表
 func (h *Handler) GetSpecificationList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -31,6 +32,7 @@ func (h *Handler) GetSpecificationList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 查询-单个规格
 func (h *Handler) GetSpecification(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -47,6 +49,7 @@ func (h *Handler) GetSpecification(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, specVO)
 }
 
+// 新增/编辑-规格
 func (h *Handler) DoEditSpecification(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSSpecificationReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -56,7 +59,7 @@ func (h *Handler) DoEditSpecification(w http.ResponseWriter, r *http.Request) {
 	if req.Id == 0 {
 		spec := h.service.SpecificationService.GetSpecificationByName(req.Name)
 		if spec.Id != 0 {
-			panic(errs.NewSpecificationError("The name already exists"))
+			panic(errs.NewSpecificationError("规格名已存在！"))
 		}
 		spec.Name = req.Name
 		spec.Description = req.Description
@@ -66,7 +69,7 @@ func (h *Handler) DoEditSpecification(w http.ResponseWriter, r *http.Request) {
 	} else {
 		spec := h.service.SpecificationService.GetSpecificationByName(req.Name)
 		if spec.Id != 0 && spec.Id != req.Id {
-			panic(errs.NewSpecificationError("The name already exists"))
+			panic(errs.NewSpecificationError("规格名已存在！"))
 		}
 		spec = h.service.SpecificationService.GetSpecificationById(req.Id)
 		if spec.Id == 0 {
@@ -82,6 +85,7 @@ func (h *Handler) DoEditSpecification(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除-规格
 func (h *Handler) DoDeleteSpecification(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -94,6 +98,7 @@ func (h *Handler) DoDeleteSpecification(w http.ResponseWriter, r *http.Request) 
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 查询-单个规格-全部属性
 func (h *Handler) GetSpecificationAttrList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	specId, _ := strconv.Atoi(vars["specId"])
@@ -111,6 +116,7 @@ func (h *Handler) GetSpecificationAttrList(w http.ResponseWriter, r *http.Reques
 	defs.SendNormalResponse(w, attrVOs)
 }
 
+// 查询-单个规格-单个属性
 func (h *Handler) GetSpecificationAttr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -126,6 +132,7 @@ func (h *Handler) GetSpecificationAttr(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, attrVO)
 }
 
+// 新增/更新-规格-单个属性
 func (h *Handler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSSpecificationAttrReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -139,7 +146,7 @@ func (h *Handler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Request
 	if req.Id == 0 {
 		spec := h.service.SpecificationService.GetSpecificationAttrByValue(req.Value)
 		if spec.Id != 0 {
-			panic(errs.NewSpecificationAttr("The value already exists"))
+			panic(errs.NewSpecificationAttr("属性名已存在！"))
 		}
 		spec.SpecId = req.SpecId
 		spec.Value = req.Value
@@ -148,7 +155,7 @@ func (h *Handler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Request
 	} else {
 		spec := h.service.SpecificationService.GetSpecificationAttrByValue(req.Value)
 		if spec.Id != 0 && spec.Id != req.Id {
-			panic(errs.NewSpecificationError("The name already exists"))
+			panic(errs.NewSpecificationError("属性名已存在！"))
 		}
 		spec = h.service.SpecificationService.GetSpecificationAttrById(req.Id)
 		if spec.Id == 0 {
@@ -163,6 +170,7 @@ func (h *Handler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Request
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除-单个规格-单个属性
 func (h *Handler) DoDeleteSpecificationAttr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])

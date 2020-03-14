@@ -10,6 +10,7 @@ import (
 	"wechat-mall-backend/errs"
 )
 
+// 查询-SKU列表
 func (h *Handler) GetSKUList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -36,6 +37,7 @@ func (h *Handler) GetSKUList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 查询-单个SKU
 func (h *Handler) GetSKU(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -56,6 +58,7 @@ func (h *Handler) GetSKU(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, skuVO)
 }
 
+// 新增/编辑 SKU
 func (h *Handler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSSKUReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -73,7 +76,7 @@ func (h *Handler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 	if req.Id == 0 {
 		sku := h.service.SKUService.GetSKUByCode(req.Code)
 		if sku.Id != 0 {
-			panic(errs.NewErrorSKU("The code already exists"))
+			panic(errs.NewErrorSKU("商品编码已存在！"))
 		}
 		sku.Title = req.Title
 		sku.Price = req.Price
@@ -87,7 +90,7 @@ func (h *Handler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 	} else {
 		sku := h.service.SKUService.GetSKUByCode(req.Code)
 		if sku.Id != 0 && sku.Id != req.Id {
-			panic(errs.NewErrorSKU("The code already exists"))
+			panic(errs.NewErrorSKU("商品编码已存在！"))
 		}
 		sku = h.service.SKUService.GetSKUById(req.Id)
 		if sku.Id == 0 {
@@ -106,6 +109,7 @@ func (h *Handler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除-单个SKU
 func (h *Handler) DoDeleteSKU(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])

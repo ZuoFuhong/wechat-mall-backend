@@ -13,11 +13,12 @@ import (
 	"wechat-mall-backend/utils"
 )
 
+// CMS-用户登录
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	loginReq := defs.CMSLoginReq{}
 	err := json.NewDecoder(r.Body).Decode(&loginReq)
 	if err != nil {
-		panic(errs.ErrorRequestBodyParseFailed)
+		panic(err)
 	}
 	validate := validator.New()
 	if err = validate.Struct(loginReq); err != nil {
@@ -32,22 +33,23 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// CMS-刷新AccessToken
 func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 	authorization := r.Header.Get("Authorization")
 	if authorization == "" {
-		panic(errs.ErrorNotAuthUser)
+		panic(errs.ErrorRefreshTokenInvalid)
 	}
 	tmpArr := strings.Split(authorization, " ")
 	if len(tmpArr) != 2 {
-		panic(errs.ErrorNotAuthUser)
+		panic(errs.ErrorRefreshTokenInvalid)
 	}
 	refreshToken := tmpArr[1]
 	if !utils.ValidateToken(refreshToken) {
-		panic(errs.ErrorTokenInvalid)
+		panic(errs.ErrorRefreshTokenInvalid)
 	}
 	payload, err := utils.ParseToken(refreshToken)
 	if err != nil {
-		panic(errs.ErrorTokenInvalid)
+		panic(errs.ErrorRefreshTokenInvalid)
 	}
 	newAccessToken, _ := utils.CreateToken(payload.Uid, defs.AccessTokenExpire)
 	newRefreshToken, _ := utils.CreateToken(payload.Uid, defs.RefreshTokenExpire)
@@ -56,6 +58,7 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// CMS-查询用户信息及权限
 func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(defs.ContextKey).(int)
 	userDO := h.service.CMSUserService.GetCMSUserById(userId)
@@ -78,6 +81,7 @@ func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 登录用户-修改密码
 func (h *Handler) DoChangePassword(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSChangePasswordReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -87,7 +91,7 @@ func (h *Handler) DoChangePassword(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	err = validate.Struct(req)
 	if err != nil {
-		panic(err.Error())
+		panic(errs.NewParameterError(err.Error()))
 	}
 	userId := r.Context().Value(defs.ContextKey).(int)
 	userDO := h.service.CMSUserService.GetCMSUserById(userId)
@@ -95,13 +99,14 @@ func (h *Handler) DoChangePassword(w http.ResponseWriter, r *http.Request) {
 		panic(errs.ErrorCMSUser)
 	}
 	if utils.Md5Encrpyt(req.OldPassword) != userDO.Password {
-		panic(errs.NewErrorCMSUser("oldPassword mistake"))
+		panic(errs.NewErrorCMSUser("原始密码错误！"))
 	}
 	userDO.Password = utils.Md5Encrpyt(req.NewPassword)
 	h.service.CMSUserService.UpdateCMSUser(userDO)
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 查询-用户列表
 func (h *Handler) GetUserList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -124,6 +129,7 @@ func (h *Handler) GetUserList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 新增/编辑-用户
 func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
 	req := &defs.CMSUserReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -159,6 +165,7 @@ func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除-用户
 func (h *Handler) DoDeleteCMSUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId, _ := strconv.Atoi(vars["id"])
@@ -171,6 +178,7 @@ func (h *Handler) DoDeleteCMSUser(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 查询-用户分组
 func (h *Handler) GetUserGroupList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -193,6 +201,7 @@ func (h *Handler) GetUserGroupList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 新增/编辑 用户分组
 func (h *Handler) DoEditUserGroup(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSUserGroupReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -207,7 +216,7 @@ func (h *Handler) DoEditUserGroup(w http.ResponseWriter, r *http.Request) {
 	if req.Id == 0 {
 		groupDO := h.service.CMSUserService.QueryUserGroupByName(req.Name)
 		if groupDO.Id != 0 {
-			panic(errs.NewErrorGroup("The name already exists"))
+			panic(errs.NewErrorGroup("分组名已存在！"))
 		}
 		groupDO.Name = req.Name
 		groupDO.Description = req.Description
@@ -216,7 +225,7 @@ func (h *Handler) DoEditUserGroup(w http.ResponseWriter, r *http.Request) {
 	} else {
 		groupDO := h.service.CMSUserService.QueryUserGroupByName(req.Name)
 		if groupDO.Id != 0 && groupDO.Id != req.Id {
-			panic(errs.NewErrorGroup("The name already  exists"))
+			panic(errs.NewErrorGroup("分组名已存在！"))
 		}
 		groupDO = h.service.CMSUserService.QueryUserGroupById(req.Id)
 		if groupDO.Id == 0 {
@@ -230,6 +239,7 @@ func (h *Handler) DoEditUserGroup(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除-用户分组
 func (h *Handler) DoDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	groupId, _ := strconv.Atoi(vars["id"])
@@ -239,13 +249,14 @@ func (h *Handler) DoDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 	}
 	num := h.service.CMSUserService.CountGroupUser(groupId)
 	if num > 0 {
-		panic(errs.NewErrorGroup("There are users in the group, Do not delete the group"))
+		panic(errs.NewErrorGroup("分组中有用户，禁止删除！"))
 	}
 	groupDO.Del = 1
 	h.service.CMSUserService.UpdateUserGroup(groupDO)
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 查询-权限模块
 func (h *Handler) GetModuleList(w http.ResponseWriter, r *http.Request) {
 	moduleList := h.service.CMSUserService.GetModuleList()
 	defs.SendNormalResponse(w, moduleList)

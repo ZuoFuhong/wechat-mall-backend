@@ -11,6 +11,7 @@ import (
 	"wechat-mall-backend/model"
 )
 
+// 查询-Banner列表
 func (h *Handler) GetBannerList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -33,6 +34,7 @@ func (h *Handler) GetBannerList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 查询-Banner详情
 func (h *Handler) GetBanner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -49,11 +51,12 @@ func (h *Handler) GetBanner(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, bVO)
 }
 
+// 新增/编辑 Banner
 func (h *Handler) DoEditBanner(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSBannerReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		panic(errs.ErrorRequestBodyParseFailed)
+		panic(err)
 	}
 	validate := validator.New()
 	if err = validate.Struct(req); err != nil {
@@ -80,6 +83,7 @@ func (h *Handler) DoEditBanner(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除Banner
 func (h *Handler) DoDeleteBanner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])

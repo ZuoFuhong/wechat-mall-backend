@@ -10,6 +10,7 @@ import (
 	"wechat-mall-backend/errs"
 )
 
+// 查询-宫格列表
 func (h *Handler) GetGridCategoryList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -33,6 +34,7 @@ func (h *Handler) GetGridCategoryList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 查询-单个宫格
 func (h *Handler) GetGridCategory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -50,6 +52,7 @@ func (h *Handler) GetGridCategory(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, gcVO)
 }
 
+// 新增/更新宫格
 func (h *Handler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSGridCategoryReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -63,7 +66,7 @@ func (h *Handler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) {
 	if req.Id == 0 {
 		gridC := h.service.GridCategoryService.GetGridCategoryByName(req.Name)
 		if gridC.Id != 0 {
-			panic(errs.NewGridCategoryError("The name already exists"))
+			panic(errs.NewGridCategoryError("宫格名称已存在！"))
 		}
 		gridC.Id = req.Id
 		gridC.Title = req.Title
@@ -74,7 +77,7 @@ func (h *Handler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) {
 	} else {
 		gridC := h.service.GridCategoryService.GetGridCategoryByName(req.Name)
 		if gridC.Id != 0 && gridC.Id != req.Id {
-			panic(errs.NewGridCategoryError("The name already exists"))
+			panic(errs.NewGridCategoryError("宫格名称已存在！"))
 		}
 		gridC = h.service.GridCategoryService.GetGridCategoryById(req.Id)
 		if gridC.Id == 0 {
@@ -89,6 +92,7 @@ func (h *Handler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除-单个宫格
 func (h *Handler) DoDeleteGridCategory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])

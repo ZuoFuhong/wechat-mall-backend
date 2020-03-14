@@ -11,6 +11,7 @@ import (
 	"wechat-mall-backend/model"
 )
 
+// 查询-优惠券列表
 func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -37,6 +38,7 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 查询优惠券
 func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -57,6 +59,7 @@ func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, couponVO)
 }
 
+// 新增/删除 优惠券
 func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 	req := defs.CMSCouponReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -98,6 +101,7 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 删除优惠券
 func (h *Handler) DoDeleteCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])

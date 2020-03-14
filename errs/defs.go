@@ -17,82 +17,76 @@ func (err Err) Error() string {
 }
 
 var (
-	ErrorRequestBodyParseFailed = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10001, ErrMsg: "Request body is not correct"}}
-	ErrorNotAuthUser            = HttpErr{HttpSC: http.StatusUnauthorized, Err: Err{Code: 10002, ErrMsg: "User authentication failed."}}
-	ErrorRedisError             = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10003, ErrMsg: "Redis ops failed"}}
-	ErrorInternalFaults         = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10004, ErrMsg: "Internal service error"}}
-	ErrorParameterValidate      = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10006, ErrMsg: "validate parameters failed"}}
-	ErrorTokenInvalid           = HttpErr{HttpSC: http.StatusUnauthorized, Err: Err{Code: 10008, ErrMsg: "Token is invalid"}}
-	ErrorValidateCodeInvalid    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10009, ErrMsg: "Code is invalid"}}
-	ErrorWechatError            = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10010, ErrMsg: "wechat error"}}
-	ErrorBannerNotExist         = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10011, ErrMsg: "Banner does not exist"}}
-	ErrorCategory               = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10012, ErrMsg: "Category does not exist"}}
-	ErrorGridCategory           = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10013, ErrMsg: "GridCategory does not exist"}}
-	ErrorSpecification          = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10014, ErrMsg: "Specification does not exist"}}
-	ErrorSpecificationAttr      = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10015, ErrMsg: "Specification attr does not exist"}}
-	ErrorGoods                  = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: "Goods does not exist"}}
-	ErrorSKU                    = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: "SKU does not exist"}}
-	ErrorCoupon                 = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10019, ErrMsg: "Coupon does not exist"}}
-	ErrorAddress                = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10020, ErrMsg: "Address does not exist"}}
-	ErrorOrder                  = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10021, ErrMsg: "Order does not exist"}}
-	ErrorGoodsCart              = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10022, ErrMsg: "Cart goods does not exist"}}
-	ErrorGroup                  = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10023, ErrMsg: "Group does not exist"}}
-	ErrorCMSUser                = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10024, ErrMsg: "User does not exist"}}
-	ErrorModulePage             = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10024, ErrMsg: "Page does not exist"}}
+	ErrorRedisError          = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10003, ErrMsg: "Redis ops failed"}}
+	ErrorInternalFaults      = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10004, ErrMsg: "Internal service error"}}
+	ErrorWechatError         = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10007, ErrMsg: "微信内部异常！"}}
+	ErrorTokenInvalid        = HttpErr{HttpSC: http.StatusUnauthorized, Err: Err{Code: 10008, ErrMsg: "Token is invalid"}}
+	ErrorRefreshTokenInvalid = HttpErr{HttpSC: http.StatusUnauthorized, Err: Err{Code: 10009, ErrMsg: "Refresh token is invalid"}}
+	ErrorParameterValidate   = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10010, ErrMsg: "参数验证失败！"}}
+	ErrorBannerNotExist      = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10011, ErrMsg: "Banner不存在！"}}
+	ErrorCategory            = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10012, ErrMsg: "分类不存在！"}}
+	ErrorGridCategory        = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10013, ErrMsg: "宫格不存在！"}}
+	ErrorSpecification       = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10014, ErrMsg: "规格不存在！"}}
+	ErrorSpecificationAttr   = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10015, ErrMsg: "规格属性不存在！"}}
+	ErrorGoods               = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10016, ErrMsg: "商品不存在！"}}
+	ErrorSKU                 = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10017, ErrMsg: "SKU不存在！"}}
+	ErrorCoupon              = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10019, ErrMsg: "优惠券不存在！"}}
+	ErrorAddress             = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10020, ErrMsg: "收货地址不存在！"}}
+	ErrorOrder               = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10021, ErrMsg: "订单不存在！"}}
+	ErrorGoodsCart           = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10022, ErrMsg: "购物车商品不存在！"}}
+	ErrorGroup               = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10023, ErrMsg: "分组不存在！"}}
+	ErrorCMSUser             = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10024, ErrMsg: "用户不存在！"}}
+	ErrorModulePage          = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10025, ErrMsg: "页面不存在！"}}
 )
 
-func NewAuthUserError(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusUnauthorized, Err: Err{Code: 10002, ErrMsg: errMsg}}
-}
-
 func NewParameterError(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10001, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10010, ErrMsg: errMsg}}
 }
 
 func NewCategoryError(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10012, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10012, ErrMsg: errMsg}}
 }
 
 func NewGridCategoryError(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10013, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10013, ErrMsg: errMsg}}
 }
 
 func NewSpecificationError(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10014, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10014, ErrMsg: errMsg}}
 }
 
 func NewSpecificationAttr(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10015, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10015, ErrMsg: errMsg}}
 }
 
 func NewErrorGoods(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10016, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10016, ErrMsg: errMsg}}
 }
 
 func NewErrorSKU(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10017, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10017, ErrMsg: errMsg}}
 }
 
 func NewErrorCoupon(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10019, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10019, ErrMsg: errMsg}}
 }
 
 func NewErrorAddress(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10020, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10020, ErrMsg: errMsg}}
 }
 
 func NewErrorOrder(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10021, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10021, ErrMsg: errMsg}}
 }
 
 func NewErrorGoodsCart(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10022, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10022, ErrMsg: errMsg}}
 }
 
 func NewErrorGroup(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10023, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10023, ErrMsg: errMsg}}
 }
 
 func NewErrorCMSUser(errMsg string) HttpErr {
-	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10024, ErrMsg: errMsg}}
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10024, ErrMsg: errMsg}}
 }
