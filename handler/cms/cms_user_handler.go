@@ -2,15 +2,14 @@ package cms
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
-	"github.com/prometheus/common/log"
 	"net/http"
+	"strconv"
 	"strings"
-	"wechat-mall-backend/dbops/rediscli"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
+	"wechat-mall-backend/model"
 	"wechat-mall-backend/utils"
 )
 
@@ -57,41 +56,197 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
-func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	registerReq := defs.CMSRegisterReq{}
-	err := json.NewDecoder(r.Body).Decode(&registerReq)
-	if err != nil {
-		panic(errs.ErrorRequestBodyParseFailed)
+func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(defs.ContextKey).(int)
+	userDO := h.service.CMSUserService.GetCMSUserById(userId)
+	if userDO.Id == 0 {
+		panic(errs.ErrorCMSUser)
 	}
-	validate := validator.New()
-	if err = validate.Struct(registerReq); err != nil {
-		panic(errs.NewParameterError(err.Error()))
-	}
+	auths := h.service.CMSUserService.QueryGroupAuths(userDO.GroupId)
 
-	h.service.CMSUserService.CMSUserRegister(&registerReq)
+	userVO := defs.CMSUserVO{}
+	userVO.Id = userDO.Id
+	userVO.Username = userDO.Username
+	userVO.Email = userDO.Email
+	userVO.Mobile = userDO.Mobile
+	userVO.Avatar = userDO.Avatar
+	userVO.GroupId = userDO.GroupId
 
-	code := utils.RandomStr(32)
-	data, _ := json.Marshal(registerReq)
-	err = rediscli.SetStr(defs.CMSCodePrefix+code, string(data), defs.CMSCodeExpire)
-	if err != nil {
-		log.Error(err)
-		panic(err)
-	}
-	defs.SendNormalResponse(w, fmt.Sprintf("已发送一封验证邮件至%s，请打开它进行验证！", registerReq.Email))
+	resp := make(map[string]interface{})
+	resp["user"] = userVO
+	resp["auths"] = auths
+	defs.SendNormalResponse(w, resp)
 }
 
-func (h *Handler) RegisterActivate(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DoChangePassword(w http.ResponseWriter, r *http.Request) {
+	req := defs.CMSChangePasswordReq{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		panic(errs.ErrorParameterValidate)
+	}
+	validate := validator.New()
+	err = validate.Struct(req)
+	if err != nil {
+		panic(err.Error())
+	}
+	userId := r.Context().Value(defs.ContextKey).(int)
+	userDO := h.service.CMSUserService.GetCMSUserById(userId)
+	if userDO.Id == 0 {
+		panic(errs.ErrorCMSUser)
+	}
+	if utils.Md5Encrpyt(req.OldPassword) != userDO.Password {
+		panic(errs.NewErrorCMSUser("oldPassword mistake"))
+	}
+	userDO.Password = utils.Md5Encrpyt(req.NewPassword)
+	h.service.CMSUserService.UpdateCMSUser(userDO)
+	defs.SendNormalResponse(w, "ok")
+}
+
+func (h *Handler) GetUserList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	code := vars["code"]
-	cacheData, err := rediscli.GetStr(code)
-	if err != nil {
-		panic(errs.ErrorValidateCodeInvalid)
+	page, _ := strconv.Atoi(vars["page"])
+	size, _ := strconv.Atoi(vars["size"])
+	userList, total := h.service.CMSUserService.GetCMSUserList(page, size)
+	userVOList := []defs.CMSUserVO{}
+	for _, v := range *userList {
+		userVO := defs.CMSUserVO{}
+		userVO.Id = v.Id
+		userVO.Username = v.Username
+		userVO.Email = v.Email
+		userVO.Mobile = v.Mobile
+		userVO.Avatar = v.Avatar
+		userVO.GroupId = v.GroupId
+		userVOList = append(userVOList, userVO)
 	}
-	registerReq := defs.CMSRegisterReq{}
-	_ = json.Unmarshal([]byte(cacheData), &registerReq)
-	err = h.service.CMSUserService.AddCMSUser(registerReq.Username, registerReq.Password, registerReq.Email)
+	resp := make(map[string]interface{})
+	resp["list"] = userVOList
+	resp["total"] = total
+	defs.SendNormalResponse(w, resp)
+}
+
+func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
+	req := &defs.CMSUserReq{}
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		log.Error(err)
-		panic(err)
+		panic(errs.ErrorParameterValidate)
 	}
+	validate := validator.New()
+	if err = validate.Struct(req); err != nil {
+		panic(errs.NewParameterError(err.Error()))
+	}
+	if req.Id == 0 {
+		cmsUserDO := model.WechatMallCMSUserDO{}
+		cmsUserDO.Username = req.Username
+		cmsUserDO.Password = utils.Md5Encrpyt(req.Password)
+		cmsUserDO.Email = req.Email
+		cmsUserDO.Mobile = req.Mobile
+		cmsUserDO.Avatar = ""
+		cmsUserDO.GroupId = req.GroupId
+		h.service.CMSUserService.AddCMSUser(&cmsUserDO)
+	} else {
+		cmsUserDO := h.service.CMSUserService.GetCMSUserById(req.Id)
+		if cmsUserDO.Id == 0 || cmsUserDO.Id == 1 {
+			panic(errs.ErrorCMSUser)
+		}
+		cmsUserDO.Email = req.Email
+		cmsUserDO.Mobile = req.Mobile
+		cmsUserDO.GroupId = req.GroupId
+		if req.Password != "" {
+			cmsUserDO.Password = utils.Md5Encrpyt(req.Password)
+		}
+		h.service.CMSUserService.UpdateCMSUser(cmsUserDO)
+	}
+	defs.SendNormalResponse(w, "ok")
+}
+
+func (h *Handler) DoDeleteCMSUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId, _ := strconv.Atoi(vars["id"])
+	cmsUserDO := h.service.CMSUserService.GetCMSUserById(userId)
+	if cmsUserDO.Id == 0 || cmsUserDO.Id == 1 {
+		panic(errs.ErrorCMSUser)
+	}
+	cmsUserDO.Del = 1
+	h.service.CMSUserService.UpdateCMSUser(cmsUserDO)
+	defs.SendNormalResponse(w, "ok")
+}
+
+func (h *Handler) GetUserGroupList(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	page, _ := strconv.Atoi(vars["page"])
+	size, _ := strconv.Atoi(vars["size"])
+
+	groupList, total := h.service.CMSUserService.QueryUserGroupList(page, size)
+	groupVOList := []defs.CMSUserGroupVO{}
+	for _, v := range *groupList {
+		auths := h.service.CMSUserService.QueryGroupAuths(v.Id)
+		groupVO := defs.CMSUserGroupVO{}
+		groupVO.Id = v.Id
+		groupVO.Name = v.Name
+		groupVO.Description = v.Description
+		groupVO.Auths = auths
+		groupVOList = append(groupVOList, groupVO)
+	}
+	resp := make(map[string]interface{})
+	resp["list"] = groupVOList
+	resp["total"] = total
+	defs.SendNormalResponse(w, resp)
+}
+
+func (h *Handler) DoEditUserGroup(w http.ResponseWriter, r *http.Request) {
+	req := defs.CMSUserGroupReq{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		panic(errs.ErrorParameterValidate)
+	}
+	validate := validator.New()
+	err = validate.Struct(req)
+	if err != nil {
+		panic(errs.NewParameterError(err.Error()))
+	}
+	if req.Id == 0 {
+		groupDO := h.service.CMSUserService.QueryUserGroupByName(req.Name)
+		if groupDO.Id != 0 {
+			panic(errs.NewErrorGroup("The name already exists"))
+		}
+		groupDO.Name = req.Name
+		groupDO.Description = req.Description
+		groupId := h.service.CMSUserService.AddUserGroup(groupDO)
+		h.service.CMSUserService.RefreshGroupAuths(groupId, req.Auths)
+	} else {
+		groupDO := h.service.CMSUserService.QueryUserGroupByName(req.Name)
+		if groupDO.Id != 0 && groupDO.Id != req.Id {
+			panic(errs.NewErrorGroup("The name already  exists"))
+		}
+		groupDO = h.service.CMSUserService.QueryUserGroupById(req.Id)
+		if groupDO.Id == 0 {
+			panic(errs.ErrorGroup)
+		}
+		groupDO.Name = req.Name
+		groupDO.Description = req.Description
+		h.service.CMSUserService.UpdateUserGroup(groupDO)
+		h.service.CMSUserService.RefreshGroupAuths(req.Id, req.Auths)
+	}
+	defs.SendNormalResponse(w, "ok")
+}
+
+func (h *Handler) DoDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	groupId, _ := strconv.Atoi(vars["id"])
+	groupDO := h.service.CMSUserService.QueryUserGroupById(groupId)
+	if groupDO.Id == 0 {
+		panic(errs.ErrorGroup)
+	}
+	num := h.service.CMSUserService.CountGroupUser(groupId)
+	if num > 0 {
+		panic(errs.NewErrorGroup("There are users in the group, Do not delete the group"))
+	}
+	groupDO.Del = 1
+	h.service.CMSUserService.UpdateUserGroup(groupDO)
+	defs.SendNormalResponse(w, "ok")
+}
+
+func (h *Handler) GetModuleList(w http.ResponseWriter, r *http.Request) {
+	moduleList := h.service.CMSUserService.GetModuleList()
+	defs.SendNormalResponse(w, moduleList)
 }

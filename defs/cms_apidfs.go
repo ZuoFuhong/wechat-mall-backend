@@ -179,3 +179,53 @@ type CMSCouponVO struct {
 	Description string `json:"description"`
 	Online      int    `json:"online"`
 }
+
+type CMSUserVO struct {
+	Id       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Mobile   string `json:"mobile"`
+	Avatar   string `json:"avatar"`
+	GroupId  int    `json:"groupId"`
+}
+
+type CMSUserReq struct {
+	Id       int    `json:"id"`
+	Username string `json:"username" validate:"required"`
+	Email    string `json:"email"`
+	Password string `json:"password" validate:"required"`
+	Mobile   string `json:"mobile"`
+	GroupId  int    `json:"groupId" validate:"required"`
+}
+
+type CMSUserGroupReq struct {
+	Id          int    `json:"id"`
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description"`
+	Auths       []int  `json:"auths"`
+}
+
+type CMSUserGroupVO struct {
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Auths       []int  `json:"auths"`
+}
+
+type CMSModuleVO struct {
+	Id          int               `json:"id"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	PageList    []CMSModulePageVO `json:"pageList"`
+}
+
+type CMSModulePageVO struct {
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type CMSChangePasswordReq struct {
+	OldPassword string `json:"oldPassword" validate:"required"`
+	NewPassword string `json:"newPassword" validate:"required"`
+}

@@ -36,6 +36,9 @@ var (
 	ErrorAddress                = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10020, ErrMsg: "Address does not exist"}}
 	ErrorOrder                  = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10021, ErrMsg: "Order does not exist"}}
 	ErrorGoodsCart              = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10022, ErrMsg: "Cart goods does not exist"}}
+	ErrorGroup                  = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10023, ErrMsg: "Group does not exist"}}
+	ErrorCMSUser                = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10024, ErrMsg: "User does not exist"}}
+	ErrorModulePage             = HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10024, ErrMsg: "Page does not exist"}}
 )
 
 func NewAuthUserError(errMsg string) HttpErr {
@@ -84,4 +87,12 @@ func NewErrorOrder(errMsg string) HttpErr {
 
 func NewErrorGoodsCart(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10022, ErrMsg: errMsg}}
+}
+
+func NewErrorGroup(errMsg string) HttpErr {
+	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10023, ErrMsg: errMsg}}
+}
+
+func NewErrorCMSUser(errMsg string) HttpErr {
+	return HttpErr{HttpSC: http.StatusBadRequest, Err: Err{Code: 10024, ErrMsg: errMsg}}
 }

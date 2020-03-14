@@ -25,6 +25,46 @@ type WechatMallCMSUserDO struct {
 	Email      string // 邮箱
 	Mobile     string // 手机号
 	Avatar     string // 头像
+	GroupId    int    // 用户分组
+	Del        int
+	CreateTime string
+	UpdateTime string
+}
+
+// CMS后台用户分组
+type WechatMallUserGroupDO struct {
+	Id          ID
+	Name        string // 名称
+	Description string // 描述
+	Del         int
+	CreateTime  string
+	UpdateTime  string
+}
+
+// CMS-组成模块
+type WechatMallModuleDO struct {
+	Id          ID
+	Name        string // 名称
+	Description string // 描述
+	Del         int
+	CreateTime  string
+	UpdateTime  string
+}
+
+type WechatMallModulePageDO struct {
+	Id          ID
+	ModuleId    ID     // 模块ID
+	Name        string // 名称
+	Description string // 描述
+	Del         int
+	CreateTime  string
+	UpdateTime  string
+}
+
+type WechatMallGroupPagePermission struct {
+	Id         ID
+	GroupId    ID // 分组ID
+	PageId     ID // 页面ID
 	Del        int
 	CreateTime string
 	UpdateTime string

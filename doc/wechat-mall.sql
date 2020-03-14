@@ -26,6 +26,7 @@ CREATE TABLE `wechat_mall_cms_user` (
     `email` varchar(20) NOT NULL DEFAULT '' COMMENT '邮箱',
     `mobile` varchar(11) NOT NULL DEFAULT '' COMMENT '手机号',
     `avatar` varchar(100) NOT NULL DEFAULT '' COMMENT '头像',
+    `group_id` int(11) NOT NULL DEFAULT '0' COMMENT '分组ID',
     `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
@@ -33,6 +34,55 @@ CREATE TABLE `wechat_mall_cms_user` (
     KEY `idx_email`(`email`),
     KEY `idx_mobile`(`mobile`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT = 'CMS后台用户表';
+
+-- CMS-后台用户分组表
+CREATE TABLE `wechat_mall_user_group` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `name` varchar(10) NOT NULL DEFAULT '' COMMENT '名称',
+    `description` varchar(30) NOT NULL DEFAULT '' COMMENT '分组描述',
+    `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY(`id`),
+    KEY `idx_name`(`name`)
+) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT = 'CMS-后台用户分组表';
+
+-- CMS-组成模块
+CREATE TABLE `wechat_mall_module` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `name` varchar(10) NOT NULL DEFAULT '' COMMENT '模块名称',
+    `description` varchar(30) NOT NULL DEFAULT '' COMMENT '描述',
+    `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY(`id`),
+    KEY `idx_name`(`name`)
+) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT = 'CMS-组成模块';
+
+-- CMS-模块页面
+CREATE TABLE `wechat_mall_module_page` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `module_id` int(11) NOT NULL DEFAULT '0' COMMENT '模块ID',
+    `name` varchar(10) NOT NULL DEFAULT '' COMMENT '页面名称',
+    `description` varchar(30) NOT NULL DEFAULT '' COMMENT '描述',
+    `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY(`id`),
+    KEY `idx_module_id`(`module_id`),
+    KEY `idx_name`(`name`)
+) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT = 'CMS-模块页面';
+
+-- CMS-用户分组-页面权限表
+CREATE TABLE `wechat_mall_group_page_permission` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `group_id` int(11) NOT NULL DEFAULT '0' COMMENT '分组ID',
+    `page_id` int(11) NOT NULL DEFAULT '0' COMMENT '页面ID',
+    `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY(`id`)
+) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT = 'CMS-用户分组-页面权限表';
 
 -- 小程序Banner表
 CREATE TABLE `wechat_mall_banner` (

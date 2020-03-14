@@ -30,7 +30,7 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		uri := r.URL.RequestURI()
 		if strings.HasPrefix(uri, "/cms") {
-			if uri == "/cms/login" {
+			if uri == "/cms/user/login" {
 				goto nextHandler
 			}
 			payload := parseTokenAndValidate(r)
