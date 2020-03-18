@@ -16,10 +16,10 @@ func (h *Handler) GetSKUList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
-	skuVOs := []defs.CMSSKUVO{}
-	skuList, total := h.service.SKUService.GetSKUList(page, size)
+	skuVOs := []defs.CMSSkuListVO{}
+	skuList, total := h.service.SKUService.GetSKUList(0, page, size)
 	for _, v := range *skuList {
-		skuVO := defs.CMSSKUVO{}
+		skuVO := defs.CMSSkuListVO{}
 		skuVO.Id = v.Id
 		skuVO.Title = v.Title
 		skuVO.Price = v.Price
@@ -45,12 +45,22 @@ func (h *Handler) GetSKU(w http.ResponseWriter, r *http.Request) {
 	if sku.Id == 0 {
 		panic(errs.ErrorSKU)
 	}
-	skuVO := defs.CMSSKUVO{}
+	goodsDO := h.service.GoodsService.GetGoodsById(sku.GoodsId)
+	if goodsDO.Id == 0 {
+		panic(errs.ErrorGoods)
+	}
+	categoryDO := h.service.CategoryService.GetCategoryById(goodsDO.CategoryId)
+	if categoryDO.Id == 0 {
+		panic(errs.ErrorCategory)
+	}
+	skuVO := defs.CMSSkuDetailVO{}
 	skuVO.Id = sku.Id
 	skuVO.Title = sku.Title
 	skuVO.Price = sku.Price
 	skuVO.Code = sku.Code
 	skuVO.Stock = sku.Stock
+	skuVO.CategoryId = categoryDO.ParentId
+	skuVO.SubCategoryId = categoryDO.Id
 	skuVO.GoodsId = sku.GoodsId
 	skuVO.Online = sku.Online
 	skuVO.Picture = sku.Picture

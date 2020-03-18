@@ -21,7 +21,24 @@ func GetCMSUserByUsername(username string) (*model.WechatMallCMSUserDO, error) {
 		return nil, err
 	}
 	cmsUser := model.WechatMallCMSUserDO{}
-	if rows.Next() {
+	for rows.Next() {
+		err := rows.Scan(&cmsUser.Id, &cmsUser.Username, &cmsUser.Password, &cmsUser.Email, &cmsUser.Mobile,
+			&cmsUser.Avatar, &cmsUser.GroupId, &cmsUser.Del, &cmsUser.CreateTime, &cmsUser.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &cmsUser, nil
+}
+
+func GetCMSUserByMobile(mobile string) (*model.WechatMallCMSUserDO, error) {
+	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE mobile = '" + mobile + "'"
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	cmsUser := model.WechatMallCMSUserDO{}
+	for rows.Next() {
 		err := rows.Scan(&cmsUser.Id, &cmsUser.Username, &cmsUser.Password, &cmsUser.Email, &cmsUser.Mobile,
 			&cmsUser.Avatar, &cmsUser.GroupId, &cmsUser.Del, &cmsUser.CreateTime, &cmsUser.UpdateTime)
 		if err != nil {
@@ -38,7 +55,7 @@ func GetCMSUserByEmail(email string) (*model.WechatMallCMSUserDO, error) {
 		return nil, err
 	}
 	cmsUser := model.WechatMallCMSUserDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&cmsUser.Id, &cmsUser.Username, &cmsUser.Password, &cmsUser.Email, &cmsUser.Mobile,
 			&cmsUser.Avatar, &cmsUser.GroupId, &cmsUser.Del, &cmsUser.CreateTime, &cmsUser.UpdateTime)
 		if err != nil {
@@ -68,7 +85,7 @@ func CountGroupUser(groupId int) (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -84,7 +101,7 @@ func QueryCMSUser(id int) (*model.WechatMallCMSUserDO, error) {
 		return nil, err
 	}
 	userDO := model.WechatMallCMSUserDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&userDO.Id, &userDO.Username, &userDO.Password, &userDO.Email, &userDO.Mobile, &userDO.Avatar,
 			&userDO.GroupId, &userDO.Del, &userDO.CreateTime, &userDO.UpdateTime)
 		if err != nil {
@@ -138,7 +155,7 @@ func CountCMSUser() (int, error) {
 		return 0, nil
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, nil
@@ -167,7 +184,7 @@ func QueryUserGroupById(id int) (*model.WechatMallUserGroupDO, error) {
 		return nil, err
 	}
 	groupDO := model.WechatMallUserGroupDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&groupDO.Id, &groupDO.Name, &groupDO.Description, &groupDO.Del, &groupDO.CreateTime, &groupDO.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -183,7 +200,7 @@ func QueryUserGroupByName(name string) (*model.WechatMallUserGroupDO, error) {
 		return nil, err
 	}
 	groupDO := model.WechatMallUserGroupDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&groupDO.Id, &groupDO.Name, &groupDO.Description, &groupDO.Del, &groupDO.CreateTime, &groupDO.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -220,7 +237,7 @@ func CountUserCoupon() (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err

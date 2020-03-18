@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"wechat-mall-backend/defs"
@@ -114,6 +115,10 @@ func (h *Handler) GetUserList(w http.ResponseWriter, r *http.Request) {
 	userList, total := h.service.CMSUserService.GetCMSUserList(page, size)
 	userVOList := []defs.CMSUserVO{}
 	for _, v := range *userList {
+		groupDO := h.service.CMSUserService.QueryUserGroupById(v.GroupId)
+		if groupDO.Id == 0 {
+			panic(errs.ErrorGroup)
+		}
 		userVO := defs.CMSUserVO{}
 		userVO.Id = v.Id
 		userVO.Username = v.Username
@@ -121,12 +126,39 @@ func (h *Handler) GetUserList(w http.ResponseWriter, r *http.Request) {
 		userVO.Mobile = v.Mobile
 		userVO.Avatar = v.Avatar
 		userVO.GroupId = v.GroupId
+		userVO.GroupName = groupDO.Name
 		userVOList = append(userVOList, userVO)
 	}
 	resp := make(map[string]interface{})
 	resp["list"] = userVOList
 	resp["total"] = total
 	defs.SendNormalResponse(w, resp)
+}
+
+// 查询-单个用户
+func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId, _ := strconv.Atoi(vars["id"])
+	userDO := h.service.CMSUserService.GetCMSUserById(userId)
+	if userDO.Id == 0 {
+		panic(errs.ErrorCMSUser)
+	}
+	if userDO.Id == 1 {
+		panic(errs.NewErrorCMSUser("权限拒绝"))
+	}
+	groupDO := h.service.CMSUserService.QueryUserGroupById(userDO.GroupId)
+	if groupDO.Id == 0 {
+		panic(errs.ErrorGroup)
+	}
+	userVO := defs.CMSUserVO{}
+	userVO.Id = userDO.Id
+	userVO.Username = userDO.Username
+	userVO.Email = userDO.Email
+	userVO.Mobile = userDO.Mobile
+	userVO.Avatar = userDO.Avatar
+	userVO.GroupId = userDO.GroupId
+	userVO.GroupName = groupDO.Name
+	defs.SendNormalResponse(w, userVO)
 }
 
 // 新增/编辑-用户
@@ -140,13 +172,21 @@ func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
 	if err = validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
+	matched, _ := regexp.MatchString("^[a-zA-Z0-9]{6,16}$", req.Username)
+	if !matched {
+		panic(errs.NewParameterError("用户名不符合规范！"))
+	}
+	matched, _ = regexp.MatchString("^1[358]\\d{9}$", req.Mobile)
+	if !matched {
+		panic(errs.NewParameterError("请输入正确手机号！"))
+	}
 	if req.Id == 0 {
 		cmsUserDO := model.WechatMallCMSUserDO{}
 		cmsUserDO.Username = req.Username
-		cmsUserDO.Password = utils.Md5Encrpyt(req.Password)
+		cmsUserDO.Password = utils.Md5Encrpyt(req.Mobile[6:])
 		cmsUserDO.Email = req.Email
 		cmsUserDO.Mobile = req.Mobile
-		cmsUserDO.Avatar = ""
+		cmsUserDO.Avatar = req.Avatar
 		cmsUserDO.GroupId = req.GroupId
 		h.service.CMSUserService.AddCMSUser(&cmsUserDO)
 	} else {
@@ -154,14 +194,40 @@ func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
 		if cmsUserDO.Id == 0 || cmsUserDO.Id == 1 {
 			panic(errs.ErrorCMSUser)
 		}
+		cmsUserDO.Avatar = req.Avatar
 		cmsUserDO.Email = req.Email
 		cmsUserDO.Mobile = req.Mobile
 		cmsUserDO.GroupId = req.GroupId
-		if req.Password != "" {
-			cmsUserDO.Password = utils.Md5Encrpyt(req.Password)
-		}
 		h.service.CMSUserService.UpdateCMSUser(cmsUserDO)
 	}
+	defs.SendNormalResponse(w, "ok")
+}
+
+// 重置密码（supper权限）
+func (h *Handler) DoResetCMSUserPassword(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(defs.ContextKey).(int)
+	if userId != 1 {
+		panic(errs.NewErrorCMSUser("权限拒绝"))
+	}
+	req := defs.CMSResetUserPasswdReq{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		panic(errs.ErrorParameterValidate)
+	}
+	validate := validator.New()
+	if err = validate.Struct(req); err != nil {
+		panic(errs.NewParameterError(err.Error()))
+	}
+	userDO := h.service.CMSUserService.GetCMSUserById(req.UserId)
+	if userDO.Id == 0 {
+		panic(errs.ErrorCMSUser)
+	}
+	matched, _ := regexp.MatchString("^[a-zA-Z0-9]{6,16}$", req.Password)
+	if !matched {
+		panic(errs.NewParameterError("密码不符合规范！"))
+	}
+	userDO.Password = utils.Md5Encrpyt(req.Password)
+	h.service.CMSUserService.UpdateCMSUser(userDO)
 	defs.SendNormalResponse(w, "ok")
 }
 
@@ -199,6 +265,23 @@ func (h *Handler) GetUserGroupList(w http.ResponseWriter, r *http.Request) {
 	resp["list"] = groupVOList
 	resp["total"] = total
 	defs.SendNormalResponse(w, resp)
+}
+
+// 查询-单个分组
+func (h *Handler) GetUserGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	groupId, _ := strconv.Atoi(vars["id"])
+	groupDO := h.service.CMSUserService.QueryUserGroupById(groupId)
+	if groupDO.Id == 0 {
+		panic(errs.ErrorGroup)
+	}
+	auths := h.service.CMSUserService.QueryGroupAuths(groupId)
+	groupVO := defs.CMSUserGroupVO{}
+	groupVO.Id = groupDO.Id
+	groupVO.Name = groupDO.Name
+	groupVO.Description = groupDO.Description
+	groupVO.Auths = auths
+	defs.SendNormalResponse(w, groupVO)
 }
 
 // 新增/编辑 用户分组

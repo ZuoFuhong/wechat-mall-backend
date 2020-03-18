@@ -53,7 +53,7 @@ func CountUserAddress(userId int) (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -69,7 +69,7 @@ func QueryUserAddressById(id int) (*model.WechatMallUserAddressDO, error) {
 		return nil, err
 	}
 	address := model.WechatMallUserAddressDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&address.Id, &address.UserId, &address.Contacts, &address.Mobile, &address.ProvinceId,
 			&address.CityId, &address.AreaId, &address.ProvinceStr, &address.CityStr, &address.AreaStr,
 			&address.Address, &address.IsDefault, &address.Del, &address.CreateTime, &address.UpdateTime)
@@ -104,7 +104,7 @@ func QueryDefaultAddress(userId int) (*model.WechatMallUserAddressDO, error) {
 		return nil, err
 	}
 	address := model.WechatMallUserAddressDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&address.Id, &address.UserId, &address.Contacts, &address.Mobile, &address.ProvinceId,
 			&address.CityId, &address.AreaId, &address.ProvinceStr, &address.CityStr, &address.AreaStr,
 			&address.Address, &address.IsDefault, &address.Del, &address.CreateTime, &address.UpdateTime)

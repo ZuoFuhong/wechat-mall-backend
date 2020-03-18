@@ -8,10 +8,10 @@ import (
 
 const goodsColunList = `
 id, brand_name, title, price, discount_price, category_id, online, picture, 
-banner_picture, detail_picture, tags, description, is_del, create_time, update_time
+banner_picture, detail_picture, tags, is_del, create_time, update_time
 `
 
-func QueryGoodsList(keyword string, order string, categoryId, page, size int) (*[]model.WechatMallGoodsDO, error) {
+func QueryGoodsList(keyword string, categoryId, online, page, size int) (*[]model.WechatMallGoodsDO, error) {
 	sql := "SELECT " + goodsColunList + " FROM wechat_mall_goods WHERE is_del = 0"
 	if keyword != "" {
 		sql += " AND title LIKE '%" + keyword + "%'"
@@ -19,9 +19,8 @@ func QueryGoodsList(keyword string, order string, categoryId, page, size int) (*
 	if categoryId != 0 {
 		sql += " AND category_id = " + strconv.Itoa(categoryId)
 	}
-	// TODO: 销量排序
-	if order != "" {
-		sql += " ORDER BY '" + order + "' DESC"
+	if online == 0 || online == 1 {
+		sql += " AND online = " + strconv.Itoa(online)
 	}
 	if page > 0 && size > 0 {
 		sql += " LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
@@ -35,7 +34,7 @@ func QueryGoodsList(keyword string, order string, categoryId, page, size int) (*
 		goods := model.WechatMallGoodsDO{}
 		err := rows.Scan(&goods.Id, &goods.BrandName, &goods.Title, &goods.Price, &goods.DiscountPrice,
 			&goods.CategoryId, &goods.Online, &goods.Picture, &goods.BannerPicture, &goods.DetailPicture,
-			&goods.Tags, &goods.Description, &goods.Del, &goods.CreateTime, &goods.UpdateTime)
+			&goods.Tags, &goods.Del, &goods.CreateTime, &goods.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +43,7 @@ func QueryGoodsList(keyword string, order string, categoryId, page, size int) (*
 	return &goodsList, nil
 }
 
-func CountGoods(keyword string, categoryId int) (int, error) {
+func CountGoods(keyword string, categoryId, online int) (int, error) {
 	sql := "SELECT COUNT(*) FROM wechat_mall_goods WHERE is_del = 0"
 	if keyword != "" {
 		sql += " AND title LIKE '%" + keyword + "%'"
@@ -52,12 +51,15 @@ func CountGoods(keyword string, categoryId int) (int, error) {
 	if categoryId != 0 {
 		sql += " AND category_id = " + strconv.Itoa(categoryId)
 	}
+	if online == 0 || online == 1 {
+		sql += " AND online = " + strconv.Itoa(online)
+	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -67,14 +69,14 @@ func CountGoods(keyword string, categoryId int) (int, error) {
 }
 
 func AddGoods(goods *model.WechatMallGoodsDO) (int64, error) {
-	sql := "INSERT INTO wechat_mall_goods ( " + goodsColunList[4:] + " ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql := "INSERT INTO wechat_mall_goods ( " + goodsColunList[4:] + " ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return 0, err
 	}
 	result, err := stmt.Exec(goods.BrandName, goods.Title, goods.Price, goods.DiscountPrice,
 		goods.CategoryId, goods.Online, goods.Picture, goods.BannerPicture, goods.DetailPicture,
-		goods.Tags, goods.Description, 0, time.Now(), time.Now())
+		goods.Tags, 0, time.Now(), time.Now())
 	if err != nil {
 		return 0, err
 	}
@@ -92,10 +94,10 @@ func QueryGoodsById(id int) (*model.WechatMallGoodsDO, error) {
 		return nil, err
 	}
 	goods := model.WechatMallGoodsDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&goods.Id, &goods.BrandName, &goods.Title, &goods.Price,
 			&goods.DiscountPrice, &goods.CategoryId, &goods.Online, &goods.Picture,
-			&goods.BannerPicture, &goods.DetailPicture, &goods.Tags, &goods.Description,
+			&goods.BannerPicture, &goods.DetailPicture, &goods.Tags,
 			&goods.Del, &goods.CreateTime, &goods.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -109,7 +111,7 @@ func UpdateGoodsById(goods *model.WechatMallGoodsDO) error {
 UPDATE wechat_mall_goods 
 SET brand_name = ?, title = ?, price = ?, discount_price = ?, category_id = ?,
 online = ?, picture = ?, banner_picture = ?, detail_picture = ?, tags = ?,
-description = ?, is_del = ?, update_time = ?
+is_del = ?, update_time = ?
 WHERE id = ?
 `
 	stmt, err := dbConn.Prepare(sql)
@@ -118,9 +120,25 @@ WHERE id = ?
 	}
 	_, err = stmt.Exec(goods.BrandName, goods.Title, goods.Price, goods.DiscountPrice,
 		goods.CategoryId, goods.Online, goods.Picture, goods.BannerPicture, goods.DetailPicture,
-		goods.Tags, goods.Description, goods.Del, time.Now(), goods.Id)
+		goods.Tags, goods.Del, time.Now(), goods.Id)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func CountCategoryGoods(categoryId int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_category WHERE is_del = 0 AND category_id = " + strconv.Itoa(categoryId)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	for rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total, nil
 }

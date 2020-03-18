@@ -53,7 +53,7 @@ func SumGoodsSaleNum(goodsId, skuId int) (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err

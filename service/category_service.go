@@ -6,7 +6,7 @@ import (
 )
 
 type ICategoryService interface {
-	GetCategoryList(page, size int) (*[]model.WechatMallCategoryDO, int)
+	GetCategoryList(pid, page, size int) (*[]model.WechatMallCategoryDO, int)
 	GetCategoryById(id int) *model.WechatMallCategoryDO
 	GetCategoryByName(name string) *model.WechatMallCategoryDO
 	AddCategory(category *model.WechatMallCategoryDO)
@@ -21,12 +21,12 @@ func NewCategoryService() ICategoryService {
 	return service
 }
 
-func (cs *categoryService) GetCategoryList(page, size int) (*[]model.WechatMallCategoryDO, int) {
-	cateList, err := dbops.QueryCategoryList(page, size)
+func (cs *categoryService) GetCategoryList(pid, page, size int) (*[]model.WechatMallCategoryDO, int) {
+	cateList, err := dbops.QueryCategoryList(pid, page, size)
 	if err != nil {
 		panic(err)
 	}
-	total, err := dbops.CountCategory()
+	total, err := dbops.CountCategory(pid)
 	if err != nil {
 		panic(err)
 	}

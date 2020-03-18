@@ -61,7 +61,7 @@ func QueryModulePageById(pageId int) (*model.WechatMallModulePageDO, error) {
 		return nil, err
 	}
 	pageDO := model.WechatMallModulePageDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&pageDO.Id, &pageDO.ModuleId, &pageDO.Name, &pageDO.Description, &pageDO.Del, &pageDO.CreateTime, &pageDO.UpdateTime)
 		if err != nil {
 			return nil, err

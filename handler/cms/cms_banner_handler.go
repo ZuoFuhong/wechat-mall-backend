@@ -22,10 +22,8 @@ func (h *Handler) GetBannerList(w http.ResponseWriter, r *http.Request) {
 	for _, v := range *bannerList {
 		vo := defs.CMSBannerVO{}
 		vo.Id = v.Id
-		vo.Name = v.Name
 		vo.Picture = v.Picture
 		vo.Title = v.Title
-		vo.Description = v.Description
 		voList = append(voList, vo)
 	}
 	resp := make(map[string]interface{}, 0)
@@ -45,9 +43,7 @@ func (h *Handler) GetBanner(w http.ResponseWriter, r *http.Request) {
 	bVO := defs.CMSBannerVO{}
 	bVO.Id = banner.Id
 	bVO.Picture = banner.Picture
-	bVO.Name = banner.Name
 	bVO.Title = banner.Title
-	bVO.Description = banner.Description
 	defs.SendNormalResponse(w, bVO)
 }
 
@@ -65,9 +61,7 @@ func (h *Handler) DoEditBanner(w http.ResponseWriter, r *http.Request) {
 	if req.Id == 0 {
 		banner := model.WechatMallBannerDO{}
 		banner.Picture = req.Picture
-		banner.Name = req.Name
 		banner.Title = req.Title
-		banner.Description = req.Description
 		h.service.BannerService.AddBanner(&banner)
 	} else {
 		banner := h.service.BannerService.GetBannerById(req.Id)
@@ -75,9 +69,7 @@ func (h *Handler) DoEditBanner(w http.ResponseWriter, r *http.Request) {
 			panic(errs.ErrorBannerNotExist)
 		}
 		banner.Picture = req.Picture
-		banner.Name = req.Name
 		banner.Title = req.Title
-		banner.Description = req.Description
 		h.service.BannerService.UpdateBannerById(banner)
 	}
 	defs.SendNormalResponse(w, "ok")

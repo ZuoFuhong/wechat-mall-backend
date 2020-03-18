@@ -13,11 +13,12 @@ import (
 // 查询-分类列表
 func (h *Handler) GetCategoryList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	pid, _ := strconv.Atoi(vars["pid"])
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
 	cateVOList := []defs.CMSCategoryVO{}
-	cateList, total := h.service.CategoryService.GetCategoryList(page, size)
+	cateList, total := h.service.CategoryService.GetCategoryList(pid, page, size)
 	for _, v := range *cateList {
 		cateVO := defs.CMSCategoryVO{}
 		cateVO.Id = v.Id
@@ -106,7 +107,40 @@ func (h *Handler) DoDeleteCategory(w http.ResponseWriter, r *http.Request) {
 	if category.Id == 0 {
 		panic(errs.ErrorCategory)
 	}
+	if category.ParentId == 0 {
+		_, total := h.service.CategoryService.GetCategoryList(id, 1, 1)
+		if total > 0 {
+			panic(errs.NewCategoryError("该分类下有子分类，不能删除！"))
+		}
+	} else {
+		total := h.service.GoodsService.CountCategoryGoods(id)
+		if total > 0 {
+			panic(errs.NewCategoryError("该分类下有商品，不能删除！"))
+		}
+	}
 	category.Del = 1
 	h.service.CategoryService.UpdateCategory(category)
 	defs.SendNormalResponse(w, "ok")
+}
+
+// CMS-查询-全部分类
+func (h *Handler) GetChooseCategory(w http.ResponseWriter, r *http.Request) {
+	tmpCategoryList := []map[string]interface{}{}
+	categoryList, _ := h.service.CategoryService.GetCategoryList(0, 0, 0)
+	for _, v := range *categoryList {
+		tmpSubCategoryList := []map[string]interface{}{}
+		subCategoryList, _ := h.service.CategoryService.GetCategoryList(v.Id, 0, 0)
+		for _, sv := range *subCategoryList {
+			tmpSubCategory := map[string]interface{}{}
+			tmpSubCategory["value"] = sv.Id
+			tmpSubCategory["label"] = sv.Name
+			tmpSubCategoryList = append(tmpSubCategoryList, tmpSubCategory)
+		}
+		tmpCategory := map[string]interface{}{}
+		tmpCategory["value"] = v.Id
+		tmpCategory["label"] = v.Name
+		tmpCategory["children"] = tmpSubCategoryList
+		tmpCategoryList = append(tmpCategoryList, tmpCategory)
+	}
+	defs.SendNormalResponse(w, tmpCategoryList)
 }

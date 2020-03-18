@@ -65,6 +65,15 @@ func (s *CMSUserService) AddCMSUser(userDO *model.WechatMallCMSUserDO) {
 			panic(errs.NewErrorCMSUser("邮箱已注册"))
 		}
 	}
+	if userDO.Mobile != "" {
+		cmsUserDO, err := dbops.GetCMSUserByMobile(userDO.Mobile)
+		if err != nil {
+			panic(err)
+		}
+		if cmsUserDO.Id != 0 {
+			panic(errs.NewErrorCMSUser("手机号已注册"))
+		}
+	}
 	groupDO, err := dbops.QueryUserGroupById(userDO.GroupId)
 	if err != nil {
 		panic(err)
@@ -86,6 +95,15 @@ func (s *CMSUserService) UpdateCMSUser(userDO *model.WechatMallCMSUserDO) {
 		}
 		if cmsUserDO.Id != 0 && cmsUserDO.Id != userDO.Id {
 			panic(errs.NewErrorCMSUser("邮箱已注册！"))
+		}
+	}
+	if userDO.Mobile != "" {
+		cmsUserDO, err := dbops.GetCMSUserByMobile(userDO.Mobile)
+		if err != nil {
+			panic(err)
+		}
+		if cmsUserDO.Id != 0 && cmsUserDO.Id != userDO.Id {
+			panic(errs.NewErrorCMSUser("手机号已注册"))
 		}
 	}
 	if userDO.GroupId != 0 {

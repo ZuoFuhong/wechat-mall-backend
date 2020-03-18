@@ -18,7 +18,7 @@ func QueryOrderByOrderNo(orderNo string) (*model.WechatMallOrderDO, error) {
 		return nil, err
 	}
 	order := model.WechatMallOrderDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&order.Id, &order.OrderNo, &order.UserId, &order.PayAmount, &order.GoodsAmount,
 			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.Status, &order.AddressId,
 			&order.AddressSnapshot, &order.WxappPrePayId, &order.Del, &order.CreateTime, &order.UpdateTime)
@@ -36,7 +36,7 @@ func QueryOrderById(id int) (*model.WechatMallOrderDO, error) {
 		return nil, err
 	}
 	order := model.WechatMallOrderDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&order.Id, &order.OrderNo, &order.UserId, &order.PayAmount, &order.GoodsAmount,
 			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.Status, &order.AddressId,
 			&order.AddressSnapshot, &order.WxappPrePayId, &order.Del, &order.CreateTime, &order.UpdateTime)
@@ -60,7 +60,7 @@ func ListOrderByParams(userId, status, page, size int) (*[]model.WechatMallOrder
 		return nil, err
 	}
 	orderList := []model.WechatMallOrderDO{}
-	if rows.Next() {
+	for rows.Next() {
 		order := model.WechatMallOrderDO{}
 		err := rows.Scan(&order.Id, &order.OrderNo, &order.UserId, &order.PayAmount, &order.GoodsAmount,
 			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.Status, &order.AddressId,
@@ -83,7 +83,7 @@ func CountOrderByParams(userId, status int) (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err

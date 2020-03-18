@@ -30,6 +30,7 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 		couponVO.StartTime = v.StartTime
 		couponVO.EndTime = v.EndTime
 		couponVO.Description = v.Description
+		couponVO.Online = v.Online
 		couponVOList = append(couponVOList, couponVO)
 	}
 	resp := make(map[string]interface{})
@@ -43,7 +44,7 @@ func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	coupon := h.service.CouponService.GetCouponById(id)
-	if coupon.Id == 0 || coupon.Id == 1 {
+	if coupon.Id == 0 || coupon.Del == 1 {
 		panic(errs.ErrorCoupon)
 	}
 	couponVO := defs.CMSCouponVO{}
@@ -56,6 +57,7 @@ func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	couponVO.StartTime = coupon.StartTime
 	couponVO.EndTime = coupon.EndTime
 	couponVO.Description = coupon.Description
+	couponVO.Online = coupon.Online
 	defs.SendNormalResponse(w, couponVO)
 }
 

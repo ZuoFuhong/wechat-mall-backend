@@ -38,7 +38,7 @@ func CountCartGoods(userId int) (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, nil
@@ -68,7 +68,7 @@ func QueryCartByParams(userId, goodsId, skuId int) (*model.WechatMallUserCartDO,
 		return nil, err
 	}
 	cartDO := model.WechatMallUserCartDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&cartDO.Id, &cartDO.UserId, &cartDO.GoodsId, &cartDO.SkuId, &cartDO.Num, &cartDO.Del, &cartDO.CreateTime, &cartDO.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func QueryCartById(id int) (*model.WechatMallUserCartDO, error) {
 		return nil, err
 	}
 	cartDO := model.WechatMallUserCartDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&cartDO.Id, &cartDO.UserId, &cartDO.GoodsId, &cartDO.SkuId, &cartDO.Num, &cartDO.Del, &cartDO.CreateTime, &cartDO.UpdateTime)
 		if err != nil {
 			return nil, err

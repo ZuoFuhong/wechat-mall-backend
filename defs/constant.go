@@ -12,8 +12,8 @@ const (
 type SkuSpecs struct {
 	Key     string `json:"key"`
 	Value   string `json:"value"`
-	KeyId   int    `json:"key_id"`
-	ValueId int    `json:"value_id"`
+	KeyId   int    `json:"keyId"`
+	ValueId int    `json:"valueId"`
 }
 
 type AddressSnapshot struct {

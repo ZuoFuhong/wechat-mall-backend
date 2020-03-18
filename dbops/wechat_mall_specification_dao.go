@@ -39,7 +39,7 @@ func CountSpecification() (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -68,7 +68,7 @@ func QuerySpecificationById(id int) (*model.WechatMallSpecificationDO, error) {
 		return nil, err
 	}
 	spec := model.WechatMallSpecificationDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&spec.Id, &spec.Name, &spec.Description, &spec.Unit, &spec.Standard, &spec.Del, &spec.CreateTime, &spec.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -84,7 +84,7 @@ func QuerySpecificationByName(name string) (*model.WechatMallSpecificationDO, er
 		return nil, err
 	}
 	spec := model.WechatMallSpecificationDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&spec.Id, &spec.Name, &spec.Description, &spec.Unit, &spec.Standard, &spec.Del, &spec.CreateTime, &spec.UpdateTime)
 		if err != nil {
 			return nil, err

@@ -42,7 +42,7 @@ func CountBanner(name string) (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -58,7 +58,7 @@ func QueryBannerById(id int) (*model.WechatMallBannerDO, error) {
 		return nil, err
 	}
 	banner := model.WechatMallBannerDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&banner.Id, &banner.Picture, &banner.Name, &banner.Title, &banner.Description, &banner.Del, &banner.CreateTime, &banner.UpdateTime)
 		if err != nil {
 			return nil, err

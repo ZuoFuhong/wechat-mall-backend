@@ -10,13 +10,12 @@ const categoryColumnList = `
 id, parent_id, name, sort, online, picture, description, is_del, create_time, update_time
 `
 
-func QueryCategoryList(page, size int) (*[]model.WechatMallCategoryDO, error) {
-	sql := "SELECT " + categoryColumnList + " FROM wechat_mall_category WHERE is_del = 0 LIMIT ?, ?"
-	stmt, err := dbConn.Prepare(sql)
-	if err != nil {
-		return nil, err
+func QueryCategoryList(pid, page, size int) (*[]model.WechatMallCategoryDO, error) {
+	sql := "SELECT " + categoryColumnList + " FROM wechat_mall_category WHERE is_del = 0 AND parent_id = " + strconv.Itoa(pid)
+	if page > 0 && size > 0 {
+		sql += " LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
 	}
-	rows, err := stmt.Query((page-1)*size, size)
+	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
 	}
@@ -32,14 +31,14 @@ func QueryCategoryList(page, size int) (*[]model.WechatMallCategoryDO, error) {
 	return &cateList, nil
 }
 
-func CountCategory() (int, error) {
-	sql := "SELECT COUNT(*) FROM wechat_mall_category WHERE is_del = 0"
+func CountCategory(pid int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_category WHERE is_del = 0 AND parent_id = " + strconv.Itoa(pid)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -55,7 +54,7 @@ func QueryCategoryById(id int) (*model.WechatMallCategoryDO, error) {
 		return nil, err
 	}
 	category := model.WechatMallCategoryDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&category.Id, &category.ParentId, &category.Name, &category.Sort, &category.Online, &category.Picture, &category.Description, &category.Del, &category.CreateTime, &category.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -71,7 +70,7 @@ func QueryCategoryByName(name string) (*model.WechatMallCategoryDO, error) {
 		return nil, err
 	}
 	category := model.WechatMallCategoryDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&category.Id, &category.ParentId, &category.Name, &category.Sort, &category.Online, &category.Picture, &category.Description, &category.Del, &category.CreateTime, &category.UpdateTime)
 		if err != nil {
 			return nil, err

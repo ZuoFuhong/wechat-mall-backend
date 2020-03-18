@@ -83,6 +83,7 @@ func checkGoodsStock(goodsList []defs.PortalOrderGoods) decimal.Decimal {
 	return goodsAmount
 }
 
+// 计算优惠金额
 func calcGoodsDiscountAmount(goodsAmount decimal.Decimal, userId, couponLogId int) decimal.Decimal {
 	if couponLogId == 0 {
 		return decimal.NewFromInt(0)
@@ -140,6 +141,9 @@ func calcGoodsDiscountAmount(goodsAmount decimal.Decimal, userId, couponLogId in
 		discountAmount = goodsAmount.Mul(rate).Round(2)
 	default:
 		discountAmount = decimal.NewFromInt(0)
+	}
+	if discountAmount.GreaterThan(goodsAmount) {
+		discountAmount = goodsAmount
 	}
 	return discountAmount
 }

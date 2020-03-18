@@ -48,7 +48,7 @@ func QuerySpecificationAttrById(id int) (*model.WechatMallSpecificationAttrDO, e
 		return nil, err
 	}
 	attr := model.WechatMallSpecificationAttrDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&attr.Id, &attr.SpecId, &attr.Value, &attr.Extend, &attr.Del, &attr.CreateTime, &attr.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -64,7 +64,7 @@ func QuerySpecificationAttrByValue(name string) (*model.WechatMallSpecificationA
 		return nil, err
 	}
 	attr := model.WechatMallSpecificationAttrDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&attr.Id, &attr.SpecId, &attr.Value, &attr.Extend, &attr.Del, &attr.CreateTime, &attr.UpdateTime)
 		if err != nil {
 			return nil, err

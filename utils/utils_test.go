@@ -3,7 +3,9 @@ package utils
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"regexp"
 	"testing"
+	"time"
 )
 
 func Test_jwt_create(t *testing.T) {
@@ -35,4 +37,17 @@ func Test_decimal(t *testing.T) {
 	val2 := decimal.NewFromFloat(1.2)
 	val3 := val.Mul(val2)
 	fmt.Println(val3.Round(2).Sub(decimal.NewFromFloat(1.1)))
+}
+
+func Test_date(t *testing.T) {
+	datetime := FormatDatetime(time.Now(), YYYYMMDDHHMMSS)
+	fmt.Println(datetime)
+	date, _ := ParseDatetime(datetime, YYYYMMDDHHMMSS)
+	fmt.Println(date)
+}
+
+func Test_substr(t *testing.T) {
+	mobile := "138714821400"
+	matched, _ := regexp.MatchString("^1[358]\\d{9}$", mobile)
+	fmt.Println(matched)
 }

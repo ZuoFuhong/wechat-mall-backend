@@ -21,7 +21,7 @@ func QueryCouponLog(userId, couponId int) (*model.WechatMallCouponLogDO, error) 
 		return nil, err
 	}
 	couponLog := model.WechatMallCouponLogDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&couponLog.Id, &couponLog.CouponId, &couponLog.UserId, &couponLog.UseTime,
 			&couponLog.ExpireTime, &couponLog.Status, &couponLog.Code, &couponLog.OrderNo, &couponLog.Del,
 			&couponLog.CreateTime, &couponLog.UpdateTime)
@@ -39,7 +39,7 @@ func QueryCouponLogById(couponLogId int) (*model.WechatMallCouponLogDO, error) {
 		return nil, err
 	}
 	couponLog := model.WechatMallCouponLogDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&couponLog.Id, &couponLog.CouponId, &couponLog.UserId, &couponLog.UseTime,
 			&couponLog.ExpireTime, &couponLog.Status, &couponLog.Code, &couponLog.OrderNo, &couponLog.Del,
 			&couponLog.CreateTime, &couponLog.UpdateTime)
@@ -84,7 +84,7 @@ func CountUserCouponLog(userId, status int) (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err

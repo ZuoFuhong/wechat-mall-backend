@@ -38,7 +38,7 @@ func CountGridCategory() (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -67,7 +67,7 @@ func QueryGridCategoryById(id int) (*model.WechatMallGridCategoryDO, error) {
 		return nil, err
 	}
 	gridC := model.WechatMallGridCategoryDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&gridC.Id, &gridC.Title, &gridC.Name, &gridC.CategoryId, &gridC.Picture, &gridC.Del, &gridC.CreateTime, &gridC.UpdateTime)
 		if err != nil {
 			return nil, err
@@ -83,7 +83,7 @@ func QueryGridCategoryByName(name string) (*model.WechatMallGridCategoryDO, erro
 		return nil, err
 	}
 	gridC := model.WechatMallGridCategoryDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&gridC.Id, &gridC.Title, &gridC.Name, &gridC.CategoryId, &gridC.Picture, &gridC.Del, &gridC.CreateTime, &gridC.UpdateTime)
 		if err != nil {
 			return nil, err

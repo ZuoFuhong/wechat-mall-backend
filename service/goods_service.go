@@ -2,8 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"strconv"
-	"strings"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
@@ -11,14 +9,15 @@ import (
 )
 
 type IGoodsService interface {
-	GetGoodsList(page, size int) (*[]model.WechatMallGoodsDO, int)
+	GetGoodsList(keyword string, categoryId, online, page, size int) (*[]model.WechatMallGoodsDO, int)
 	GetGoodsById(id int) *model.WechatMallGoodsDO
 	UpdateGoodsById(goods *model.WechatMallGoodsDO)
 	AddGoods(goods *model.WechatMallGoodsDO) int
-	GetGoodsSpecList(goodsId int) *[]int
-	AddGoodsSpec(goodsId int, specList string)
-	QueryGoodsList(goodsName string, order string, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int)
-	QueryGoodsDetail(goodsId int) *defs.PortalGoodsInfo
+	GetGoodsSpecList(goodsId int) *[]defs.CMSGoodsSpecVO
+	AddGoodsSpec(goodsId int, specList []int)
+	QueryPortalGoodsList(keyword string, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int)
+	QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo
+	CountCategoryGoods(categoryId int) int
 }
 
 type goodsService struct {
@@ -29,12 +28,12 @@ func NewGoodsService() IGoodsService {
 	return service
 }
 
-func (s *goodsService) GetGoodsList(page, size int) (*[]model.WechatMallGoodsDO, int) {
-	goodsList, err := dbops.QueryGoodsList("", "", 0, page, size)
+func (s *goodsService) GetGoodsList(keyword string, categoryId, online, page, size int) (*[]model.WechatMallGoodsDO, int) {
+	goodsList, err := dbops.QueryGoodsList(keyword, categoryId, online, page, size)
 	if err != nil {
 		panic(err)
 	}
-	total, err := dbops.CountGoods("", 0)
+	total, err := dbops.CountGoods(keyword, categoryId, online)
 	if err != nil {
 		panic(err)
 	}
@@ -64,28 +63,48 @@ func (s *goodsService) AddGoods(goods *model.WechatMallGoodsDO) int {
 	return int(id)
 }
 
-func (s *goodsService) GetGoodsSpecList(goodsId int) *[]int {
+func (s *goodsService) GetGoodsSpecList(goodsId int) *[]defs.CMSGoodsSpecVO {
 	specList, err := dbops.GetGoodsSpecList(goodsId)
 	if err != nil {
 		panic(err)
 	}
-	specIds := []int{}
+	specVOList := []defs.CMSGoodsSpecVO{}
 	for _, v := range *specList {
-		specIds = append(specIds, v.SpecId)
+		specificationDO, err := dbops.QuerySpecificationById(v.SpecId)
+		if err != nil {
+			panic(err)
+		}
+		attrList, err := dbops.QuerySpecificationAttrList(v.SpecId)
+		if err != nil {
+			panic(err)
+		}
+		attrVOList := []defs.CMSSpecificationAttrVO{}
+		for _, item := range *attrList {
+			attrVO := defs.CMSSpecificationAttrVO{}
+			attrVO.Id = item.Id
+			attrVO.SpecId = item.SpecId
+			attrVO.Value = item.Value
+			attrVO.Extend = item.Extend
+			attrVOList = append(attrVOList, attrVO)
+		}
+		specVO := defs.CMSGoodsSpecVO{}
+		specVO.SpecId = v.SpecId
+		specVO.Name = specificationDO.Name
+		specVO.AttrList = attrVOList
+		specVOList = append(specVOList, specVO)
 	}
-	return &specIds
+	return &specVOList
 }
 
-func (s *goodsService) AddGoodsSpec(goodsId int, specList string) {
+func (s *goodsService) AddGoodsSpec(goodsId int, specList []int) {
 	err := dbops.DeleteGoodsSpec(goodsId)
 	if err != nil {
 		panic(err)
 	}
-	specIds := strings.Split(specList, ",")
-	for _, v := range specIds {
+	for _, v := range specList {
 		spec := model.WechatMallGoodsSpecDO{}
 		spec.GoodsId = goodsId
-		spec.SpecId, _ = strconv.Atoi(v)
+		spec.SpecId = v
 		err := dbops.InsertGoodsSpec(&spec)
 		if err != nil {
 			panic(err)
@@ -93,12 +112,12 @@ func (s *goodsService) AddGoodsSpec(goodsId int, specList string) {
 	}
 }
 
-func (s *goodsService) QueryGoodsList(keyword string, order string, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int) {
-	goodsList, err := dbops.QueryGoodsList(keyword, order, categoryId, page, size)
+func (s *goodsService) QueryPortalGoodsList(keyword string, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int) {
+	goodsList, err := dbops.QueryGoodsList(keyword, categoryId, 1, page, size)
 	if err != nil {
 		panic(err)
 	}
-	total, err := dbops.CountGoods(keyword, categoryId)
+	total, err := dbops.CountGoods(keyword, categoryId, 1)
 	if err != nil {
 		panic(err)
 	}
@@ -121,7 +140,7 @@ func (s *goodsService) QueryGoodsList(keyword string, order string, categoryId, 
 	return &goodsVOList, total
 }
 
-func (s *goodsService) QueryGoodsDetail(goodsId int) *defs.PortalGoodsInfo {
+func (s *goodsService) QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo {
 	goodsDO, err := dbops.QueryGoodsById(goodsId)
 	if err != nil {
 		panic(err)
@@ -178,41 +197,42 @@ func extractSkuVOList(skuDOList *[]model.WechatMallSkuDO) []defs.PortalSkuVO {
 }
 
 func extraceSpecVOList(goodsId int, skuDOList *[]model.WechatMallSkuDO) []defs.PortalSpecVO {
-	specVOMap := extraceSpecAttrVOList(skuDOList)
+	specVOMap, specAttrVOMap := extraceSpecAttrVOList(skuDOList)
 	specList, err := dbops.GetGoodsSpecList(goodsId)
 	if err != nil {
 		panic(err)
 	}
 	specVOList := []defs.PortalSpecVO{}
 	for _, v := range *specList {
-		specId := v.Id
-		specDO, err := dbops.QuerySpecificationById(specId)
-		if err != nil {
-			panic(err)
-		}
+		specId := v.SpecId
 		specVO := defs.PortalSpecVO{}
 		specVO.SpecId = specId
-		specVO.Name = specDO.Name
-		specVO.AttrList = specVOMap[specId]
+		specVO.Name = specVOMap[specId]
+		specVO.AttrList = specAttrVOMap[specId]
 		specVOList = append(specVOList, specVO)
 	}
 	return specVOList
 }
 
-func extraceSpecAttrVOList(skuDOList *[]model.WechatMallSkuDO) map[int][]defs.PortalSpecAttrVO {
-	specVOMap := map[int][]defs.PortalSpecAttrVO{}
+func extraceSpecAttrVOList(skuDOList *[]model.WechatMallSkuDO) (map[int]string, map[int][]defs.PortalSpecAttrVO) {
+	specVOMap := map[int]string{}
+	specAttrVOMap := map[int][]defs.PortalSpecAttrVO{}
 	for _, v := range *skuDOList {
-		// [{"key": "颜色", "value": "青芒色", "key_id": 1, "value_id": 42}, {"key": "尺寸", "value": "7英寸", "key_id": 2, "value_id": 5}]
+		// [{"key": "颜色", "value": "青芒色", "keyId": 1, "valueId": 42}, {"key": "尺寸", "value": "7英寸", "keyId": 2, "valueId": 5}]
 		specs := []defs.SkuSpecs{}
 		err := json.Unmarshal([]byte(v.Specs), &specs)
 		if err != nil {
 			panic(err)
 		}
 		for _, item := range specs {
-			attrVOList := specVOMap[item.KeyId]
+			specName := specVOMap[item.KeyId]
+			if specName == "" {
+				specVOMap[item.KeyId] = item.Key
+			}
+			attrVOList := specAttrVOMap[item.KeyId]
 			if attrVOList == nil {
 				attrVOList = []defs.PortalSpecAttrVO{}
-				specVOMap[item.KeyId] = attrVOList
+				specAttrVOMap[item.KeyId] = attrVOList
 			}
 			flag := false
 			for _, attrVO := range attrVOList {
@@ -228,8 +248,16 @@ func extraceSpecAttrVOList(skuDOList *[]model.WechatMallSkuDO) map[int][]defs.Po
 			attrVO.AttrId = item.ValueId
 			attrVO.Value = item.Value
 			attrVOList = append(attrVOList, attrVO)
-			specVOMap[item.KeyId] = attrVOList
+			specAttrVOMap[item.KeyId] = attrVOList
 		}
 	}
-	return specVOMap
+	return specVOMap, specAttrVOMap
+}
+
+func (s *goodsService) CountCategoryGoods(categoryId int) int {
+	total, err := dbops.CountCategoryGoods(categoryId)
+	if err != nil {
+		panic(err)
+	}
+	return total
 }

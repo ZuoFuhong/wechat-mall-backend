@@ -93,6 +93,10 @@ func (h *Handler) DoDeleteSpecification(w http.ResponseWriter, r *http.Request) 
 	if spec.Id == 0 {
 		panic(errs.ErrorSpecification)
 	}
+	attrList := h.service.SpecificationService.GetSpecificationAttrList(id)
+	if len(*attrList) > 0 {
+		panic(errs.NewSpecificationError("该规格下有属性，不能删除！"))
+	}
 	spec.Del = 1
 	h.service.SpecificationService.UpdateSpecificationById(spec)
 	defs.SendNormalResponse(w, "ok")

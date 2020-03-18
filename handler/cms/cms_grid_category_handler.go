@@ -19,11 +19,15 @@ func (h *Handler) GetGridCategoryList(w http.ResponseWriter, r *http.Request) {
 	gcArr, total := h.service.GridCategoryService.GetGridCategoryList(page, size)
 	gcVOList := []defs.CMSGridCategoryVO{}
 	for _, v := range *gcArr {
+		categoryDO := h.service.CategoryService.GetCategoryById(v.CategoryId)
+		if categoryDO.Id == 0 {
+			panic(errs.ErrorCategory)
+		}
 		gcVO := defs.CMSGridCategoryVO{}
 		gcVO.Id = v.Id
-		gcVO.Title = v.Title
 		gcVO.Name = v.Name
 		gcVO.CategoryId = v.CategoryId
+		gcVO.CategoryName = categoryDO.Name
 		gcVO.Picture = v.Picture
 		gcVOList = append(gcVOList, gcVO)
 	}
@@ -43,11 +47,16 @@ func (h *Handler) GetGridCategory(w http.ResponseWriter, r *http.Request) {
 	if gridC.Id == 0 {
 		panic(errs.ErrorGridCategory)
 	}
-	gcVO := defs.CMSGridCategoryVO{}
+	categoryDO := h.service.CategoryService.GetCategoryById(gridC.CategoryId)
+	if categoryDO.Id == 0 {
+		panic(errs.ErrorCategory)
+	}
+	gcVO := defs.CMSGridCategoryDetailVO{}
 	gcVO.Id = gridC.Id
-	gcVO.Title = gridC.Title
 	gcVO.Name = gridC.Name
-	gcVO.CategoryId = gridC.CategoryId
+	gcVO.CategoryId = categoryDO.ParentId
+	gcVO.SubCategoryId = categoryDO.Id
+	gcVO.SubCategoryName = categoryDO.Name
 	gcVO.Picture = gridC.Picture
 	defs.SendNormalResponse(w, gcVO)
 }
@@ -69,7 +78,6 @@ func (h *Handler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) {
 			panic(errs.NewGridCategoryError("宫格名称已存在！"))
 		}
 		gridC.Id = req.Id
-		gridC.Title = req.Title
 		gridC.Name = req.Name
 		gridC.CategoryId = req.CategoryId
 		gridC.Picture = req.Picture
@@ -83,7 +91,6 @@ func (h *Handler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) {
 		if gridC.Id == 0 {
 			panic(errs.ErrorGridCategory)
 		}
-		gridC.Title = req.Title
 		gridC.Name = req.Name
 		gridC.CategoryId = req.CategoryId
 		gridC.Picture = req.Picture

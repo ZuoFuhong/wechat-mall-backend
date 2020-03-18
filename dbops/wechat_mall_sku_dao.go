@@ -35,14 +35,17 @@ func GetSKUList(goodsId, page, size int) (*[]model.WechatMallSkuDO, error) {
 	return &skuList, nil
 }
 
-func CountSKU() (int, error) {
+func CountSKU(goodsId int) (int, error) {
 	sql := "SELECT COUNT(*) FROM wechat_mall_sku WHERE is_del = 0"
+	if goodsId != 0 {
+		sql += " AND goods_id = " + strconv.Itoa(goodsId)
+	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -71,7 +74,7 @@ func GetSKUById(id int) (*model.WechatMallSkuDO, error) {
 		return nil, err
 	}
 	sku := model.WechatMallSkuDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&sku.Id, &sku.Title, &sku.Price, &sku.Code, &sku.Stock, &sku.GoodsId, &sku.Online, &sku.Picture,
 			&sku.Specs, &sku.Del, &sku.CreateTime, &sku.UpdateTime)
 		if err != nil {
@@ -88,7 +91,7 @@ func GetSKUByCode(code string) (*model.WechatMallSkuDO, error) {
 		return nil, err
 	}
 	sku := model.WechatMallSkuDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&sku.Id, &sku.Title, &sku.Price, &sku.Code, &sku.Stock, &sku.GoodsId, &sku.Online, &sku.Picture,
 			&sku.Specs, &sku.Del, &sku.CreateTime, &sku.UpdateTime)
 		if err != nil {

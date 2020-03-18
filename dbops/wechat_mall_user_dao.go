@@ -17,7 +17,7 @@ func GetUserByOpenid(openid string) (*model.WechatMallUserDO, error) {
 		return nil, err
 	}
 	user := model.WechatMallUserDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err = rows.Scan(&user.Id, &user.Openid, &user.Nickname, &user.Avatar, &user.Mobile, &user.City,
 			&user.Province, &user.Country, &user.Gender, &user.CreateTime, &user.UpdateTime)
 		if err != nil {
@@ -34,7 +34,7 @@ func GetUserById(id int) (*model.WechatMallUserDO, error) {
 		return nil, err
 	}
 	user := model.WechatMallUserDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err = rows.Scan(&user.Id, &user.Openid, &user.Nickname, &user.Avatar, &user.Mobile, &user.City,
 			&user.Province, &user.Country, &user.Gender, &user.CreateTime, &user.UpdateTime)
 		if err != nil {

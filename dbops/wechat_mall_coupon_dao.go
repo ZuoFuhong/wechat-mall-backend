@@ -46,7 +46,7 @@ func CountCoupon(online int) (int, error) {
 		return 0, err
 	}
 	total := 0
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&total)
 		if err != nil {
 			return 0, err
@@ -62,7 +62,7 @@ func QueryCouponById(id int) (*model.WechatMallCouponDO, error) {
 		return nil, err
 	}
 	coupon := model.WechatMallCouponDO{}
-	if rows.Next() {
+	for rows.Next() {
 		err := rows.Scan(&coupon.Id, &coupon.Title, &coupon.FullMoney, &coupon.Minus,
 			&coupon.Rate, &coupon.Type, &coupon.StartTime, &coupon.EndTime, &coupon.Description,
 			&coupon.Online, &coupon.Del, &coupon.CreateTime, &coupon.UpdateTime)
