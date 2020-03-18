@@ -3,6 +3,7 @@ package dbops
 import (
 	"strconv"
 	"time"
+	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
 )
 
@@ -119,4 +120,34 @@ WHERE id = ?
 		order.PayTime, order.Status, order.AddressId, order.AddressSnapshot, order.WxappPrePayId, order.Del,
 		time.Now(), order.Id)
 	return err
+}
+
+func QueryOrderSaleData(page, size int) (*[]defs.OrderSaleData, error) {
+	sql := `
+SELECT 
+   DATE_FORMAT(create_time, '%Y-%m-%d') AS createTime, 
+   COUNT(id) AS orderNum, 
+   IFNULL( SUM(pay_amount), 0) AS saleAmount
+FROM wechat_mall_order 
+WHERE status IN (1, 2, 3)
+GROUP BY createTime
+ORDER BY createTime DESC
+`
+	if page > 0 && size > 0 {
+		sql += " LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
+	}
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	saleDataList := []defs.OrderSaleData{}
+	for rows.Next() {
+		saleData := defs.OrderSaleData{}
+		err := rows.Scan(&saleData.Time, &saleData.OrderNum, &saleData.SaleAmount)
+		if err != nil {
+			return nil, err
+		}
+		saleDataList = append(saleDataList, saleData)
+	}
+	return &saleDataList, nil
 }

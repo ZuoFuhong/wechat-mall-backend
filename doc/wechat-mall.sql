@@ -293,7 +293,7 @@ CREATE TABLE `wechat_mall_order` (
     `discount_amount` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '优惠金额',
     `dispatch_amount` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '运费',
     `pay_time` datetime NOT NULL COMMENT '支付时间',
-    `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成',
+    `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成 4-已退款',
     `address_id` int(11) NOT NULL DEFAULT '0' COMMENT '收货地址ID',
     `address_snapshot` varchar(200) NOT NULL DEFAULT '' COMMENT '收货地址快照',
     `wxapp_prepay_id` varchar(50) NOT NULL DEFAULT '' COMMENT '微信预支付ID',

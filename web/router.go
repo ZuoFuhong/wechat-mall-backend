@@ -92,4 +92,5 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	router.Handle("/cms/coupon/edit", chain.ThenFunc(cmsHandler.DoEditCoupon)).Methods("POST")
 	router.Handle("/cms/coupon/{id:[0-9]+}", chain.ThenFunc(cmsHandler.DoDeleteCoupon)).Methods("DELETE")
 	router.Handle("/cms/oss/policy-token", chain.ThenFunc(cmsHandler.GetOSSPolicyToken)).Methods("GET").Queries("dir", "{dir}")
+	router.Handle("/cms/order/order_statement", chain.ThenFunc(cmsHandler.GetSaleTableData)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
 }

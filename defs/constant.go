@@ -27,3 +27,10 @@ type AddressSnapshot struct {
 	AreaStr     string `json:"areaStr"`     // 地区
 	Address     string `json:"address"`     // 详细地址
 }
+
+// 报表数据-订单统计
+type OrderSaleData struct {
+	Time       string `json:"time"`       // 下单时间
+	OrderNum   int    `json:"orderNum"`   // 订单数
+	SaleAmount string `json:"saleAmount"` // 销售额
+}

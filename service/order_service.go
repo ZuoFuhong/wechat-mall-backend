@@ -17,6 +17,7 @@ type IOrderService interface {
 	QueryOrderList(userId, status, page, size int) (*[]defs.PortalOrderListVO, int)
 	QueryOrderDetail(userId, orderId int) *defs.PortalOrderDetailVO
 	OrderPaySuccessNotify(orderNo string)
+	QueryOrderSaleData(page, size int) *[]defs.OrderSaleData
 }
 
 type orderService struct {
@@ -319,4 +320,12 @@ func (s *orderService) OrderPaySuccessNotify(orderNo string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (s *orderService) QueryOrderSaleData(page, size int) *[]defs.OrderSaleData {
+	saleData, err := dbops.QueryOrderSaleData(page, size)
+	if err != nil {
+		panic(err)
+	}
+	return saleData
 }
