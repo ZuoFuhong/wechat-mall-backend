@@ -293,7 +293,7 @@ CREATE TABLE `wechat_mall_order` (
     `discount_amount` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '优惠金额',
     `dispatch_amount` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '运费',
     `pay_time` datetime NOT NULL COMMENT '支付时间',
-    `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成 4-已退款',
+    `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成 4-（待发货）退款申请 5-已退款',
     `address_id` int(11) NOT NULL DEFAULT '0' COMMENT '收货地址ID',
     `address_snapshot` varchar(200) NOT NULL DEFAULT '' COMMENT '收货地址快照',
     `wxapp_prepay_id` varchar(50) NOT NULL DEFAULT '' COMMENT '微信预支付ID',
@@ -325,8 +325,31 @@ CREATE TABLE `wechat_mall_order_goods` (
     KEY `idx_sku_id`(`sku_id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT = '商城订单-商品表';
 
+-- 商城-访客记录表
+CREATE TABLE `wechat_mall_visitor_record` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '平台用户ID',
+    `ip` varchar(20) NOT NULL DEFAULT '' COMMENT '独立IP',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id`(`user_id`)
+) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT = '商城-访客记录表';
 
-
-
+-- 商城-订单退款记录表
+CREATE TABLE `wechat_mall_order_refund` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `refund_no` varchar(30) NOT NULL DEFAULT '' COMMENT '退款编号',
+    `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '平台用户ID',
+    `order_no` varchar(30) NOT NULL DEFAULT '' COMMENT '订单号',
+    `reason` varchar(30) NOT NULL DEFAULT '' COMMENT '退款原因',
+    `refund_amount` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '退款金额',
+    `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '状态：0-退款申请 1-商家处理申请 2-退款完成',
+    `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id`(`user_id`)
+) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT  = '商城-订单退款申请表';
 
 

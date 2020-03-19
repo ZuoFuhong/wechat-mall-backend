@@ -124,3 +124,41 @@ func UpdateSkuStockById(id, num int) error {
 	_, err := dbConn.Exec(sql)
 	return err
 }
+
+func QuerySellOutSKUList(page, size int) (*[]model.WechatMallSkuDO, error) {
+	sql := "SELECT " + skuColumnList + " FROM wechat_mall_sku WHERE is_del = 0 AND stock = 0"
+	if page > 0 && size > 0 {
+		sql += " LIMIT " + strconv.Itoa(page) + ", " + strconv.Itoa(size)
+	}
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	skuList := []model.WechatMallSkuDO{}
+	for rows.Next() {
+		sku := model.WechatMallSkuDO{}
+		err := rows.Scan(&sku.Id, &sku.Title, &sku.Price, &sku.Code, &sku.Stock, &sku.GoodsId, &sku.Online, &sku.Picture,
+			&sku.Specs, &sku.Del, &sku.CreateTime, &sku.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+		skuList = append(skuList, sku)
+	}
+	return &skuList, nil
+}
+
+func CountSellOutSKUList() (int, error) {
+	sql := "SELECT " + skuColumnList + " FROM wechat_mall_sku WHERE is_del = 0 AND stock = 0"
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	for rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total, nil
+}

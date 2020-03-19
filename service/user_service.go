@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/prometheus/common/log"
+	"time"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/dbops/rediscli"
 	"wechat-mall-backend/defs"
@@ -17,6 +18,8 @@ type IUserService interface {
 	LoginCodeAuth(code string) string
 	DoWxUserPhoneSignature(userId int, sessionKey, encryptedData, iv string)
 	DoUserAuthInfo(userId int, req defs.WxappAuthUserInfoReq)
+	DoAddVisitorRecord(userId int, ip string)
+	QueryTodayUniqueVisitor() int
 }
 
 type UserService struct {
@@ -107,4 +110,24 @@ func (s *UserService) DoUserAuthInfo(userId int, req defs.WxappAuthUserInfoReq) 
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (s *UserService) DoAddVisitorRecord(userId int, ip string) {
+	err := dbops.AddVisitorRecord(userId, ip)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// 统计-UV
+func (s *UserService) QueryTodayUniqueVisitor() int {
+	todayStr := utils.FormatDatetime(time.Now(), utils.YYYYMMDD)
+	today, _ := utils.ParseDatetime(todayStr, utils.YYYYMMDD)
+	startTime := time.Unix(today.Unix()-28800, 0)
+	endTime := time.Unix(today.Unix()+57600, 0)
+	total, err := dbops.CountUniqueVisitor(startTime, endTime)
+	if err != nil {
+		panic(err)
+	}
+	return total
 }

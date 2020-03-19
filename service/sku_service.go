@@ -11,6 +11,8 @@ type ISKUService interface {
 	GetSKUByCode(code string) *model.WechatMallSkuDO
 	AddSKU(sku *model.WechatMallSkuDO)
 	UpdateSKUById(sku *model.WechatMallSkuDO)
+	CountSellOutSKU() int
+	QuerySellOutSKU(page, size int) (*[]model.WechatMallSkuDO, int)
 }
 
 type sKUService struct {
@@ -61,4 +63,26 @@ func (s *sKUService) UpdateSKUById(sku *model.WechatMallSkuDO) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// 统计-售罄的SKU数量
+func (s *sKUService) CountSellOutSKU() int {
+	total, err := dbops.CountSellOutSKUList()
+	if err != nil {
+		panic(err)
+	}
+	return total
+}
+
+// 查询-售罄的商品
+func (s *sKUService) QuerySellOutSKU(page, size int) (*[]model.WechatMallSkuDO, int) {
+	skuList, err := dbops.QuerySellOutSKUList(page, size)
+	if err != nil {
+		panic(err)
+	}
+	total, err := dbops.CountSellOutSKUList()
+	if err != nil {
+		panic(err)
+	}
+	return skuList, total
 }

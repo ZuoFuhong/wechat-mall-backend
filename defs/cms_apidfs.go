@@ -269,3 +269,10 @@ type CMSGoodsSpecVO struct {
 	Name     string                   `json:"name" validate:"required"`
 	AttrList []CMSSpecificationAttrVO `json:"attrList"`
 }
+
+type CMSMarketMetricsVO struct {
+	VisitorNum    int `json:"visitorNum"`
+	SellOutSKUNum int `json:"sellOutSKUNum"`
+	WaitingOrder  int `json:"waitingOrder"`
+	ActivistOrder int `json:"activistOrder"`
+}

@@ -18,6 +18,8 @@ type IOrderService interface {
 	QueryOrderDetail(userId, orderId int) *defs.PortalOrderDetailVO
 	OrderPaySuccessNotify(orderNo string)
 	QueryOrderSaleData(page, size int) *[]defs.OrderSaleData
+	CountWaitingOrderNum(status int) int
+	CountPendingOrderRefund() int
 }
 
 type orderService struct {
@@ -328,4 +330,22 @@ func (s *orderService) QueryOrderSaleData(page, size int) *[]defs.OrderSaleData 
 		panic(err)
 	}
 	return saleData
+}
+
+// 统计-待发货订单数量
+func (s *orderService) CountWaitingOrderNum(status int) int {
+	orderNum, err := dbops.CountOrderNum(status)
+	if err != nil {
+		return 0
+	}
+	return orderNum
+}
+
+// 统计-待处理的退款订单数量
+func (s *orderService) CountPendingOrderRefund() int {
+	total, err := dbops.CountPendingOrderRefund()
+	if err != nil {
+		panic(err)
+	}
+	return total
 }

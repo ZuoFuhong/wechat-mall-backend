@@ -151,3 +151,19 @@ ORDER BY createTime DESC
 	}
 	return &saleDataList, nil
 }
+
+func CountOrderNum(status int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_order WHERE status = " + strconv.Itoa(status)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	for rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total, nil
+}

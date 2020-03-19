@@ -40,10 +40,12 @@ func Test_decimal(t *testing.T) {
 }
 
 func Test_date(t *testing.T) {
-	datetime := FormatDatetime(time.Now(), YYYYMMDDHHMMSS)
-	fmt.Println(datetime)
-	date, _ := ParseDatetime(datetime, YYYYMMDDHHMMSS)
-	fmt.Println(date)
+	todayStr := FormatDatetime(time.Now(), YYYYMMDD)
+	today, _ := ParseDatetime(todayStr, YYYYMMDD)
+	startTime := time.Unix(today.Unix()-28800, 0)
+	endTime := time.Unix(today.Unix()+57600, 0)
+	fmt.Println(startTime)
+	fmt.Println(endTime)
 }
 
 func Test_substr(t *testing.T) {

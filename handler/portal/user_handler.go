@@ -9,6 +9,7 @@ import (
 	"wechat-mall-backend/dbops/rediscli"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
+	"wechat-mall-backend/utils"
 )
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -17,6 +18,10 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		panic(errs.NewParameterError("缺少code"))
 	}
 	token := h.service.UserService.LoginCodeAuth(code)
+	// 访客记录
+	payload, _ := utils.ParseToken(token)
+	userIP := utils.ReadUserIP(r)
+	h.service.UserService.DoAddVisitorRecord(payload.Uid, userIP)
 
 	resp := make(map[string]interface{})
 	resp["token"] = token

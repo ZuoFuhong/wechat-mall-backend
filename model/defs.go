@@ -249,7 +249,7 @@ type WechatMallOrderDO struct {
 	DiscountAmount  string // 优惠金额
 	DispatchAmount  string // 运费
 	PayTime         string // 支付时间
-	Status          int    // 状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成
+	Status          int    // 状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成 4-（待发货）退款申请 5-已退款
 	AddressId       int    // 地址ID
 	AddressSnapshot string // 地址快照
 	WxappPrePayId   string // 微信预支付ID
@@ -271,4 +271,17 @@ type WechatMallOrderGoodsDO struct {
 	LockStatus int    // 锁定状态：0-预定 1-付款 2-取消
 	CreateTime string
 	UpdateTime string
+}
+
+type WechatMallOrderRefund struct {
+	Id           ID
+	RefundNo     string // 退款编号
+	UserId       int    // 用户ID
+	OrderNo      string // 订单编号
+	Reason       string // 退款原因
+	RefundAmount string // 退款金额
+	Status       int    // 状态：0-退款申请 1-商家处理申请 2-退款完成
+	Del          int    // 是否删除：0-否 1-是
+	CreateTime   string
+	UpdateTime   string
 }
