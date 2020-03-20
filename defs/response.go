@@ -8,8 +8,6 @@ import (
 
 func SendNormalResponse(w http.ResponseWriter, result interface{}) {
 	w.Header().Add("Content-Type", "application/json;charset=UTF-8")
-	w.Header().Add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 	bytes, _ := json.Marshal(result)
 	_, _ = io.WriteString(w, string(bytes))

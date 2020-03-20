@@ -56,6 +56,22 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
+func (m Middleware) CORSHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		header := w.Header()
+		header.Set("Access-Control-Allow-Origin", "*")
+		header.Set("Access-Control-Allow-Headers", "*")
+		header.Set("Access-Control-Allow-Credentials", "true")
+		header.Set("Access-Control-Allow-Methods", "POST,GET,DELETE,PUT,OPTIONS")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
+	return http.HandlerFunc(fn)
+}
+
 func parseTokenAndValidate(r *http.Request) *utils.Payload {
 	authorization := r.Header.Get("Authorization")
 	if authorization == "" {
@@ -94,8 +110,6 @@ func (m Middleware) RecoverPanic(next http.Handler) http.Handler {
 				}
 
 				w.Header().Add("Content-Type", "application/json;charset=UTF-8")
-				w.Header().Add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE")
-				w.Header().Add("Access-Control-Allow-Origin", "*")
 				w.WriteHeader(httpErr.HttpSC)
 				resStr, _ := json.Marshal(httpErr.Err)
 				_, _ = io.WriteString(w, string(resStr))
