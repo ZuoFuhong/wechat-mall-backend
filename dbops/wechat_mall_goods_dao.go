@@ -128,7 +128,7 @@ WHERE id = ?
 }
 
 func CountCategoryGoods(categoryId int) (int, error) {
-	sql := "SELECT COUNT(*) FROM wechat_mall_category WHERE is_del = 0 AND category_id = " + strconv.Itoa(categoryId)
+	sql := "SELECT COUNT(*) FROM wechat_mall_goods WHERE is_del = 0 AND category_id = " + strconv.Itoa(categoryId)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return 0, err

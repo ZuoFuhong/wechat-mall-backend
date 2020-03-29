@@ -1,5 +1,15 @@
 package defs
 
+type WxappLoginVO struct {
+	Token string `json:"token"`
+}
+
+type WxappUserInfoVO struct {
+	Nickname string `json:"nickName"`
+	Avatar   string `json:"avatar"`
+	Mobile   string `json:"mobile"`
+}
+
 type WxappAuthUserInfoReq struct {
 	NickName  string `json:"nickName" validate:"required"`
 	AvatarUrl string `jsoN:"avatarUrl" validate:"required"`
@@ -15,13 +25,15 @@ type WxappAuthPhone struct {
 }
 
 type PortalBannerVO struct {
-	Id      int    `json:"id"`
-	Picture string `json:"picture"`
+	Id           int    `json:"id"`
+	Picture      string `json:"picture"`
+	BusinessType int    `json:"businessType"`
+	BusinessId   int    `json:"businessId"`
 }
 
 type PortalGridCategoryVO struct {
 	Id         int    `json:"id"`
-	Title      string `json:"title"`
+	Name       string `json:"name"`
 	CategoryId int    `json:"category"`
 	Picture    string `json:"picture"`
 }
@@ -62,24 +74,21 @@ type PortalGoodsListVO struct {
 	Price         string `json:"price"`         // 价格
 	DiscountPrice string `json:"discountPrice"` // 折扣
 	Picture       string `json:"picture"`       // 图片
-	Tags          string `json:"tags"`          // 标签
 	SaleNum       int    `json:"saleNum"`       // 销量
 }
 
 type PortalGoodsInfo struct {
-	Id              int            `json:"id"`              // 商品ID
-	BrandName       string         `json:"brandName"`       // 品牌
-	Title           string         `json:"title"`           // 标题
-	Price           string         `json:"price"`           // 价格
-	DiscountPrice   string         `json:"discountPrice"`   // 折扣
-	Picture         string         `json:"picture"`         // 主图
-	BannerPicture   string         `json:"bannerPicture"`   // 详情图
-	DetailPicture   string         `json:"detailPicture"`   // 轮播图
-	Tags            string         `json:"tags"`            // 标签
-	Description     string         `json:"description"`     // 详情
-	MultiplePicture []string       `json:"multiplePicture"` // 多图
-	SkuList         []PortalSkuVO  `json:"skuList"`         // sku列表
-	SpecList        []PortalSpecVO `json:"specList"`        // 规格列表
+	Id            int            `json:"id"`            // 商品ID
+	Title         string         `json:"title"`         // 标题
+	Price         string         `json:"price"`         // 价格
+	DiscountPrice string         `json:"discountPrice"` // 折扣
+	Picture       string         `json:"picture"`       // 主图
+	BannerPicture string         `json:"bannerPicture"` // 详情图
+	DetailPicture string         `json:"detailPicture"` // 轮播图
+	Tags          string         `json:"tags"`          // 标签
+	Description   string         `json:"description"`   // 详情
+	SkuList       []PortalSkuVO  `json:"skuList"`       // sku列表
+	SpecList      []PortalSpecVO `json:"specList"`      // 规格列表
 }
 
 type PortalSpecVO struct {
@@ -191,4 +200,12 @@ type PortalOrderDetailVO struct {
 	Status    int                  `json:"status"`    // 订单状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成
 	GoodsList []PortalOrderGoodsVO `json:"goodsList"`
 	Address   AddressSnapshot      `json:"address"`
+}
+
+type PortalBrowseRecordVO struct {
+	Id         int    `json:"id"`         // 记录ID
+	Picture    string `json:"picture"`    // 商品图片
+	Title      string `json:"title"`      // 商品标题
+	Price      string `json:"price"`      // 商品价格
+	CreateTime string `json:"createTime"` // 浏览时间，格式：yyyy-MM-dd HH:mm:ss
 }

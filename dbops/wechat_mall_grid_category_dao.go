@@ -108,3 +108,19 @@ WHERE id = ?
 	}
 	return nil
 }
+
+func CountGridByCategoryId(categoryId int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_grid_category WHERE is_del = 0 AND category_id = " + strconv.Itoa(categoryId)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		panic(err)
+	}
+	total := 0
+	for rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total, nil
+}

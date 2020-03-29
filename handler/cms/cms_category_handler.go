@@ -117,6 +117,10 @@ func (h *Handler) DoDeleteCategory(w http.ResponseWriter, r *http.Request) {
 		if total > 0 {
 			panic(errs.NewCategoryError("该分类下有商品，不能删除！"))
 		}
+		total = h.service.GridCategoryService.CountCategoryBindGrid(id)
+		if total > 0 {
+			panic(errs.NewCategoryError("该分类绑定了宫格，不能删除！"))
+		}
 	}
 	category.Del = 1
 	h.service.CategoryService.UpdateCategory(category)

@@ -11,6 +11,7 @@ type IGridCategoryService interface {
 	GetGridCategoryByName(name string) *model.WechatMallGridCategoryDO
 	AddGridCategory(gridC *model.WechatMallGridCategoryDO)
 	UpdateGridCategory(gridC *model.WechatMallGridCategoryDO)
+	CountCategoryBindGrid(categoryId int) int
 }
 
 type gridCategoryService struct {
@@ -61,4 +62,13 @@ func (g *gridCategoryService) UpdateGridCategory(gridC *model.WechatMallGridCate
 	if err != nil {
 		panic(err)
 	}
+}
+
+// 统计分类绑定的宫格
+func (g *gridCategoryService) CountCategoryBindGrid(categoryId int) int {
+	total, err := dbops.CountGridByCategoryId(categoryId)
+	if err != nil {
+		panic(err)
+	}
+	return total
 }

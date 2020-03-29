@@ -72,14 +72,15 @@ type WechatMallGroupPagePermission struct {
 
 // 商城Banner
 type WechatMallBannerDO struct {
-	Id          ID
-	Picture     string // 图片
-	Name        string // 名称
-	Title       string // 标题
-	Description string // 描述
-	Del         int
-	CreateTime  string
-	UpdateTime  string
+	Id           ID
+	Picture      string // 图片
+	Name         string // 名称
+	BusinessType int    // 业务类型：1-商品
+	BusinessId   int    // 业务主键
+	Status       int    // 是否显示：0-否 1-是
+	Del          int
+	CreateTime   string
+	UpdateTime   string
 }
 
 // 商城-分类
@@ -284,4 +285,16 @@ type WechatMallOrderRefund struct {
 	Del          int    // 是否删除：0-否 1-是
 	CreateTime   string
 	UpdateTime   string
+}
+
+type WechatMallGoodsBrowseRecord struct {
+	Id         ID
+	UserId     int    // 用户ID
+	GoodsId    int    // 商品ID
+	Picture    string // 商品图片
+	Title      string // 商品名称
+	Price      string // 商品价格
+	Del        int    // 是否删除：0-否 1-是
+	CreateTime string
+	UpdateTime string
 }

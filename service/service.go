@@ -17,6 +17,7 @@ type Service struct {
 	CartService          ICartService
 	AddressService       IAddressService
 	OrderService         IOrderService
+	BrowseRecordService  IBrowseRecordService
 }
 
 func NewService(conf *env.Conf) *Service {
@@ -33,5 +34,6 @@ func NewService(conf *env.Conf) *Service {
 	service.CartService = NewCartService()
 	service.AddressService = NewAddressService()
 	service.OrderService = NewOrderService()
+	service.BrowseRecordService = NewBrowseRecordService()
 	return service
 }

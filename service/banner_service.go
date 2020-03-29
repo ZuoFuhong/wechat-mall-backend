@@ -6,7 +6,7 @@ import (
 )
 
 type IBannerService interface {
-	GetBannerList(page, size int) (*[]model.WechatMallBannerDO, int)
+	GetBannerList(status, page, size int) (*[]model.WechatMallBannerDO, int)
 	GetBannerById(id int) *model.WechatMallBannerDO
 	AddBanner(banner *model.WechatMallBannerDO)
 	UpdateBannerById(banner *model.WechatMallBannerDO)
@@ -20,12 +20,12 @@ func NewBannerService() IBannerService {
 	return service
 }
 
-func (bs *bannerService) GetBannerList(page, size int) (*[]model.WechatMallBannerDO, int) {
-	bannerList, err := dbops.QueryBannerList("", page, size)
+func (bs *bannerService) GetBannerList(status, page, size int) (*[]model.WechatMallBannerDO, int) {
+	bannerList, err := dbops.QueryBannerList(status, page, size)
 	if err != nil {
 		panic(err)
 	}
-	total, err := dbops.CountBanner("")
+	total, err := dbops.CountBanner(status)
 	if err != nil {
 		panic(err)
 	}

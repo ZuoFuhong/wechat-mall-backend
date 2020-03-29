@@ -42,7 +42,7 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			r = r.WithContext(ctx)
 		}
 		if strings.HasPrefix(uri, "/api") {
-			if uri == "/api/wxapp/login" {
+			if strings.HasPrefix(uri, "/api/wxapp/login") {
 				goto nextHandler
 			}
 			payload := parseTokenAndValidate(r)

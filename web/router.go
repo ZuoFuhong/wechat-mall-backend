@@ -22,11 +22,12 @@ func NewRouter(app *App) *mux.Router {
 func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler *portal.Handler) {
 	mw := &Middleware{}
 	chain := alice.New(mw.LoggingHandler, mw.RecoverPanic, mw.CORSHandler, mw.ValidateAuthToken)
-	router.Handle("/api/wxapp/login", chain.ThenFunc(portalHandler.Login)).Methods("POST")
+	router.Handle("/api/wxapp/login", chain.ThenFunc(portalHandler.Login)).Methods("GET").Queries("code", "{code}")
+	router.Handle("/api/wxapp/user-info", chain.ThenFunc(portalHandler.UserInfo)).Methods("GET")
 	router.Handle("/api/wxapp/auth-phone", chain.ThenFunc(portalHandler.AuthPhone)).Methods("POST")
 	router.Handle("/api/wxapp/auth-info", chain.ThenFunc(portalHandler.AuthUserInfo)).Methods("POST")
-	router.Handle("/api/home/banner", chain.ThenFunc(portalHandler.GetBannerList)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
-	router.Handle("/api/home/grid", chain.ThenFunc(portalHandler.GetGridCategoryList)).Methods("GET")
+	router.Handle("/api/home/banner", chain.ThenFunc(portalHandler.HomeBanner)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
+	router.Handle("/api/home/grid", chain.ThenFunc(portalHandler.GetGridCategoryList)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
 	router.Handle("/api/goods/list", chain.ThenFunc(portalHandler.GetGoodsList)).Methods("GET").Queries("k", "{k}").Queries("c", "{c}").Queries("page", "{page}").Queries("size", "{size}")
 	router.Handle("/api/goods/detail", chain.ThenFunc(portalHandler.GetGoodsDetail)).Methods("GET").Queries("id", "{id}")
 	router.Handle("/api/cart/list", chain.ThenFunc(portalHandler.GetCartGoodsList)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")

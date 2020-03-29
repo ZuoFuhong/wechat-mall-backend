@@ -11,7 +11,7 @@ id, parent_id, name, sort, online, picture, description, is_del, create_time, up
 `
 
 func QueryCategoryList(pid, page, size int) (*[]model.WechatMallCategoryDO, error) {
-	sql := "SELECT " + categoryColumnList + " FROM wechat_mall_category WHERE is_del = 0 AND parent_id = " + strconv.Itoa(pid)
+	sql := "SELECT " + categoryColumnList + " FROM wechat_mall_category WHERE is_del = 0 AND parent_id = " + strconv.Itoa(pid) + " ORDER BY sort"
 	if page > 0 && size > 0 {
 		sql += " LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
 	}

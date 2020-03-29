@@ -15,11 +15,12 @@ import (
 )
 
 type IUserService interface {
-	LoginCodeAuth(code string) string
+	LoginCodeAuth(code string) (string, int)
 	DoWxUserPhoneSignature(userId int, sessionKey, encryptedData, iv string)
 	DoUserAuthInfo(userId int, req defs.WxappAuthUserInfoReq)
 	DoAddVisitorRecord(userId int, ip string)
 	QueryTodayUniqueVisitor() int
+	QueryUserInfo(userId int) *model.WechatMallUserDO
 }
 
 type UserService struct {
@@ -30,7 +31,7 @@ func NewUserService(conf *env.Conf) IUserService {
 	return &UserService{Conf: conf}
 }
 
-func (s *UserService) LoginCodeAuth(code string) string {
+func (s *UserService) LoginCodeAuth(code string) (string, int) {
 	baseUrl := "https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code"
 	url := fmt.Sprintf(baseUrl, s.Conf.Wxapp.Appid, s.Conf.Wxapp.Appsecret, code)
 
@@ -56,9 +57,9 @@ func (s *UserService) LoginCodeAuth(code string) string {
 	}
 	err = rediscli.SetStr(defs.MiniappTokenPrefix+token, tmpVal, defs.AccessTokenExpire)
 	if err != nil {
-		panic(errs.ErrorRedisError)
+		panic(err)
 	}
-	return token
+	return token, userId
 }
 
 func registerUser(openid string) int {
@@ -130,4 +131,15 @@ func (s *UserService) QueryTodayUniqueVisitor() int {
 		panic(err)
 	}
 	return total
+}
+
+func (s *UserService) QueryUserInfo(userId int) *model.WechatMallUserDO {
+	userDO, err := dbops.GetUserById(userId)
+	if err != nil {
+		panic(err)
+	}
+	if userDO.Id == 0 {
+		panic(errs.ErrorCMSUser)
+	}
+	return userDO
 }

@@ -39,3 +39,7 @@ func Md5Encrpyt(passwd string) string {
 	ctx.Write([]byte("salt123"))
 	return hex.EncodeToString(ctx.Sum(nil))
 }
+
+func PhoneMark(phone string) string {
+	return phone[0:3] + "****" + phone[7:]
+}

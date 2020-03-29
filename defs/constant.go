@@ -7,6 +7,7 @@ const (
 	RefreshTokenExpire = 30 * 24 * 3600
 	CMSCodePrefix      = "cmscode:"
 	CMSCodeExpire      = 300
+	ALL                = -999
 )
 
 type SkuSpecs struct {

@@ -133,7 +133,6 @@ func (s *goodsService) QueryPortalGoodsList(keyword string, categoryId, page, si
 		goodsVO.Price = v.Price
 		goodsVO.DiscountPrice = v.DiscountPrice
 		goodsVO.Picture = v.Picture
-		goodsVO.Tags = v.Tags
 		goodsVO.SaleNum = saleNum
 		goodsVOList = append(goodsVOList, goodsVO)
 	}
@@ -152,13 +151,11 @@ func (s *goodsService) QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo
 	if err != nil {
 		panic(err)
 	}
-	muptiplePicture := extractMuptiplePicture(skuDOList)
 	skuList := extractSkuVOList(skuDOList)
 	specList := extraceSpecVOList(goodsId, skuDOList)
 
 	goodsVO := defs.PortalGoodsInfo{}
 	goodsVO.Id = goodsDO.Id
-	goodsVO.BrandName = goodsDO.BrandName
 	goodsVO.Title = goodsDO.Title
 	goodsVO.Price = goodsDO.Price
 	goodsVO.DiscountPrice = goodsDO.DiscountPrice
@@ -167,18 +164,9 @@ func (s *goodsService) QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo
 	goodsVO.DetailPicture = goodsDO.DetailPicture
 	goodsVO.Tags = goodsDO.Tags
 	goodsVO.Description = goodsDO.Description
-	goodsVO.MultiplePicture = muptiplePicture
 	goodsVO.SkuList = skuList
 	goodsVO.SpecList = specList
 	return &goodsVO
-}
-
-func extractMuptiplePicture(skuDOList *[]model.WechatMallSkuDO) []string {
-	multiplePicture := []string{}
-	for _, v := range *skuDOList {
-		multiplePicture = append(multiplePicture, v.Picture)
-	}
-	return multiplePicture
 }
 
 func extractSkuVOList(skuDOList *[]model.WechatMallSkuDO) []defs.PortalSkuVO {
@@ -205,6 +193,9 @@ func extraceSpecVOList(goodsId int, skuDOList *[]model.WechatMallSkuDO) []defs.P
 	specVOList := []defs.PortalSpecVO{}
 	for _, v := range *specList {
 		specId := v.SpecId
+		if specVOMap[specId] == "" {
+			continue
+		}
 		specVO := defs.PortalSpecVO{}
 		specVO.SpecId = specId
 		specVO.Name = specVOMap[specId]

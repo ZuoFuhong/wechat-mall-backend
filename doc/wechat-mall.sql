@@ -89,8 +89,9 @@ CREATE TABLE `wechat_mall_banner` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `picture` varchar(200) NOT NULL DEFAULT '' COMMENT '图片地址',
     `name` varchar(30) NOT NULL DEFAULT '' COMMENT '名称',
-    `title` varchar(30) NOT NULL DEFAULT '' COMMENT '标题',
-    `description` varchar(50) NOT NULL DEFAULT '' COMMENT '描述',
+    `business_type` tinyint(2) NOT NULL DEFAULT '0' COMMENT '业务类型：1-商品',
+    `business_id` int(1) NOT NULL DEFAULT '0' COMMENT '业务主键',
+    `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否显示：0-否 1-是',
     `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -147,7 +148,7 @@ CREATE TABLE `wechat_mall_specification` (
 CREATE TABLE `wechat_mall_specification_attr` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `spec_id` int(11) NOT NULL DEFAULT '0' COMMENT '规格ID',
-    `value` varchar(10) NOT NULL DEFAULT '' COMMENT '属性值',
+    `value` varchar(20) NOT NULL DEFAULT '' COMMENT '属性值',
     `extend` varchar(30) NOT NULL DEFAULT '' COMMENT '扩展',
     `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -161,7 +162,7 @@ CREATE TABLE `wechat_mall_specification_attr` (
 CREATE TABLE `wechat_mall_goods` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `brand_name` varchar(30) NOT NULL DEFAULT '' COMMENT '品牌名称',
-    `title` varchar(30) NOT NULL DEFAULT '' COMMENT '标题',
+    `title` varchar(80) NOT NULL DEFAULT '' COMMENT '标题',
     `price` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '价格',
     `discount_price` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '折扣',
     `category_id` int(11) NOT NULL DEFAULT '0' COMMENT '分类ID',
@@ -312,7 +313,7 @@ CREATE TABLE `wechat_mall_order_goods` (
     `goods_id` int(11) NOT NULL DEFAULT '0' COMMENT '商品ID',
     `sku_id` int(11) NOT NULL DEFAULT '0' COMMENT 'sku ID',
     `picture` varchar(200) NOT NULL  DEFAULT '' COMMENT '商品图片',
-    `title` varchar(30) NOT NULL DEFAULT '' COMMENT '商品标题',
+    `title` varchar(80) NOT NULL DEFAULT '' COMMENT '商品标题',
     `price` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '价格',
     `specs` varchar(500) NOT NULL DEFAULT '' COMMENT 'sku规格属性',
     `num` int(11) NOT NULL DEFAULT '0' COMMENT '数量',
@@ -352,4 +353,18 @@ CREATE TABLE `wechat_mall_order_refund` (
     KEY `idx_user_id`(`user_id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT  = '商城-订单退款申请表';
 
-
+-- 商城-商品浏览记录
+CREATE TABLE `wechat_mall_goods_browse_record` (
+    `id` int(11) NOT NULL AUTO_INCREMENT comment '主键',
+    `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `goods_id` int(11) NOT NULL DEFAULT '0' COMMENT '商品ID',
+    `picture` varchar(200) NOT NULL DEFAULT '' COMMENT '商品图片',
+    `title` varchar(80) NOT NULL DEFAULT '' COMMENT '商品名称',
+    `price` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '商品价格',
+    `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id`(`user_id`),
+    KEY `idx_goods_id`(`goods_id`)
+) ENGINE = InnoDB AUTO_INCREMENT = 0 DEFAULT CHARSET = utf8mb4 COMMENT = '商城-商品浏览记录';

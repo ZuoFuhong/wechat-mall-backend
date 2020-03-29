@@ -16,14 +16,15 @@ func (h *Handler) GetBannerList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
-	bannerList, total := h.service.BannerService.GetBannerList(page, size)
+	bannerList, total := h.service.BannerService.GetBannerList(defs.ALL, page, size)
 
 	voList := []defs.CMSBannerVO{}
 	for _, v := range *bannerList {
 		vo := defs.CMSBannerVO{}
 		vo.Id = v.Id
 		vo.Picture = v.Picture
-		vo.Title = v.Title
+		vo.Name = v.Name
+		vo.Status = v.Status
 		voList = append(voList, vo)
 	}
 	resp := make(map[string]interface{}, 0)
@@ -32,7 +33,7 @@ func (h *Handler) GetBannerList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
-// 查询-Banner详情
+// 查询-Banner详情（当前仅支持关联商品）
 func (h *Handler) GetBanner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
@@ -40,10 +41,20 @@ func (h *Handler) GetBanner(w http.ResponseWriter, r *http.Request) {
 	if banner.Id == 0 {
 		panic(errs.ErrorBannerNotExist)
 	}
-	bVO := defs.CMSBannerVO{}
+	goodsDO := h.service.GoodsService.GetGoodsById(banner.BusinessId)
+	categoryDO := model.WechatMallCategoryDO{}
+	if goodsDO.Id != 0 {
+		categoryDO = *h.service.CategoryService.GetCategoryById(goodsDO.CategoryId)
+	}
+
+	bVO := defs.CMSGoodsBannerVO{}
 	bVO.Id = banner.Id
 	bVO.Picture = banner.Picture
-	bVO.Title = banner.Title
+	bVO.Name = banner.Name
+	bVO.GoodsId = goodsDO.Id
+	bVO.CategoryId = categoryDO.ParentId
+	bVO.SubCategoryId = categoryDO.Id
+	bVO.Status = banner.Status
 	defs.SendNormalResponse(w, bVO)
 }
 
@@ -61,7 +72,10 @@ func (h *Handler) DoEditBanner(w http.ResponseWriter, r *http.Request) {
 	if req.Id == 0 {
 		banner := model.WechatMallBannerDO{}
 		banner.Picture = req.Picture
-		banner.Title = req.Title
+		banner.Name = req.Name
+		banner.BusinessType = req.BusinessType
+		banner.BusinessId = req.BusinessId
+		banner.Status = req.Status
 		h.service.BannerService.AddBanner(&banner)
 	} else {
 		banner := h.service.BannerService.GetBannerById(req.Id)
@@ -69,7 +83,10 @@ func (h *Handler) DoEditBanner(w http.ResponseWriter, r *http.Request) {
 			panic(errs.ErrorBannerNotExist)
 		}
 		banner.Picture = req.Picture
-		banner.Title = req.Title
+		banner.Name = req.Name
+		banner.BusinessType = req.BusinessType
+		banner.BusinessId = req.BusinessId
+		banner.Status = req.Status
 		h.service.BannerService.UpdateBannerById(banner)
 	}
 	defs.SendNormalResponse(w, "ok")

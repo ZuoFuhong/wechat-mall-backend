@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"github.com/go-playground/validator"
 	"github.com/go-redis/redis"
+	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"strings"
 	"wechat-mall-backend/dbops/rediscli"
@@ -13,19 +15,41 @@ import (
 )
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	code := r.FormValue("code")
+	vars := mux.Vars(r)
+	code := vars["code"]
 	if code == "" {
 		panic(errs.NewParameterError("缺少code"))
 	}
-	token := h.service.UserService.LoginCodeAuth(code)
-	// 访客记录
-	payload, _ := utils.ParseToken(token)
-	userIP := utils.ReadUserIP(r)
-	h.service.UserService.DoAddVisitorRecord(payload.Uid, userIP)
+	token, userId := h.service.UserService.LoginCodeAuth(code)
+	go h.recordVisitorRecod(userId, r)
 
-	resp := make(map[string]interface{})
-	resp["token"] = token
-	defs.SendNormalResponse(w, resp)
+	defs.SendNormalResponse(w, defs.WxappLoginVO{Token: token})
+}
+
+// 访客记录
+func (h *Handler) recordVisitorRecod(userId int, r *http.Request) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			log.Print(err)
+		}
+	}()
+	userIP := utils.ReadUserIP(r)
+	h.service.UserService.DoAddVisitorRecord(userId, userIP)
+}
+
+// 查询用户信息
+func (h *Handler) UserInfo(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	userDO := h.service.UserService.QueryUserInfo(userId)
+	userVO := defs.WxappUserInfoVO{}
+	userVO.Nickname = userDO.Nickname
+	userVO.Avatar = userDO.Avatar
+	if userDO.Mobile != "" {
+		userVO.Mobile = utils.PhoneMark(userDO.Mobile)
+	}
+	defs.SendNormalResponse(w, userVO)
 }
 
 func (h *Handler) AuthPhone(w http.ResponseWriter, r *http.Request) {
