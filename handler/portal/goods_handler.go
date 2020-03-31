@@ -2,6 +2,7 @@ package portal
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/shopspring/decimal"
 	"log"
 	"net/http"
 	"strconv"
@@ -50,6 +51,6 @@ func (h *Handler) recordGoodsBrowse(userId int, goods *defs.PortalGoodsInfo) {
 	browse.GoodsId = goods.Id
 	browse.Picture = goods.Picture
 	browse.Title = goods.Title
-	browse.Price = goods.Price
+	browse.Price = decimal.NewFromFloat(goods.Price).String()
 	h.service.BrowseRecordService.AddBrowseRecord(&browse)
 }

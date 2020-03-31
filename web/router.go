@@ -28,6 +28,7 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	router.Handle("/api/wxapp/auth-info", chain.ThenFunc(portalHandler.AuthUserInfo)).Methods("POST")
 	router.Handle("/api/home/banner", chain.ThenFunc(portalHandler.HomeBanner)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
 	router.Handle("/api/home/grid", chain.ThenFunc(portalHandler.GetGridCategoryList)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
+	router.Handle("/api/category/list", chain.ThenFunc(portalHandler.GetSubCategoryList)).Methods("GET")
 	router.Handle("/api/goods/list", chain.ThenFunc(portalHandler.GetGoodsList)).Methods("GET").Queries("k", "{k}").Queries("s", "{s}").Queries("c", "{c}").Queries("page", "{page}").Queries("size", "{size}")
 	router.Handle("/api/goods/detail", chain.ThenFunc(portalHandler.GetGoodsDetail)).Methods("GET").Queries("id", "{id}")
 	router.Handle("/api/cart/list", chain.ThenFunc(portalHandler.GetCartGoodsList)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")

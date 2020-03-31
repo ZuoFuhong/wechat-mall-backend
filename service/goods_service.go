@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"strconv"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
@@ -142,8 +143,7 @@ func (s *goodsService) QueryPortalGoodsList(keyword string, sort, categoryId, pa
 		goodsVO := defs.PortalGoodsListVO{}
 		goodsVO.Id = v.Id
 		goodsVO.Title = v.Title
-		goodsVO.Price = v.Price
-		goodsVO.DiscountPrice = v.DiscountPrice
+		goodsVO.Price, _ = strconv.ParseFloat(v.Price, 2)
 		goodsVO.Picture = v.Picture
 		goodsVO.SaleNum = saleNum
 		goodsVOList = append(goodsVOList, goodsVO)
@@ -169,8 +169,7 @@ func (s *goodsService) QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo
 	goodsVO := defs.PortalGoodsInfo{}
 	goodsVO.Id = goodsDO.Id
 	goodsVO.Title = goodsDO.Title
-	goodsVO.Price = goodsDO.Price
-	goodsVO.DiscountPrice = goodsDO.DiscountPrice
+	goodsVO.Price, _ = strconv.ParseFloat(goodsDO.Price, 2)
 	goodsVO.Picture = goodsDO.Picture
 	goodsVO.BannerPicture = goodsDO.BannerPicture
 	goodsVO.DetailPicture = goodsDO.DetailPicture
@@ -188,7 +187,7 @@ func extractSkuVOList(skuDOList *[]model.WechatMallSkuDO) []defs.PortalSkuVO {
 		skuVO.Id = v.Id
 		skuVO.Picture = v.Picture
 		skuVO.Title = v.Title
-		skuVO.Price = v.Price
+		skuVO.Price, _ = strconv.ParseFloat(v.Price, 2)
 		skuVO.Code = v.Code
 		skuVO.Stock = v.Stock
 		skuVO.Specs = v.Specs

@@ -33,9 +33,14 @@ type PortalBannerVO struct {
 
 type PortalGridCategoryVO struct {
 	Id         int    `json:"id"`
-	Name       string `json:"name"`
-	CategoryId int    `json:"category"`
-	Picture    string `json:"picture"`
+	Name       string `json:"name"`       // 宫格标题
+	CategoryId int    `json:"categoryId"` // 关联的分类
+	Picture    string `json:"picture"`    // 宫格图标
+}
+
+type PortalCategoryVO struct {
+	Id   int    `json:"id"`   // 分类ID
+	Name string `json:"name"` // 分类名称
 }
 
 type PortalCouponVO struct {
@@ -68,19 +73,17 @@ type PortalUserCouponVO struct {
 }
 
 type PortalGoodsListVO struct {
-	Id            int    `json:"id"`            // 商品ID
-	Title         string `json:"title"`         // 标题
-	Price         string `json:"price"`         // 价格
-	DiscountPrice string `json:"discountPrice"` // 折扣
-	Picture       string `json:"picture"`       // 图片
-	SaleNum       int    `json:"saleNum"`       // 销量
+	Id      int     `json:"id"`      // 商品ID
+	Title   string  `json:"title"`   // 标题
+	Price   float64 `json:"price"`   // 价格
+	Picture string  `json:"picture"` // 图片
+	SaleNum int     `json:"saleNum"` // 销量
 }
 
 type PortalGoodsInfo struct {
 	Id            int            `json:"id"`            // 商品ID
 	Title         string         `json:"title"`         // 标题
-	Price         string         `json:"price"`         // 价格
-	DiscountPrice string         `json:"discountPrice"` // 折扣
+	Price         float64        `json:"price"`         // 价格
 	Picture       string         `json:"picture"`       // 主图
 	BannerPicture string         `json:"bannerPicture"` // 详情图
 	DetailPicture string         `json:"detailPicture"` // 轮播图
@@ -102,13 +105,13 @@ type PortalSpecAttrVO struct {
 }
 
 type PortalSkuVO struct {
-	Id      int    `json:"id"`      // skuId
-	Picture string `json:"picture"` // 图片
-	Title   string `json:"title"`   // 标题
-	Price   string `json:"price"`   // 价格
-	Code    string `json:"code"`    // 编码
-	Stock   int    `json:"stock"`   // 库存量
-	Specs   string `json:"specs"`   // 多规格属性
+	Id      int     `json:"id"`      // skuId
+	Picture string  `json:"picture"` // 图片
+	Title   string  `json:"title"`   // 标题
+	Price   float64 `json:"price"`   // 价格
+	Code    string  `json:"code"`    // 编码
+	Stock   int     `json:"stock"`   // 库存量
+	Specs   string  `json:"specs"`   // 多规格属性
 }
 
 type PortalCartGoodsReq struct {

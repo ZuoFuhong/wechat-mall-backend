@@ -44,3 +44,9 @@ func (h *Handler) GetGridCategoryList(w http.ResponseWriter, r *http.Request) {
 	}
 	defs.SendNormalResponse(w, gridVOList)
 }
+
+// 查询-全部二级分类
+func (h *Handler) GetSubCategoryList(w http.ResponseWriter, r *http.Request) {
+	categoryList := h.service.CouponService.GetAllSubCategory()
+	defs.SendNormalResponse(w, categoryList)
+}

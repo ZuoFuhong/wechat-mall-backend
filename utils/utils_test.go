@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/shopspring/decimal"
 	"regexp"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -55,6 +56,16 @@ func Test_substr(t *testing.T) {
 }
 
 func Test_math(t *testing.T) {
-	mobile := "138714821400"
-	fmt.Println(mobile[0 : len(mobile)-1])
+	a := "1.66"
+	b := "-103.32"
+	c := "0.00"
+	a1, _ := strconv.ParseFloat(a, 2)
+	b1, _ := strconv.ParseFloat(b, 2)
+	c1, _ := strconv.ParseFloat(c, 2)
+	fmt.Println(a1)
+	fmt.Println(b1)
+	fmt.Println(c1)
+
+	val := decimal.NewFromFloat(b1).String()
+	fmt.Println(val)
 }

@@ -18,6 +18,7 @@ type ICouponService interface {
 	QueryUserCoupon(userId, status, page, size int) (*[]defs.PortalUserCouponVO, int)
 	CountCouponTakeNum(userId, couponId int) int
 	DoDeleteCouponLog(couponLog *model.WechatMallCouponLogDO)
+	GetAllSubCategory() *[]defs.PortalCategoryVO
 }
 
 type couponService struct {
@@ -134,4 +135,20 @@ func (cs *couponService) DoDeleteCouponLog(couponLog *model.WechatMallCouponLogD
 	if err != nil {
 		panic(err)
 	}
+}
+
+// 查询-所有的二级分类
+func (cs *couponService) GetAllSubCategory() *[]defs.PortalCategoryVO {
+	categoryList, err := dbops.QueryAllSubCategory()
+	if err != nil {
+		panic(err)
+	}
+	categoryVOList := []defs.PortalCategoryVO{}
+	for _, v := range *categoryList {
+		categoryVO := defs.PortalCategoryVO{}
+		categoryVO.Id = v.Id
+		categoryVO.Name = v.Name
+		categoryVOList = append(categoryVOList, categoryVO)
+	}
+	return &categoryVOList
 }

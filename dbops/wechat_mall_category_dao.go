@@ -132,3 +132,23 @@ func UpdateSubCategoryOnline(categoryId, online int) error {
 	_, err := dbConn.Exec(sql)
 	return err
 }
+
+// 查询-所有二级分类
+func QueryAllSubCategory() (*[]model.WechatMallCategoryDO, error) {
+	sql := "SELECT " + categoryColumnList + " FROM wechat_mall_category WHERE is_del = 0 AND online = 1 AND parent_id != 0"
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	categoryList := []model.WechatMallCategoryDO{}
+	for rows.Next() {
+		category := model.WechatMallCategoryDO{}
+		err := rows.Scan(&category.Id, &category.ParentId, &category.Name, &category.Sort, &category.Online,
+			&category.Picture, &category.Description, &category.Del, &category.CreateTime, &category.UpdateTime)
+		if err != nil {
+			panic(err)
+		}
+		categoryList = append(categoryList, category)
+	}
+	return &categoryList, nil
+}
