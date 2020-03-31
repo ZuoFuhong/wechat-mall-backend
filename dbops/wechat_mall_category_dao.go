@@ -108,3 +108,27 @@ WHERE id = ?
 	}
 	return nil
 }
+
+func QuerySubCategoryByParentId(categoryId int) (*[]int, error) {
+	sql := "SELECT id FROM wechat_mall_category WHERE is_del = 0 AND parent_id = " + strconv.Itoa(categoryId)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	ids := []int{}
+	for rows.Next() {
+		id := 0
+		err := rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return &ids, nil
+}
+
+func UpdateSubCategoryOnline(categoryId, online int) error {
+	sql := "UPDATE wechat_mall_category SET online = " + strconv.Itoa(online) + " WHERE is_del = 0 AND parent_id = " + strconv.Itoa(categoryId)
+	_, err := dbConn.Exec(sql)
+	return err
+}

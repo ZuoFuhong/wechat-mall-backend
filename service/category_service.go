@@ -61,4 +61,30 @@ func (cs *categoryService) UpdateCategory(category *model.WechatMallCategoryDO) 
 	if err != nil {
 		panic(err)
 	}
+	syncSubCategoryAndGoodsOnline(category.ParentId, category.Id, category.Online)
+}
+
+// 同步其子分类和商品的上下架状态
+func syncSubCategoryAndGoodsOnline(parentId, categoryId, online int) {
+	if parentId == 0 {
+		err := dbops.UpdateSubCategoryOnline(categoryId, online)
+		if err != nil {
+			panic(err)
+		}
+		ids, err := dbops.QuerySubCategoryByParentId(categoryId)
+		if err != nil {
+			panic(err)
+		}
+		for _, v := range *ids {
+			err := dbops.UpdateCategoryGoodsOnlineStatus(v, online)
+			if err != nil {
+				panic(err)
+			}
+		}
+	} else {
+		err := dbops.UpdateCategoryGoodsOnlineStatus(categoryId, online)
+		if err != nil {
+			panic(err)
+		}
+	}
 }

@@ -171,6 +171,7 @@ CREATE TABLE `wechat_mall_goods` (
     `banner_picture` text COMMENT '轮播图',
     `detail_picture` text COMMENT '详情图',
     `tags` varchar(100) NOT NULL DEFAULT '' COMMENT '标签，示例：包邮$热门',
+    `sale_num` int(11) NOT NULL DEFAULT '0' COMMENT '商品总销量',
     `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',

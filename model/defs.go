@@ -146,6 +146,7 @@ type WechatMallGoodsDO struct {
 	DetailPicture string // 轮播图
 	Tags          string // 标签
 	Description   string // 详情
+	SaleNum       int    // 销量
 	Del           int
 	CreateTime    string
 	UpdateTime    string

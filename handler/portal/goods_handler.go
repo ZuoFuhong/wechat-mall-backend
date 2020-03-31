@@ -13,11 +13,12 @@ import (
 func (h *Handler) GetGoodsList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	keyword := vars["k"]
+	sort, _ := strconv.Atoi(vars["s"])
 	categoryId, _ := strconv.Atoi(vars["c"])
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
-	goodsList, total := h.service.GoodsService.QueryPortalGoodsList(keyword, categoryId, page, size)
+	goodsList, total := h.service.GoodsService.QueryPortalGoodsList(keyword, sort, categoryId, page, size)
 
 	resp := make(map[string]interface{})
 	resp["list"] = goodsList

@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
-	"math"
 	"regexp"
 	"testing"
 	"time"
@@ -56,7 +55,6 @@ func Test_substr(t *testing.T) {
 }
 
 func Test_math(t *testing.T) {
-	a := 1
-	a = int(math.Abs(-1))
-	fmt.Println(a)
+	mobile := "138714821400"
+	fmt.Println(mobile[0 : len(mobile)-1])
 }

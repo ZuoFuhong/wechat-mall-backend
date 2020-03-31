@@ -15,7 +15,7 @@ type IGoodsService interface {
 	AddGoods(goods *model.WechatMallGoodsDO) int
 	GetGoodsSpecList(goodsId int) *[]defs.CMSGoodsSpecVO
 	AddGoodsSpec(goodsId int, specList []int)
-	QueryPortalGoodsList(keyword string, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int)
+	QueryPortalGoodsList(keyword string, sort, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int)
 	QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo
 	CountCategoryGoods(categoryId int) int
 }
@@ -29,7 +29,7 @@ func NewGoodsService() IGoodsService {
 }
 
 func (s *goodsService) GetGoodsList(keyword string, categoryId, online, page, size int) (*[]model.WechatMallGoodsDO, int) {
-	goodsList, err := dbops.QueryGoodsList(keyword, categoryId, online, page, size)
+	goodsList, err := dbops.QueryGoodsList(keyword, "", categoryId, online, page, size)
 	if err != nil {
 		panic(err)
 	}
@@ -112,8 +112,20 @@ func (s *goodsService) AddGoodsSpec(goodsId int, specList []int) {
 	}
 }
 
-func (s *goodsService) QueryPortalGoodsList(keyword string, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int) {
-	goodsList, err := dbops.QueryGoodsList(keyword, categoryId, 1, page, size)
+func (s *goodsService) QueryPortalGoodsList(keyword string, sort, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int) {
+	// 排序：0-综合 1-新品 2-销量 3-价格
+	var order string
+	switch sort {
+	case 1:
+		order = "create_time"
+	case 2:
+		order = "sale_num"
+	case 3:
+		order = "price"
+	default:
+		order = ""
+	}
+	goodsList, err := dbops.QueryGoodsList(keyword, order, categoryId, 1, page, size)
 	if err != nil {
 		panic(err)
 	}
