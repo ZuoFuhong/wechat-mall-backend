@@ -147,7 +147,7 @@ func (s *goodsService) QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo
 	if goodsDO.Id == 0 {
 		panic(errs.ErrorGoods)
 	}
-	skuDOList, err := dbops.GetSKUList(goodsId, 0, 0)
+	skuDOList, err := dbops.GetSKUList("", goodsId, 1, 0, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -174,6 +174,7 @@ func extractSkuVOList(skuDOList *[]model.WechatMallSkuDO) []defs.PortalSkuVO {
 	for _, v := range *skuDOList {
 		skuVO := defs.PortalSkuVO{}
 		skuVO.Id = v.Id
+		skuVO.Picture = v.Picture
 		skuVO.Title = v.Title
 		skuVO.Price = v.Price
 		skuVO.Code = v.Code

@@ -3,34 +3,13 @@ package dbops
 import (
 	"strconv"
 	"time"
+	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
 )
 
 const couponLogColumnList = `
 id, coupon_id, user_id, use_time, expire_time, status, code, order_no, is_del, create_time, update_time
 `
-
-func QueryCouponLog(userId, couponId int) (*model.WechatMallCouponLogDO, error) {
-	sql := "SELECT " + couponLogColumnList + " FROM wechat_mall_coupon_log WHERE user_id = ? AND coupon_id = ?"
-	stmt, err := dbConn.Prepare(sql)
-	if err != nil {
-		return nil, err
-	}
-	rows, err := stmt.Query(userId, couponId)
-	if err != nil {
-		return nil, err
-	}
-	couponLog := model.WechatMallCouponLogDO{}
-	for rows.Next() {
-		err := rows.Scan(&couponLog.Id, &couponLog.CouponId, &couponLog.UserId, &couponLog.UseTime,
-			&couponLog.ExpireTime, &couponLog.Status, &couponLog.Code, &couponLog.OrderNo, &couponLog.Del,
-			&couponLog.CreateTime, &couponLog.UpdateTime)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &couponLog, nil
-}
 
 func QueryCouponLogById(couponLogId int) (*model.WechatMallCouponLogDO, error) {
 	sql := "SELECT " + couponLogColumnList + " FROM wechat_mall_coupon_log WHERE is_del = 0 AND id = " + strconv.Itoa(couponLogId)
@@ -75,10 +54,20 @@ func QueryCouponLogList(userId, status, page, size int) (*[]model.WechatMallCoup
 	return &couponLogList, nil
 }
 
-func CountUserCouponLog(userId, status int) (int, error) {
-	sql := "SELECT COUNT(*) FROM wechat_mall_coupon_log WHERE is_del = 0"
-	sql += " AND user_id = " + strconv.Itoa(userId)
-	sql += " AND status = " + strconv.Itoa(status)
+func CountCouponTakeNum(userId, couponId, status int, del int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_coupon_log WHERE 1 = 1"
+	if userId != defs.ALL {
+		sql += " AND user_id = " + strconv.Itoa(userId)
+	}
+	if couponId != defs.ALL {
+		sql += " AND coupon_id = " + strconv.Itoa(couponId)
+	}
+	if status != defs.ALL {
+		sql += " AND status = " + strconv.Itoa(status)
+	}
+	if del != defs.ALL {
+		sql += " AND is_del = " + strconv.Itoa(del)
+	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return 0, err

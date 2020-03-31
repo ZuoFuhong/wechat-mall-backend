@@ -91,11 +91,11 @@ func calcGoodsDiscountAmount(goodsAmount decimal.Decimal, userId, couponLogId in
 	if couponLogId == 0 {
 		return decimal.NewFromInt(0)
 	}
-	couponLog, err := dbops.QueryCouponLog(userId, couponLogId)
+	couponLog, err := dbops.QueryCouponLogById(couponLogId)
 	if err != nil {
 		panic(err)
 	}
-	if couponLog.Id == 0 || couponLog.Status != 0 {
+	if couponLog.Id == 0 || couponLog.Status != 0 || couponLog.UserId != userId {
 		panic(errs.NewErrorCoupon("无效的优惠券！"))
 	}
 	coupon, err := dbops.QueryCouponById(couponLog.CouponId)

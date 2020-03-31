@@ -77,22 +77,6 @@ func QueryCartByParams(userId, goodsId, skuId int) (*model.WechatMallUserCartDO,
 	return &cartDO, nil
 }
 
-func QueryCartById(id int) (*model.WechatMallUserCartDO, error) {
-	sql := "SELECT " + cartColumnList + " FROM wechat_mall_user_cart WHERE is_del = 0 AND id = " + strconv.Itoa(id)
-	rows, err := dbConn.Query(sql)
-	if err != nil {
-		return nil, err
-	}
-	cartDO := model.WechatMallUserCartDO{}
-	for rows.Next() {
-		err := rows.Scan(&cartDO.Id, &cartDO.UserId, &cartDO.GoodsId, &cartDO.SkuId, &cartDO.Num, &cartDO.Del, &cartDO.CreateTime, &cartDO.UpdateTime)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &cartDO, nil
-}
-
 func UpdateCartById(cartDO *model.WechatMallUserCartDO) error {
 	sql := `
 UPDATE wechat_mall_user_cart 

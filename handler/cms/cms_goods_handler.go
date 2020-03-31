@@ -127,7 +127,7 @@ func (h *Handler) DoDeleteGoods(w http.ResponseWriter, r *http.Request) {
 	if goodsDO.Id == 0 {
 		panic(errs.ErrorGoods)
 	}
-	_, total := h.service.SKUService.GetSKUList(id, 1, 1)
+	_, total := h.service.SKUService.GetSKUList("", id, defs.ALL, 1, 1)
 	if total > 0 {
 		panic(errs.NewErrorGoods("该商品下有SKU，不能删除！"))
 	}

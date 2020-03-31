@@ -8,6 +8,8 @@ const (
 	CMSCodePrefix      = "cmscode:"
 	CMSCodeExpire      = 300
 	ALL                = -999
+	CartMax            = 99
+	CouponMax          = 10
 )
 
 type SkuSpecs struct {

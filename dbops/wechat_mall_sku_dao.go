@@ -10,10 +10,16 @@ const skuColumnList = `
 id, title, price, code, stock, goods_id, online, picture, specs, is_del, create_time, update_time
 `
 
-func GetSKUList(goodsId, page, size int) (*[]model.WechatMallSkuDO, error) {
+func GetSKUList(title string, goodsId, online, page, size int) (*[]model.WechatMallSkuDO, error) {
 	sql := "SELECT " + skuColumnList + " FROM wechat_mall_sku WHERE is_del = 0"
 	if goodsId != 0 {
 		sql += " AND goods_id = " + strconv.Itoa(goodsId)
+	}
+	if title != "" {
+		sql += " AND title like '%" + title + "%'"
+	}
+	if online == 0 || online == 1 {
+		sql += " AND online = " + strconv.Itoa(online)
 	}
 	if page > 0 && size > 0 {
 		sql += " LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
@@ -35,10 +41,16 @@ func GetSKUList(goodsId, page, size int) (*[]model.WechatMallSkuDO, error) {
 	return &skuList, nil
 }
 
-func CountSKU(goodsId int) (int, error) {
+func CountSKU(title string, goodsId, online int) (int, error) {
 	sql := "SELECT COUNT(*) FROM wechat_mall_sku WHERE is_del = 0"
 	if goodsId != 0 {
 		sql += " AND goods_id = " + strconv.Itoa(goodsId)
+	}
+	if online == 0 || online == 1 {
+		sql += " AND online = " + strconv.Itoa(online)
+	}
+	if title != "" {
+		sql += " AND title like '%" + title + "%'"
 	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
@@ -148,7 +160,7 @@ func QuerySellOutSKUList(page, size int) (*[]model.WechatMallSkuDO, error) {
 }
 
 func CountSellOutSKUList() (int, error) {
-	sql := "SELECT " + skuColumnList + " FROM wechat_mall_sku WHERE is_del = 0 AND stock = 0"
+	sql := "SELECT COUNT(*) FROM wechat_mall_sku WHERE is_del = 0 AND stock = 0"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return 0, err

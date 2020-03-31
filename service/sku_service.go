@@ -6,7 +6,7 @@ import (
 )
 
 type ISKUService interface {
-	GetSKUList(goodsId, page, size int) (*[]model.WechatMallSkuDO, int)
+	GetSKUList(title string, goodsId, online, page, size int) (*[]model.WechatMallSkuDO, int)
 	GetSKUById(id int) *model.WechatMallSkuDO
 	GetSKUByCode(code string) *model.WechatMallSkuDO
 	AddSKU(sku *model.WechatMallSkuDO)
@@ -23,12 +23,12 @@ func NewSKUService() ISKUService {
 	return &service
 }
 
-func (s *sKUService) GetSKUList(goodsId, page, size int) (*[]model.WechatMallSkuDO, int) {
-	skuList, err := dbops.GetSKUList(goodsId, page, size)
+func (s *sKUService) GetSKUList(title string, goodsId, online, page, size int) (*[]model.WechatMallSkuDO, int) {
+	skuList, err := dbops.GetSKUList(title, goodsId, online, page, size)
 	if err != nil {
 		panic(err)
 	}
-	total, err := dbops.CountSKU(goodsId)
+	total, err := dbops.CountSKU(title, goodsId, online)
 	if err != nil {
 		panic(err)
 	}

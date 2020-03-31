@@ -185,6 +185,8 @@ type WechatMallCouponDO struct {
 	Minus       string // 优惠金额
 	Rate        string // 折扣
 	Type        int    // 类型
+	GrantNum    int    // 发券数量
+	LimitNum    int    // 领取数量
 	StartTime   string // 开始时间
 	EndTime     string // 截止时间
 	Description string // 规则描述

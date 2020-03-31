@@ -1,6 +1,7 @@
 package service
 
 import (
+	"math"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
@@ -21,8 +22,22 @@ func NewCartService() ICartService {
 }
 
 func (s *cartService) DoEditCart(userId, goodsId, skuId, num int) {
-	if num == 0 {
-		return
+	if num == 0 || math.Abs(float64(num)) > defs.CartMax {
+		panic(errs.ErrorParameterValidate)
+	}
+	goodsDO, err := dbops.QueryGoodsById(goodsId)
+	if err != nil {
+		panic(err)
+	}
+	if goodsDO.Id == 0 {
+		panic(errs.ErrorGoods)
+	}
+	skuDO, err := dbops.GetSKUById(skuId)
+	if err != nil {
+		panic(err)
+	}
+	if skuDO.Id == 0 {
+		panic(errs.ErrorSKU)
 	}
 	cartDO, err := dbops.QueryCartByParams(userId, goodsId, skuId)
 	if err != nil {
@@ -37,18 +52,19 @@ func (s *cartService) DoEditCart(userId, goodsId, skuId, num int) {
 			userCartDO.Num = num
 			err = dbops.AddUserCart(&userCartDO)
 		} else {
-			cartDO.Num += num
+			if cartDO.Num+num > defs.CartMax {
+				cartDO.Num = defs.CartMax
+			} else {
+				cartDO.Num += num
+			}
 			err = dbops.UpdateCartById(cartDO)
 		}
 	} else {
 		if cartDO.Id == 0 {
 			panic(errs.ErrorGoodsCart)
 		}
-		if cartDO.Num+num > 0 {
+		if cartDO.Num+num >= 1 {
 			cartDO.Num += num
-			err = dbops.UpdateCartById(cartDO)
-		} else {
-			cartDO.Del = 1
 			err = dbops.UpdateCartById(cartDO)
 		}
 	}

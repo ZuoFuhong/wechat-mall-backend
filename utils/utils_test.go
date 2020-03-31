@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/shopspring/decimal"
+	"math"
 	"regexp"
 	"testing"
 	"time"
@@ -52,4 +53,10 @@ func Test_substr(t *testing.T) {
 	mobile := "138714821400"
 	matched, _ := regexp.MatchString("^1[358]\\d{9}$", mobile)
 	fmt.Println(matched)
+}
+
+func Test_math(t *testing.T) {
+	a := 1
+	a = int(math.Abs(-1))
+	fmt.Println(a)
 }

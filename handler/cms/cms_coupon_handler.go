@@ -18,7 +18,7 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	size, _ := strconv.Atoi(vars["size"])
 
 	couponVOList := []defs.CMSCouponVO{}
-	couponList, total := h.service.CouponService.GetCouponList(page, size, 0)
+	couponList, total := h.service.CouponService.GetCouponList(page, size, defs.ALL)
 	for _, v := range *couponList {
 		couponVO := defs.CMSCouponVO{}
 		couponVO.Id = v.Id
@@ -27,6 +27,8 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 		couponVO.Minus = v.Minus
 		couponVO.Rate = v.Rate
 		couponVO.Type = v.Type
+		couponVO.GrantNum = v.GrantNum
+		couponVO.LimitNum = v.LimitNum
 		couponVO.StartTime = v.StartTime
 		couponVO.EndTime = v.EndTime
 		couponVO.Description = v.Description
@@ -54,6 +56,8 @@ func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	couponVO.Minus = coupon.Minus
 	couponVO.Rate = coupon.Rate
 	couponVO.Type = coupon.Type
+	couponVO.GrantNum = coupon.GrantNum
+	couponVO.LimitNum = coupon.LimitNum
 	couponVO.StartTime = coupon.StartTime
 	couponVO.EndTime = coupon.EndTime
 	couponVO.Description = coupon.Description
@@ -73,12 +77,18 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 		panic(errs.NewParameterError(err.Error()))
 	}
 	if req.Id == 0 {
+		_, total := h.service.CouponService.GetCouponList(1, defs.CouponMax, defs.ALL)
+		if total >= defs.CouponMax {
+			panic(errs.NewErrorCoupon("最多只能添加" + strconv.Itoa(defs.CouponMax) + "张优惠券"))
+		}
 		coupon := model.WechatMallCouponDO{}
 		coupon.Title = req.Title
 		coupon.FullMoney = req.FullMoney
 		coupon.Minus = req.Minus
 		coupon.Rate = req.Rate
 		coupon.Type = req.Type
+		coupon.GrantNum = req.GrantNum
+		coupon.LimitNum = req.LimitNum
 		coupon.StartTime = req.StartTime
 		coupon.EndTime = req.EndTime
 		coupon.Description = req.Description
@@ -94,6 +104,8 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 		coupon.Minus = req.Minus
 		coupon.Rate = req.Rate
 		coupon.Type = req.Type
+		coupon.GrantNum = req.GrantNum
+		coupon.LimitNum = req.LimitNum
 		coupon.StartTime = req.StartTime
 		coupon.EndTime = req.EndTime
 		coupon.Description = req.Description

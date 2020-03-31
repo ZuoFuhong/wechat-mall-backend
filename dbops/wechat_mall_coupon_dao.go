@@ -3,16 +3,17 @@ package dbops
 import (
 	"strconv"
 	"time"
+	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
 )
 
 const couponColumnList = `
-id, title, full_money, minus, rate, type, start_time, end_time, description, online, is_del, create_time, update_time
+id, title, full_money, minus, rate, type, grant_num, limit_num, start_time, end_time, description, online, is_del, create_time, update_time
 `
 
 func QueryCouponList(page, size, online int) (*[]model.WechatMallCouponDO, error) {
 	sql := "SELECT " + couponColumnList + " FROM wechat_mall_coupon WHERE is_del = 0"
-	if online != 0 {
+	if online != defs.ALL {
 		sql += " AND online = " + strconv.Itoa(online)
 	}
 	if page > 0 && size > 0 {
@@ -26,8 +27,8 @@ func QueryCouponList(page, size, online int) (*[]model.WechatMallCouponDO, error
 	for rows.Next() {
 		coupon := model.WechatMallCouponDO{}
 		err := rows.Scan(&coupon.Id, &coupon.Title, &coupon.FullMoney, &coupon.Minus, &coupon.Rate,
-			&coupon.Type, &coupon.StartTime, &coupon.EndTime, &coupon.Description, &coupon.Online,
-			&coupon.Del, &coupon.CreateTime, &coupon.UpdateTime)
+			&coupon.Type, &coupon.GrantNum, &coupon.LimitNum, &coupon.StartTime, &coupon.EndTime,
+			&coupon.Description, &coupon.Online, &coupon.Del, &coupon.CreateTime, &coupon.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -38,7 +39,7 @@ func QueryCouponList(page, size, online int) (*[]model.WechatMallCouponDO, error
 
 func CountCoupon(online int) (int, error) {
 	sql := "SELECT COUNT(*) FROM wechat_mall_coupon WHERE is_del = 0"
-	if online != 0 {
+	if online != defs.ALL {
 		sql += " AND online = " + strconv.Itoa(online)
 	}
 	rows, err := dbConn.Query(sql)
@@ -63,9 +64,9 @@ func QueryCouponById(id int) (*model.WechatMallCouponDO, error) {
 	}
 	coupon := model.WechatMallCouponDO{}
 	for rows.Next() {
-		err := rows.Scan(&coupon.Id, &coupon.Title, &coupon.FullMoney, &coupon.Minus,
-			&coupon.Rate, &coupon.Type, &coupon.StartTime, &coupon.EndTime, &coupon.Description,
-			&coupon.Online, &coupon.Del, &coupon.CreateTime, &coupon.UpdateTime)
+		err := rows.Scan(&coupon.Id, &coupon.Title, &coupon.FullMoney, &coupon.Minus, &coupon.Rate,
+			&coupon.Type, &coupon.GrantNum, &coupon.LimitNum, &coupon.StartTime, &coupon.EndTime,
+			&coupon.Description, &coupon.Online, &coupon.Del, &coupon.CreateTime, &coupon.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -74,13 +75,13 @@ func QueryCouponById(id int) (*model.WechatMallCouponDO, error) {
 }
 
 func InsertCoupon(coupon *model.WechatMallCouponDO) error {
-	sql := "INSERT INTO wechat_mall_coupon( " + couponColumnList[4:] + " ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql := "INSERT INTO wechat_mall_coupon( " + couponColumnList[4:] + " ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(coupon.Title, coupon.FullMoney, coupon.Minus, coupon.Rate, coupon.Type,
-		coupon.StartTime, coupon.EndTime, coupon.Description, coupon.Online, 0, time.Now(), time.Now())
+	_, err = stmt.Exec(coupon.Title, coupon.FullMoney, coupon.Minus, coupon.Rate, coupon.Type, coupon.GrantNum,
+		coupon.LimitNum, coupon.StartTime, coupon.EndTime, coupon.Description, coupon.Online, 0, time.Now(), time.Now())
 	if err != nil {
 		return err
 	}
@@ -90,7 +91,7 @@ func InsertCoupon(coupon *model.WechatMallCouponDO) error {
 func UpdateCouponById(coupon *model.WechatMallCouponDO) error {
 	sql := `
 UPDATE wechat_mall_coupon 
-SET title = ?, full_money = ?, minus = ?, rate = ?, type = ?, start_time = ?, 
+SET title = ?, full_money = ?, minus = ?, rate = ?, type = ?, grant_num = ?, limit_num = ?, start_time = ?, 
     end_time = ?,  description = ?, online = ?, is_del = ?, update_time = ?
 WHERE id = ?
 `
@@ -98,8 +99,8 @@ WHERE id = ?
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(coupon.Title, coupon.FullMoney, coupon.Minus, coupon.Rate, coupon.Type,
-		coupon.StartTime, coupon.EndTime, coupon.Description, coupon.Online, coupon.Del, time.Now(), coupon.Id)
+	_, err = stmt.Exec(coupon.Title, coupon.FullMoney, coupon.Minus, coupon.Rate, coupon.Type, coupon.GrantNum,
+		coupon.LimitNum, coupon.StartTime, coupon.EndTime, coupon.Description, coupon.Online, coupon.Del, time.Now(), coupon.Id)
 	if err != nil {
 		return err
 	}

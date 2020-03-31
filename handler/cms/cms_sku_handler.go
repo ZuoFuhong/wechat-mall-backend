@@ -8,16 +8,20 @@ import (
 	"strconv"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
+	"wechat-mall-backend/model"
 )
 
 // 查询-SKU列表
 func (h *Handler) GetSKUList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+	goodsId, _ := strconv.Atoi(vars["goodsId"])
+	keyword := vars["k"]
+	online, _ := strconv.Atoi(vars["o"])
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
 	skuVOs := []defs.CMSSkuListVO{}
-	skuList, total := h.service.SKUService.GetSKUList(0, page, size)
+	skuList, total := h.service.SKUService.GetSKUList(keyword, goodsId, online, page, size)
 	for _, v := range *skuList {
 		skuVO := defs.CMSSkuListVO{}
 		skuVO.Id = v.Id
@@ -84,10 +88,7 @@ func (h *Handler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 		panic(errs.ErrorGoods)
 	}
 	if req.Id == 0 {
-		sku := h.service.SKUService.GetSKUByCode(req.Code)
-		if sku.Id != 0 {
-			panic(errs.NewErrorSKU("商品编码已存在！"))
-		}
+		sku := model.WechatMallSkuDO{}
 		sku.Title = req.Title
 		sku.Price = req.Price
 		sku.Code = req.Code
@@ -96,13 +97,9 @@ func (h *Handler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 		sku.Online = req.Online
 		sku.Picture = req.Picture
 		sku.Specs = req.Specs
-		h.service.SKUService.AddSKU(sku)
+		h.service.SKUService.AddSKU(&sku)
 	} else {
-		sku := h.service.SKUService.GetSKUByCode(req.Code)
-		if sku.Id != 0 && sku.Id != req.Id {
-			panic(errs.NewErrorSKU("商品编码已存在！"))
-		}
-		sku = h.service.SKUService.GetSKUById(req.Id)
+		sku := h.service.SKUService.GetSKUById(req.Id)
 		if sku.Id == 0 {
 			panic(errs.ErrorSKU)
 		}

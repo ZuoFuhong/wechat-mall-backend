@@ -14,9 +14,9 @@ type ICouponService interface {
 	AddCoupon(coupon *model.WechatMallCouponDO)
 	UpdateCouponById(coupon *model.WechatMallCouponDO)
 	QueryCouponLogById(couponLogId int) *model.WechatMallCouponLogDO
-	QueryCouponLog(userId, couponId int) *model.WechatMallCouponLogDO
 	RecordCouponLog(userId, couponId int)
 	QueryUserCoupon(userId, status, page, size int) (*[]defs.PortalUserCouponVO, int)
+	CountCouponTakeNum(userId, couponId int) int
 	DoDeleteCouponLog(couponLog *model.WechatMallCouponLogDO)
 }
 
@@ -70,14 +70,6 @@ func (cs *couponService) QueryCouponLogById(couponLogId int) *model.WechatMallCo
 	return couponLogDO
 }
 
-func (cs *couponService) QueryCouponLog(userId, couponId int) *model.WechatMallCouponLogDO {
-	couponLog, err := dbops.QueryCouponLog(userId, couponId)
-	if err != nil {
-		panic(err)
-	}
-	return couponLog
-}
-
 func (cs *couponService) RecordCouponLog(userId, couponId int) {
 	coupon, err := dbops.QueryCouponById(couponId)
 	if err != nil {
@@ -120,11 +112,20 @@ func (cs *couponService) QueryUserCoupon(userId, status, page, size int) (*[]def
 		couponVO.Description = couponDO.Description
 		voList = append(voList, couponVO)
 	}
-	total, err := dbops.CountUserCouponLog(userId, status)
+	total, err := dbops.CountCouponTakeNum(userId, defs.ALL, status, 0)
 	if err != nil {
 		panic(err)
 	}
 	return &voList, total
+}
+
+// 查询-优惠券领取的数量
+func (cs *couponService) CountCouponTakeNum(userId, couponId int) int {
+	total, err := dbops.CountCouponTakeNum(userId, couponId, defs.ALL, defs.ALL)
+	if err != nil {
+		panic(err)
+	}
+	return total
 }
 
 func (cs *couponService) DoDeleteCouponLog(couponLog *model.WechatMallCouponLogDO) {

@@ -84,7 +84,7 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	router.Handle("/cms/goods/{id:[0-9]+}", chain.ThenFunc(cmsHandler.DoDeleteGoods)).Methods("DELETE", "OPTIONS")
 	router.Handle("/cms/goods/spec", chain.ThenFunc(cmsHandler.GetGoodsSpecList)).Methods("GET", "OPTIONS").Queries("id", "{id}")
 	router.Handle("/cms/goods/all", chain.ThenFunc(cmsHandler.GetChooseCategoryGoods)).Methods("GET", "OPTIONS")
-	router.Handle("/cms/sku/list", chain.ThenFunc(cmsHandler.GetSKUList)).Methods("GET", "OPTIONS").Queries("page", "{page}").Queries("size", "{size}")
+	router.Handle("/cms/sku/list", chain.ThenFunc(cmsHandler.GetSKUList)).Methods("GET", "OPTIONS").Queries("page", "{page}").Queries("size", "{size}").Queries("goodsId", "{goodsId}").Queries("k", "{k}").Queries("o", "{o}")
 	router.Handle("/cms/sku/{id:[0-9]+}", chain.ThenFunc(cmsHandler.GetSKU)).Methods("GET", "OPTIONS")
 	router.Handle("/cms/sku/edit", chain.ThenFunc(cmsHandler.DoEditSKU)).Methods("POST", "OPTIONS")
 	router.Handle("/cms/sku/{id:[0-9]+}", chain.ThenFunc(cmsHandler.DoDeleteSKU)).Methods("DELETE", "OPTIONS")

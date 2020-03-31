@@ -14,16 +14,10 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
-	userId := r.Context().Value(defs.ContextKey).(int)
 
 	couponList, total := h.service.CouponService.GetCouponList(page, size, 1)
 	voList := []defs.PortalCouponVO{}
 	for _, v := range *couponList {
-		couponLog := h.service.CouponService.QueryCouponLog(userId, v.Id)
-		status := 0
-		if couponLog.Id != 0 {
-			status = 1
-		}
 		couponVO := defs.PortalCouponVO{}
 		couponVO.Id = v.Id
 		couponVO.Title = v.Title
@@ -34,7 +28,6 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 		couponVO.StartTime = v.StartTime
 		couponVO.EndTime = v.EndTime
 		couponVO.Description = v.Description
-		couponVO.Status = status
 		voList = append(voList, couponVO)
 	}
 	resp := make(map[string]interface{})
@@ -57,9 +50,13 @@ func (h *Handler) TakeCoupon(w http.ResponseWriter, r *http.Request) {
 	if coupon.Id == 0 || coupon.Del == 1 {
 		panic(errs.ErrorCoupon)
 	}
-	couponLog := h.service.CouponService.QueryCouponLog(userId, couponId)
-	if couponLog.Id != 0 {
-		panic(errs.NewErrorCoupon("请勿重复领取！"))
+	totalTakeNum := h.service.CouponService.CountCouponTakeNum(defs.ALL, couponId)
+	if totalTakeNum >= coupon.GrantNum {
+		panic(errs.NewErrorCoupon("来晚了，优惠券领光了！"))
+	}
+	userTakeNum := h.service.CouponService.CountCouponTakeNum(userId, couponId)
+	if userTakeNum >= coupon.LimitNum {
+		panic(errs.NewErrorCoupon("单人限领！"))
 	}
 	h.service.CouponService.RecordCouponLog(userId, couponId)
 	defs.SendNormalResponse(w, "ok")

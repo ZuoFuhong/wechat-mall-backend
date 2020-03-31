@@ -203,6 +203,8 @@ type CMSCouponReq struct {
 	Minus       string `json:"minus" validate:"required"`
 	Rate        string `json:"rate" validate:"required"`
 	Type        int    `json:"type" validate:"required"`
+	GrantNum    int    `json:"grantNum" validate:"required"`
+	LimitNum    int    `json:"limitNum" validate:"required"`
 	StartTime   string `json:"startTime" validate:"required"`
 	EndTime     string `json:"endTime" validate:"required"`
 	Description string `json:"description"`
@@ -216,6 +218,8 @@ type CMSCouponVO struct {
 	Minus       string `json:"minus"`
 	Rate        string `json:"rate"`
 	Type        int    `json:"type"`
+	GrantNum    int    `json:"grantNum"`
+	LimitNum    int    `json:"limitNum"`
 	StartTime   string `json:"startTime"`
 	EndTime     string `json:"endTime"`
 	Description string `json:"description"`

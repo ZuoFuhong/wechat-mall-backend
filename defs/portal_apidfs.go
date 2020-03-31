@@ -44,11 +44,10 @@ type PortalCouponVO struct {
 	FullMoney   string `json:"fullMoney"`   // 满减额
 	Minus       string `json:"minus"`       // 优惠额
 	Rate        string `json:"rate"`        // 折扣
-	Type        int    `json:"type"`        // 券类型：1-满减券 2-折扣券 3-无门槛券 4-满金额折扣券
+	Type        int    `json:"type"`        // 券类型：1-满减券 2-折扣券 3-代金券 4-满金额折扣券
 	StartTime   string `json:"startTime"`   // 开始时间
 	EndTime     string `json:"endTime"`     // 结束时间
 	Description string `json:"description"` // 描述
-	Status      int    `json:"status"`      // 领取状态：
 }
 
 type PortalTakeCouponReq struct {
@@ -62,7 +61,7 @@ type PortalUserCouponVO struct {
 	FullMoney   string `json:"fullMoney"`   // 满减额
 	Minus       string `json:"minus"`       // 优惠额
 	Rate        string `json:"rate"`        // 折扣
-	Type        int    `json:"type"`        // 券类型：1-满减券 2-折扣券 3-无门槛券 4-满金额折扣券
+	Type        int    `json:"type"`        // 券类型：1-满减券 2-折扣券 3-代金券 4-满金额折扣券
 	StartTime   string `json:"startTime"`   // 开始时间
 	EndTime     string `json:"endTime"`     // 结束时间
 	Description string `json:"description"` // 描述
@@ -103,12 +102,13 @@ type PortalSpecAttrVO struct {
 }
 
 type PortalSkuVO struct {
-	Id    int    `json:"id"`    // skuId
-	Title string `json:"title"` // 标题
-	Price string `json:"price"` // 价格
-	Code  string `json:"code"`  // 编码
-	Stock int    `json:"stock"` // 库存量
-	Specs string `json:"specs"` // 多规格属性
+	Id      int    `json:"id"`      // skuId
+	Picture string `json:"picture"` // 图片
+	Title   string `json:"title"`   // 标题
+	Price   string `json:"price"`   // 价格
+	Code    string `json:"code"`    // 编码
+	Stock   int    `json:"stock"`   // 库存量
+	Specs   string `json:"specs"`   // 多规格属性
 }
 
 type PortalCartGoodsReq struct {
