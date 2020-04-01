@@ -34,7 +34,7 @@ func QueryCouponLogList(userId, status, page, size int) (*[]model.WechatMallCoup
 	sql += " AND user_id = " + strconv.Itoa(userId)
 	sql += " AND status = " + strconv.Itoa(status)
 	if page > 0 && size > 0 {
-		sql += " LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
+		sql += " ORDER BY update_time DESC LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
 	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
