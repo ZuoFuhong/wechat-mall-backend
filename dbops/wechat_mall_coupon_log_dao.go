@@ -12,7 +12,7 @@ id, coupon_id, user_id, use_time, expire_time, status, code, order_no, is_del, c
 `
 
 func QueryCouponLogById(couponLogId int) (*model.WechatMallCouponLogDO, error) {
-	sql := "SELECT " + couponLogColumnList + " FROM wechat_mall_coupon_log WHERE is_del = 0 AND id = " + strconv.Itoa(couponLogId)
+	sql := "SELECT " + couponLogColumnList + " FROM wechat_mall_coupon_log WHERE id = " + strconv.Itoa(couponLogId)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

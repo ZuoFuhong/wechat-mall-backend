@@ -19,6 +19,7 @@ type IGoodsService interface {
 	QueryPortalGoodsList(keyword string, sort, categoryId, page, size int) (*[]defs.PortalGoodsListVO, int)
 	QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo
 	CountCategoryGoods(categoryId int) int
+	CountGoodsSpecBySpecId(specId int) int
 }
 
 type goodsService struct {
@@ -75,6 +76,9 @@ func (s *goodsService) GetGoodsSpecList(goodsId int) *[]defs.CMSGoodsSpecVO {
 		if err != nil {
 			panic(err)
 		}
+		if specificationDO.Id == defs.ZERO || specificationDO.Del == defs.DELETE {
+			panic(errs.ErrorSpecificationAttr)
+		}
 		attrList, err := dbops.QuerySpecificationAttrList(v.SpecId)
 		if err != nil {
 			panic(err)
@@ -126,17 +130,17 @@ func (s *goodsService) QueryPortalGoodsList(keyword string, sort, categoryId, pa
 	default:
 		order = ""
 	}
-	goodsList, err := dbops.QueryGoodsList(keyword, order, categoryId, 1, page, size)
+	goodsList, err := dbops.QueryGoodsList(keyword, order, categoryId, defs.ONLINE, page, size)
 	if err != nil {
 		panic(err)
 	}
-	total, err := dbops.CountGoods(keyword, categoryId, 1)
+	total, err := dbops.CountGoods(keyword, categoryId, defs.ONLINE)
 	if err != nil {
 		panic(err)
 	}
 	goodsVOList := []defs.PortalGoodsListVO{}
 	for _, v := range *goodsList {
-		saleNum, err := dbops.SumGoodsSaleNum(v.Id, 0)
+		saleNum, err := dbops.SumGoodsSaleNum(v.Id, defs.ALL)
 		if err != nil {
 			panic(err)
 		}
@@ -156,10 +160,10 @@ func (s *goodsService) QueryPortalGoodsDetail(goodsId int) *defs.PortalGoodsInfo
 	if err != nil {
 		panic(err)
 	}
-	if goodsDO.Id == 0 {
+	if goodsDO.Id == defs.ZERO || goodsDO.Del == defs.DELETE || goodsDO.Online == defs.OFFLINE {
 		panic(errs.ErrorGoods)
 	}
-	skuDOList, err := dbops.GetSKUList("", goodsId, 1, 0, 0)
+	skuDOList, err := dbops.GetSKUList("", goodsId, defs.ONLINE, 0, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -263,4 +267,13 @@ func (s *goodsService) CountCategoryGoods(categoryId int) int {
 		panic(err)
 	}
 	return total
+}
+
+// 统计-商品规格-关联的商品
+func (s *goodsService) CountGoodsSpecBySpecId(specId int) int {
+	goodsNum, err := dbops.CountGoodsSpecBySpecId(specId)
+	if err != nil {
+		panic(err)
+	}
+	return goodsNum
 }

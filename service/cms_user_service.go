@@ -78,7 +78,7 @@ func (s *CMSUserService) AddCMSUser(userDO *model.WechatMallCMSUserDO) {
 	if err != nil {
 		panic(err)
 	}
-	if groupDO.Id == 0 {
+	if groupDO.Id == defs.ZERO || groupDO.Del == defs.DELETE {
 		panic(errs.ErrorGroup)
 	}
 	err = dbops.AddCMSUser(userDO)
@@ -93,7 +93,7 @@ func (s *CMSUserService) UpdateCMSUser(userDO *model.WechatMallCMSUserDO) {
 		if err != nil {
 			panic(err)
 		}
-		if cmsUserDO.Id != 0 && cmsUserDO.Id != userDO.Id {
+		if cmsUserDO.Id != defs.ZERO && cmsUserDO.Id != userDO.Id {
 			panic(errs.NewErrorCMSUser("邮箱已注册！"))
 		}
 	}
@@ -102,16 +102,16 @@ func (s *CMSUserService) UpdateCMSUser(userDO *model.WechatMallCMSUserDO) {
 		if err != nil {
 			panic(err)
 		}
-		if cmsUserDO.Id != 0 && cmsUserDO.Id != userDO.Id {
+		if cmsUserDO.Id != defs.ZERO && cmsUserDO.Id != userDO.Id {
 			panic(errs.NewErrorCMSUser("手机号已注册"))
 		}
 	}
-	if userDO.GroupId != 0 {
+	if userDO.GroupId != defs.ZERO {
 		groupDO, err := dbops.QueryUserGroupById(userDO.GroupId)
 		if err != nil {
 			panic(err)
 		}
-		if groupDO.Id == 0 {
+		if groupDO.Id == defs.ZERO || groupDO.Del == defs.DELETE {
 			panic(errs.ErrorGroup)
 		}
 	}
@@ -214,7 +214,7 @@ func (s *CMSUserService) RefreshGroupAuths(groupId int, auths []int) {
 		if err != nil {
 			panic(err)
 		}
-		if pageDO.Id == 0 {
+		if pageDO.Id == defs.ZERO || pageDO.Del == defs.DELETE {
 			panic(errs.ErrorModulePage)
 		}
 		err = dbops.AddGroupPagePermission(v, groupId)

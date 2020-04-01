@@ -15,7 +15,7 @@ func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
-	couponList, total := h.service.CouponService.GetCouponList(page, size, 1)
+	couponList, total := h.service.CouponService.GetCouponList(page, size, defs.ONLINE)
 	voList := []defs.PortalCouponVO{}
 	for _, v := range *couponList {
 		couponVO := defs.PortalCouponVO{}
@@ -47,8 +47,8 @@ func (h *Handler) TakeCoupon(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(defs.ContextKey).(int)
 
 	coupon := h.service.CouponService.GetCouponById(couponId)
-	if coupon.Id == 0 || coupon.Del == 1 {
-		panic(errs.ErrorCoupon)
+	if coupon.Id == defs.ZERO || coupon.Del == defs.DELETE || coupon.Online == defs.OFFLINE {
+		panic(errs.NewErrorCoupon("优惠券不存在或下架了"))
 	}
 	totalTakeNum := h.service.CouponService.CountCouponTakeNum(defs.ALL, couponId)
 	if totalTakeNum >= coupon.GrantNum {
@@ -85,10 +85,9 @@ func (h *Handler) DoDeleteCouponLog(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(defs.ContextKey).(int)
 
 	couponLog := h.service.CouponService.QueryCouponLogById(couponLogId)
-	if couponLog.Id == 0 || couponLog.UserId != userId {
+	if couponLog.Id == defs.ZERO || couponLog.Del == defs.DELETE || couponLog.UserId != userId {
 		panic(errs.NewErrorCoupon("未知的记录！"))
 	}
-
 	h.service.CouponService.DoDeleteCouponLog(couponLog)
 	defs.SendNormalResponse(w, "ok")
 }

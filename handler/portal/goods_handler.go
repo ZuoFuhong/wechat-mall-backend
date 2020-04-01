@@ -19,6 +19,9 @@ func (h *Handler) GetGoodsList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
+	if categoryId == 0 {
+		categoryId = defs.ALL
+	}
 	goodsList, total := h.service.GoodsService.QueryPortalGoodsList(keyword, sort, categoryId, page, size)
 
 	resp := make(map[string]interface{})

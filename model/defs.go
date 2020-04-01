@@ -178,6 +178,17 @@ type WechatMallSkuDO struct {
 	UpdateTime string
 }
 
+// 商城-SKU规格属性
+type WechatMallSkuSpecAttrDO struct {
+	Id         ID
+	SkuId      ID
+	SpecId     ID
+	AttrId     ID
+	Del        int
+	CreateTime string
+	UpdateTime string
+}
+
 // 商城-优惠券
 type WechatMallCouponDO struct {
 	Id          ID

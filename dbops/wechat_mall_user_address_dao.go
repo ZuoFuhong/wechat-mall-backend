@@ -63,7 +63,7 @@ func CountUserAddress(userId int) (int, error) {
 }
 
 func QueryUserAddressById(id int) (*model.WechatMallUserAddressDO, error) {
-	sql := "SELECT " + userAddressColumnList + " FROM wechat_mall_user_address WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + userAddressColumnList + " FROM wechat_mall_user_address WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

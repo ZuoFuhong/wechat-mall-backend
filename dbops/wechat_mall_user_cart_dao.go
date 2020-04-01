@@ -13,7 +13,7 @@ id, user_id, goods_id, sku_id, num, is_del, create_time, update_time
 func QueryCartList(userId, page, size int) (*[]model.WechatMallUserCartDO, error) {
 	sql := "SELECT " + cartColumnList + " FROM wechat_mall_user_cart WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
 	if page > 0 && size > 0 {
-		sql += " LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
+		sql += " ORDER BY update_time DESC LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
 	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
@@ -89,4 +89,20 @@ WHERE id = ?
 	}
 	_, err = stmt.Exec(cartDO.UserId, cartDO.GoodsId, cartDO.Num, cartDO.Del, time.Now(), cartDO.Id)
 	return err
+}
+
+func SelectCartById(id int) (*model.WechatMallUserCartDO, error) {
+	sql := "SELECT " + cartColumnList + " FROM wechat_mall_user_cart WHERE id = " + strconv.Itoa(id)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return nil, err
+	}
+	cartDO := model.WechatMallUserCartDO{}
+	for rows.Next() {
+		err := rows.Scan(&cartDO.Id, &cartDO.UserId, &cartDO.GoodsId, &cartDO.SkuId, &cartDO.Num, &cartDO.Del, &cartDO.CreateTime, &cartDO.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &cartDO, nil
 }

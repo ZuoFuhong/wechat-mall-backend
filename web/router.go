@@ -32,6 +32,7 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	router.Handle("/api/goods/list", chain.ThenFunc(portalHandler.GetGoodsList)).Methods("GET").Queries("k", "{k}").Queries("s", "{s}").Queries("c", "{c}").Queries("page", "{page}").Queries("size", "{size}")
 	router.Handle("/api/goods/detail", chain.ThenFunc(portalHandler.GetGoodsDetail)).Methods("GET").Queries("id", "{id}")
 	router.Handle("/api/cart/list", chain.ThenFunc(portalHandler.GetCartGoodsList)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
+	router.Handle("/api/cart/add", chain.ThenFunc(portalHandler.AddCartGoods)).Methods("POST")
 	router.Handle("/api/cart/edit", chain.ThenFunc(portalHandler.EditCartGoods)).Methods("POST")
 	router.Handle("/api/coupon/list", chain.ThenFunc(portalHandler.GetCouponList)).Methods("GET").Queries("page", "{page}").Queries("size", "{size}")
 	router.Handle("/api/coupon/take", chain.ThenFunc(portalHandler.TakeCoupon)).Methods("POST")

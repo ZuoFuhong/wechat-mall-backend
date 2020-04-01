@@ -13,7 +13,7 @@ func (h *Handler) HomeBanner(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
-	bannerList, _ := h.service.BannerService.GetBannerList(1, page, size)
+	bannerList, _ := h.service.BannerService.GetBannerList(defs.ONLINE, page, size)
 	voList := []defs.PortalBannerVO{}
 	for _, v := range *bannerList {
 		bannerVO := defs.PortalBannerVO{}

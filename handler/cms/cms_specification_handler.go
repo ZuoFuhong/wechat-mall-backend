@@ -37,7 +37,7 @@ func (h *Handler) GetSpecification(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	spec := h.service.SpecificationService.GetSpecificationById(id)
-	if spec.Id == 0 {
+	if spec.Id == defs.ZERO || spec.Del == defs.DELETE {
 		panic(errs.ErrorSpecification)
 	}
 	specVO := defs.CMSSpecificationVO{}
@@ -56,9 +56,9 @@ func (h *Handler) DoEditSpecification(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(errs.ErrorParameterValidate)
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		spec := h.service.SpecificationService.GetSpecificationByName(req.Name)
-		if spec.Id != 0 {
+		if spec.Id != defs.ZERO {
 			panic(errs.NewSpecificationError("规格名已存在！"))
 		}
 		spec.Name = req.Name
@@ -68,14 +68,13 @@ func (h *Handler) DoEditSpecification(w http.ResponseWriter, r *http.Request) {
 		h.service.SpecificationService.AddSpecification(spec)
 	} else {
 		spec := h.service.SpecificationService.GetSpecificationByName(req.Name)
-		if spec.Id != 0 && spec.Id != req.Id {
+		if spec.Id != defs.ZERO && spec.Id != req.Id {
 			panic(errs.NewSpecificationError("规格名已存在！"))
 		}
 		spec = h.service.SpecificationService.GetSpecificationById(req.Id)
-		if spec.Id == 0 {
+		if spec.Id == defs.ZERO || spec.Del == defs.DELETE {
 			panic(errs.ErrorSpecification)
 		}
-		spec = h.service.SpecificationService.GetSpecificationById(req.Id)
 		spec.Name = req.Name
 		spec.Description = req.Description
 		spec.Unit = req.Unit
@@ -90,14 +89,18 @@ func (h *Handler) DoDeleteSpecification(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	spec := h.service.SpecificationService.GetSpecificationById(id)
-	if spec.Id == 0 {
+	if spec.Id == defs.ZERO || spec.Del == defs.DELETE {
 		panic(errs.ErrorSpecification)
 	}
 	attrList := h.service.SpecificationService.GetSpecificationAttrList(id)
 	if len(*attrList) > 0 {
 		panic(errs.NewSpecificationError("该规格下有属性，不能删除！"))
 	}
-	spec.Del = 1
+	goodsNum := h.service.GoodsService.CountGoodsSpecBySpecId(id)
+	if goodsNum > 0 {
+		panic(errs.NewSpecificationError("部分商品正在使用该规格，不能删除！"))
+	}
+	spec.Del = defs.DELETE
 	h.service.SpecificationService.UpdateSpecificationById(spec)
 	defs.SendNormalResponse(w, "ok")
 }
@@ -125,7 +128,7 @@ func (h *Handler) GetSpecificationAttr(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	spec := h.service.SpecificationService.GetSpecificationAttrById(id)
-	if spec.Id == 0 {
+	if spec.Id == defs.ZERO || spec.Del == defs.DELETE {
 		panic(errs.ErrorSpecificationAttr)
 	}
 	attrVO := defs.CMSSpecificationAttrVO{}
@@ -144,12 +147,12 @@ func (h *Handler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Request
 		panic(errs.ErrorParameterValidate)
 	}
 	spec := h.service.SpecificationService.GetSpecificationById(req.SpecId)
-	if spec.Id == 0 {
+	if spec.Id == defs.ZERO || spec.Del == defs.DELETE {
 		panic(errs.ErrorSpecificationAttr)
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		spec := h.service.SpecificationService.GetSpecificationAttrByValue(req.Value)
-		if spec.Id != 0 {
+		if spec.Id != defs.ZERO {
 			panic(errs.NewSpecificationAttr("属性名已存在！"))
 		}
 		spec.SpecId = req.SpecId
@@ -158,14 +161,13 @@ func (h *Handler) DoEditSpecificationAttr(w http.ResponseWriter, r *http.Request
 		h.service.SpecificationService.AddSpecificationAttr(spec)
 	} else {
 		spec := h.service.SpecificationService.GetSpecificationAttrByValue(req.Value)
-		if spec.Id != 0 && spec.Id != req.Id {
+		if spec.Id != defs.ZERO && spec.Id != req.Id {
 			panic(errs.NewSpecificationError("属性名已存在！"))
 		}
 		spec = h.service.SpecificationService.GetSpecificationAttrById(req.Id)
-		if spec.Id == 0 {
+		if spec.Id == defs.ZERO || spec.Del == defs.DELETE {
 			panic(errs.ErrorSpecificationAttr)
 		}
-		spec = h.service.SpecificationService.GetSpecificationAttrById(req.Id)
 		spec.SpecId = req.SpecId
 		spec.Value = req.Value
 		spec.Extend = req.Extend
@@ -179,10 +181,14 @@ func (h *Handler) DoDeleteSpecificationAttr(w http.ResponseWriter, r *http.Reque
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	spec := h.service.SpecificationService.GetSpecificationAttrById(id)
-	if spec.Id == 0 {
+	if spec.Id == defs.ZERO || spec.Del == defs.DELETE {
 		panic(errs.ErrorSpecificationAttr)
 	}
-	spec.Del = 1
+	total := h.service.SKUService.CountAttrRelatedSku(id)
+	if total > 0 {
+		panic(errs.NewSpecificationAttr("部分商品正在使用该属性，禁止删除！"))
+	}
+	spec.Del = defs.DELETE
 	h.service.SpecificationService.UpdateSpecificationAttrById(spec)
 	defs.SendNormalResponse(w, "ok")
 }

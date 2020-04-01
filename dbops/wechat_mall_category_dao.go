@@ -48,7 +48,7 @@ func CountCategory(pid int) (int, error) {
 }
 
 func QueryCategoryById(id int) (*model.WechatMallCategoryDO, error) {
-	sql := "SELECT " + categoryColumnList + " FROM wechat_mall_category WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + categoryColumnList + " FROM wechat_mall_category WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func QuerySubCategoryByParentId(categoryId int) (*[]int, error) {
 }
 
 func UpdateSubCategoryOnline(categoryId, online int) error {
-	sql := "UPDATE wechat_mall_category SET online = " + strconv.Itoa(online) + " WHERE is_del = 0 AND parent_id = " + strconv.Itoa(categoryId)
+	sql := "UPDATE wechat_mall_category SET update_time = now(), online = " + strconv.Itoa(online) + " WHERE is_del = 0 AND parent_id = " + strconv.Itoa(categoryId)
 	_, err := dbConn.Exec(sql)
 	return err
 }

@@ -212,6 +212,21 @@ CREATE TABLE `wechat_mall_sku` (
     KEY `idx_goods_id`(`goods_id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COMMENT = '商城-SKU表';
 
+-- 商城-SKU关联的规格属性
+CREATE TABLE `wechat_mall_sku_spec_attr` (
+    `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `sku_id` int(11) NOT NULL DEFAULT '0' COMMENT 'sku表主键',
+    `spec_id` int(11) NOT NULL DEFAULT '0' COMMENT '规格ID',
+    `attr_id` int(11) NOT NULL DEFAULT '0' COMMENT '规格-属性ID',
+    `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
+    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY(`id`),
+    KEY `idx_sku_id`(`sku_id`),
+    KEY `idx_spec_id`(`spec_id`),
+    KEY `idx_attr_id`(`attr_id`)
+) ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = utf8mb4 COMMENT = '商城-SKU关联的规格属性';
+
 -- 商城-优惠券表
 CREATE TABLE `wechat_mall_coupon` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',

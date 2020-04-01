@@ -3,6 +3,7 @@ package dbops
 import (
 	"strconv"
 	"time"
+	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
 )
 
@@ -16,10 +17,10 @@ func QueryGoodsList(keyword, order string, categoryId, online, page, size int) (
 	if keyword != "" {
 		sql += " AND title LIKE '%" + keyword + "%'"
 	}
-	if categoryId != 0 {
+	if categoryId != defs.ALL {
 		sql += " AND category_id = " + strconv.Itoa(categoryId)
 	}
-	if online == 0 || online == 1 {
+	if online != defs.ALL {
 		sql += " AND online = " + strconv.Itoa(online)
 	}
 	if order != "" {
@@ -51,10 +52,10 @@ func CountGoods(keyword string, categoryId, online int) (int, error) {
 	if keyword != "" {
 		sql += " AND title LIKE '%" + keyword + "%'"
 	}
-	if categoryId != 0 {
+	if categoryId != defs.ALL {
 		sql += " AND category_id = " + strconv.Itoa(categoryId)
 	}
-	if online == 0 || online == 1 {
+	if online != defs.ALL {
 		sql += " AND online = " + strconv.Itoa(online)
 	}
 	rows, err := dbConn.Query(sql)
@@ -91,7 +92,7 @@ func AddGoods(goods *model.WechatMallGoodsDO) (int64, error) {
 }
 
 func QueryGoodsById(id int) (*model.WechatMallGoodsDO, error) {
-	sql := "SELECT " + goodsColumnList + " FROM wechat_mall_goods WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + goodsColumnList + " FROM wechat_mall_goods WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -147,7 +148,7 @@ func CountCategoryGoods(categoryId int) (int, error) {
 }
 
 func UpdateCategoryGoodsOnlineStatus(categoryId, online int) error {
-	sql := "UPDATE wechat_mall_goods SET online = " + strconv.Itoa(online) + " WHERE is_del = 0 AND category_id = " + strconv.Itoa(categoryId)
+	sql := "UPDATE wechat_mall_goods SET update_time = now(), online = " + strconv.Itoa(online) + " WHERE is_del = 0 AND category_id = " + strconv.Itoa(categoryId)
 	_, err := dbConn.Exec(sql)
 	return err
 }

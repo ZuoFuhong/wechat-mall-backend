@@ -2,6 +2,7 @@ package service
 
 import (
 	"wechat-mall-backend/dbops"
+	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
 )
 
@@ -74,7 +75,7 @@ func clearDefaultAddress(userId int) {
 	if err != nil {
 		panic(err)
 	}
-	if addressDO.Id != 0 {
+	if addressDO.Id != defs.ZERO {
 		addressDO.IsDefault = 0
 		err = dbops.UpdateUserAddress(addressDO)
 		if err != nil {

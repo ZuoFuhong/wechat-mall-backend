@@ -37,6 +37,7 @@ var (
 	ErrorGroup               = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10023, ErrMsg: "分组不存在！"}}
 	ErrorCMSUser             = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10024, ErrMsg: "用户不存在！"}}
 	ErrorModulePage          = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10025, ErrMsg: "页面不存在！"}}
+	ErrorMiniappUser         = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10026, ErrMsg: "用户不存在"}}
 )
 
 func NewParameterError(errMsg string) HttpErr {

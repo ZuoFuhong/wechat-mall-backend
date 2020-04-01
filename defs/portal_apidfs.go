@@ -121,16 +121,20 @@ type PortalCartGoodsReq struct {
 }
 
 type PortalCartGoodsVO struct {
-	GoodsId       int    `json:"goodsId"`       // 商品ID
-	Title         string `json:"title"`         // 标题
-	Price         string `json:"price"`         // 价格
-	DiscountPrice string `json:"discountPrice"` // 折扣
-	Picture       string `json:"picture"`       // 图片
-	Tags          string `json:"tags"`          // 标签
-	SkuId         int    `json:"skuId"`         // skuId
-	Specs         string `json:"specs"`         // specs值
-	Num           int    `json:"num"`           // 数量
-	Status        int    `json:"status"`        // 库存状态：0-正常 1-缺货 2-下架
+	Id      int     `json:"id"`      // 购物车ID
+	GoodsId int     `json:"goodsId"` // 商品ID
+	SkuId   int     `json:"skuId"`   // SKU ID
+	Title   string  `json:"title"`   // 标题
+	Price   float64 `json:"price"`   // SKU价格
+	Picture string  `json:"picture"` // SKU图片
+	Specs   string  `json:"specs"`   // specs值
+	Num     int     `json:"num"`     // 数量
+	Status  int     `json:"status"`  // 库存状态：0-正常 1-缺货 2-下架
+}
+
+type PortalEditCartReq struct {
+	Id  int `json:"id"`  // 主键
+	Num int `json:"num"` // 数量：-1 减一件 0 删除 1 加一件
 }
 
 type PortalAddressVO struct {
@@ -162,18 +166,16 @@ type PortalAddressReq struct {
 }
 
 type PortalCartPlaceOrderReq struct {
-	AddressId      int                `json:"addressId"`      // 收货地址ID
-	CouponLogId    int                `json:"couponLogId"`    // 优惠券记录ID
-	DispatchAmount string             `json:"dispatchAmount"` // 运费
-	ExpectAmount   string             `json:"expectAmount"`   // 预期支付金额
-	GoodsList      []PortalOrderGoods `json:"goodsList"`      // 下单商品
+	AddressId      int               `json:"addressId"`      // 收货地址ID
+	CouponLogId    int               `json:"couponLogId"`    // 优惠券记录ID
+	DispatchAmount string            `json:"dispatchAmount"` // 运费
+	ExpectAmount   string            `json:"expectAmount"`   // 预期支付金额
+	GoodsList      []PortalCartGoods `json:"goodsList"`      // 下单商品
 }
 
-type PortalOrderGoods struct {
-	GoodsId int `json:"goodsId"` // 用户ID
-	SkuId   int `json:"skuId"`   // sku ID
-	Num     int `json:"num"`     // 数量
-	CartId  int `json:"cartId"`  // 购物车记录ID
+type PortalCartGoods struct {
+	Num    int `json:"num"`    // 数量
+	CartId int `json:"cartId"` // 购物车ID
 }
 
 type PortalOrderListVO struct {

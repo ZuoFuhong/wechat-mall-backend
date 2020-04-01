@@ -29,6 +29,22 @@ func GetGoodsSpecList(goodsId int) (*[]model.WechatMallGoodsSpecDO, error) {
 	return &goodsSpecList, nil
 }
 
+func CountGoodsSpecBySpecId(specId int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_goods_spec WHERE is_del = 0 AND spec_id = " + strconv.Itoa(specId)
+	rows, err := dbConn.Query(sql)
+	if err != nil {
+		return 0, err
+	}
+	total := 0
+	for rows.Next() {
+		err := rows.Scan(&total)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return total, nil
+}
+
 func DeleteGoodsSpec(goodsId int) error {
 	sql := "UPDATE wechat_mall_goods_spec SET is_del = 1 WHERE goods_id = " + strconv.Itoa(goodsId)
 	_, err := dbConn.Exec(sql)

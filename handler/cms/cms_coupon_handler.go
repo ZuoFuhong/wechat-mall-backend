@@ -46,7 +46,7 @@ func (h *Handler) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	coupon := h.service.CouponService.GetCouponById(id)
-	if coupon.Id == 0 || coupon.Del == 1 {
+	if coupon.Id == defs.ZERO || coupon.Del == defs.DELETE {
 		panic(errs.ErrorCoupon)
 	}
 	couponVO := defs.CMSCouponVO{}
@@ -76,7 +76,7 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 	if err := validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		_, total := h.service.CouponService.GetCouponList(1, defs.CouponMax, defs.ALL)
 		if total >= defs.CouponMax {
 			panic(errs.NewErrorCoupon("最多只能添加" + strconv.Itoa(defs.CouponMax) + "张优惠券"))
@@ -96,7 +96,7 @@ func (h *Handler) DoEditCoupon(w http.ResponseWriter, r *http.Request) {
 		h.service.CouponService.AddCoupon(&coupon)
 	} else {
 		coupon := h.service.CouponService.GetCouponById(req.Id)
-		if coupon.Id == 0 || coupon.Del == 1 {
+		if coupon.Id == defs.ZERO || coupon.Del == defs.DELETE {
 			panic(errs.ErrorCoupon)
 		}
 		coupon.Title = req.Title
@@ -120,10 +120,10 @@ func (h *Handler) DoDeleteCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	coupon := h.service.CouponService.GetCouponById(id)
-	if coupon.Id == 0 || coupon.Del == 1 {
+	if coupon.Id == defs.ZERO || coupon.Del == defs.DELETE {
 		panic(errs.ErrorCoupon)
 	}
-	coupon.Del = 1
+	coupon.Del = defs.DELETE
 	h.service.CouponService.UpdateCouponById(coupon)
 	defs.SendNormalResponse(w, "ok")
 }

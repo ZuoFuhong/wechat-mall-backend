@@ -66,21 +66,21 @@ func CountSKU(title string, goodsId, online int) (int, error) {
 	return total, nil
 }
 
-func AddSKU(sku *model.WechatMallSkuDO) error {
+func AddSKU(sku *model.WechatMallSkuDO) (int64, error) {
 	sql := "INSERT INTO wechat_mall_sku( " + skuColumnList[4:] + " ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	_, err = stmt.Exec(sku.Title, sku.Price, sku.Code, sku.Stock, sku.GoodsId, sku.Online, sku.Picture, sku.Specs, 0, time.Now(), time.Now())
+	result, err := stmt.Exec(sku.Title, sku.Price, sku.Code, sku.Stock, sku.GoodsId, sku.Online, sku.Picture, sku.Specs, 0, time.Now(), time.Now())
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return result.LastInsertId()
 }
 
 func GetSKUById(id int) (*model.WechatMallSkuDO, error) {
-	sql := "SELECT " + skuColumnList + " FROM wechat_mall_sku WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + skuColumnList + " FROM wechat_mall_sku WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -131,7 +131,7 @@ WHERE id = ?
 }
 
 func UpdateSkuStockById(id, num int) error {
-	sql := "UPDATE wechat_mall_sku SET stock = stock - " + strconv.Itoa(num) + " WHERE id = " + strconv.Itoa(id)
+	sql := "UPDATE wechat_mall_sku SET update_time = now(), stock = stock - " + strconv.Itoa(num) + " WHERE id = " + strconv.Itoa(id)
 	sql += " AND stock >= " + strconv.Itoa(num)
 	_, err := dbConn.Exec(sql)
 	return err

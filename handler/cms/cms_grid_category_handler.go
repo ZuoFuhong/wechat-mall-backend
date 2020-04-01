@@ -20,7 +20,7 @@ func (h *Handler) GetGridCategoryList(w http.ResponseWriter, r *http.Request) {
 	gcVOList := []defs.CMSGridCategoryVO{}
 	for _, v := range *gcArr {
 		categoryDO := h.service.CategoryService.GetCategoryById(v.CategoryId)
-		if categoryDO.Id == 0 {
+		if categoryDO.Id == defs.ZERO || categoryDO.Del == defs.DELETE {
 			panic(errs.ErrorCategory)
 		}
 		gcVO := defs.CMSGridCategoryVO{}
@@ -44,11 +44,11 @@ func (h *Handler) GetGridCategory(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(vars["id"])
 
 	gridC := h.service.GridCategoryService.GetGridCategoryById(id)
-	if gridC.Id == 0 {
+	if gridC.Id == defs.ZERO || gridC.Del == defs.DELETE {
 		panic(errs.ErrorGridCategory)
 	}
 	categoryDO := h.service.CategoryService.GetCategoryById(gridC.CategoryId)
-	if categoryDO.Id == 0 {
+	if categoryDO.Id == defs.ZERO || categoryDO.Del == defs.DELETE {
 		panic(errs.ErrorCategory)
 	}
 	gcVO := defs.CMSGridCategoryDetailVO{}
@@ -72,9 +72,9 @@ func (h *Handler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) {
 	if err := validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		gridC := h.service.GridCategoryService.GetGridCategoryByName(req.Name)
-		if gridC.Id != 0 {
+		if gridC.Id != defs.ZERO {
 			panic(errs.NewGridCategoryError("宫格名称已存在！"))
 		}
 		gridC.Id = req.Id
@@ -84,11 +84,11 @@ func (h *Handler) DoEditGridCategory(w http.ResponseWriter, r *http.Request) {
 		h.service.GridCategoryService.AddGridCategory(gridC)
 	} else {
 		gridC := h.service.GridCategoryService.GetGridCategoryByName(req.Name)
-		if gridC.Id != 0 && gridC.Id != req.Id {
+		if gridC.Id != defs.ZERO && gridC.Id != req.Id {
 			panic(errs.NewGridCategoryError("宫格名称已存在！"))
 		}
 		gridC = h.service.GridCategoryService.GetGridCategoryById(req.Id)
-		if gridC.Id == 0 {
+		if gridC.Id == defs.ZERO || gridC.Del == defs.DELETE {
 			panic(errs.ErrorGridCategory)
 		}
 		gridC.Name = req.Name
@@ -104,10 +104,10 @@ func (h *Handler) DoDeleteGridCategory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	gridC := h.service.GridCategoryService.GetGridCategoryById(id)
-	if gridC.Id == 0 {
+	if gridC.Id == defs.ZERO || gridC.Del == defs.DELETE {
 		panic(errs.ErrorGridCategory)
 	}
-	gridC.Del = 1
+	gridC.Del = defs.DELETE
 	h.service.GridCategoryService.UpdateGridCategory(gridC)
 	defs.SendNormalResponse(w, "ok")
 }

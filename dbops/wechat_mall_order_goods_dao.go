@@ -3,6 +3,7 @@ package dbops
 import (
 	"strconv"
 	"time"
+	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
 )
 
@@ -42,10 +43,10 @@ func AddOrderGoods(goods *model.WechatMallOrderGoodsDO) error {
 
 func SumGoodsSaleNum(goodsId, skuId int) (int, error) {
 	sql := "SELECT IFNULL(SUM(num), 0) FROM wechat_mall_order_goods WHERE lock_status = 1"
-	if goodsId != 0 {
+	if goodsId != defs.ALL {
 		sql += " AND goods_id = " + strconv.Itoa(goodsId)
 	}
-	if skuId != 0 {
+	if skuId != defs.ALL {
 		sql += " AND sku_id = " + strconv.Itoa(skuId)
 	}
 	rows, err := dbConn.Query(sql)

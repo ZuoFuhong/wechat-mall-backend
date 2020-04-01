@@ -63,7 +63,7 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(defs.ContextKey).(int)
 	userDO := h.service.CMSUserService.GetCMSUserById(userId)
-	if userDO.Id == 0 {
+	if userDO.Id == defs.ZERO || userDO.Del == defs.DELETE {
 		panic(errs.ErrorCMSUser)
 	}
 	auths := h.service.CMSUserService.QueryGroupAuths(userDO.GroupId)
@@ -96,7 +96,7 @@ func (h *Handler) DoChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 	userId := r.Context().Value(defs.ContextKey).(int)
 	userDO := h.service.CMSUserService.GetCMSUserById(userId)
-	if userDO.Id == 0 {
+	if userDO.Id == defs.ZERO || userDO.Del == defs.DELETE {
 		panic(errs.ErrorCMSUser)
 	}
 	if utils.Md5Encrpyt(req.OldPassword) != userDO.Password {
@@ -116,7 +116,7 @@ func (h *Handler) GetUserList(w http.ResponseWriter, r *http.Request) {
 	userVOList := []defs.CMSUserVO{}
 	for _, v := range *userList {
 		groupDO := h.service.CMSUserService.QueryUserGroupById(v.GroupId)
-		if groupDO.Id == 0 {
+		if groupDO.Id == defs.ZERO || groupDO.Del == defs.DELETE {
 			panic(errs.ErrorGroup)
 		}
 		userVO := defs.CMSUserVO{}
@@ -140,14 +140,14 @@ func (h *Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId, _ := strconv.Atoi(vars["id"])
 	userDO := h.service.CMSUserService.GetCMSUserById(userId)
-	if userDO.Id == 0 {
+	if userDO.Id == defs.ZERO || userDO.Del == defs.DELETE {
 		panic(errs.ErrorCMSUser)
 	}
-	if userDO.Id == 1 {
+	if userDO.Id == defs.ADMIN {
 		panic(errs.NewErrorCMSUser("权限拒绝"))
 	}
 	groupDO := h.service.CMSUserService.QueryUserGroupById(userDO.GroupId)
-	if groupDO.Id == 0 {
+	if groupDO.Id == defs.ZERO || groupDO.Del == defs.DELETE {
 		panic(errs.ErrorGroup)
 	}
 	userVO := defs.CMSUserVO{}
@@ -180,7 +180,7 @@ func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
 	if !matched {
 		panic(errs.NewParameterError("请输入正确手机号！"))
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		cmsUserDO := model.WechatMallCMSUserDO{}
 		cmsUserDO.Username = req.Username
 		cmsUserDO.Password = utils.Md5Encrpyt(req.Mobile[6:])
@@ -191,8 +191,11 @@ func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
 		h.service.CMSUserService.AddCMSUser(&cmsUserDO)
 	} else {
 		cmsUserDO := h.service.CMSUserService.GetCMSUserById(req.Id)
-		if cmsUserDO.Id == 0 || cmsUserDO.Id == 1 {
+		if cmsUserDO.Id == defs.ZERO || cmsUserDO.Del == defs.DELETE {
 			panic(errs.ErrorCMSUser)
+		}
+		if cmsUserDO.Id == defs.ADMIN {
+			panic(errs.NewErrorCMSUser("权限拒绝！"))
 		}
 		cmsUserDO.Avatar = req.Avatar
 		cmsUserDO.Email = req.Email
@@ -206,7 +209,7 @@ func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
 // 重置密码（supper权限）
 func (h *Handler) DoResetCMSUserPassword(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(defs.ContextKey).(int)
-	if userId != 1 {
+	if userId != defs.ADMIN {
 		panic(errs.NewErrorCMSUser("权限拒绝"))
 	}
 	req := defs.CMSResetUserPasswdReq{}
@@ -219,7 +222,7 @@ func (h *Handler) DoResetCMSUserPassword(w http.ResponseWriter, r *http.Request)
 		panic(errs.NewParameterError(err.Error()))
 	}
 	userDO := h.service.CMSUserService.GetCMSUserById(req.UserId)
-	if userDO.Id == 0 {
+	if userDO.Id == defs.ZERO || userDO.Del == defs.DELETE {
 		panic(errs.ErrorCMSUser)
 	}
 	matched, _ := regexp.MatchString("^[a-zA-Z0-9]{6,16}$", req.Password)
@@ -236,10 +239,13 @@ func (h *Handler) DoDeleteCMSUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId, _ := strconv.Atoi(vars["id"])
 	cmsUserDO := h.service.CMSUserService.GetCMSUserById(userId)
-	if cmsUserDO.Id == 0 || cmsUserDO.Id == 1 {
+	if cmsUserDO.Id == defs.ZERO || cmsUserDO.Del == defs.DELETE {
 		panic(errs.ErrorCMSUser)
 	}
-	cmsUserDO.Del = 1
+	if cmsUserDO.Id == defs.ADMIN {
+		panic(errs.NewErrorCMSUser("权限拒绝"))
+	}
+	cmsUserDO.Del = defs.DELETE
 	h.service.CMSUserService.UpdateCMSUser(cmsUserDO)
 	defs.SendNormalResponse(w, "ok")
 }
@@ -272,7 +278,7 @@ func (h *Handler) GetUserGroup(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	groupId, _ := strconv.Atoi(vars["id"])
 	groupDO := h.service.CMSUserService.QueryUserGroupById(groupId)
-	if groupDO.Id == 0 {
+	if groupDO.Id == defs.ZERO || groupDO.Del == defs.DELETE {
 		panic(errs.ErrorGroup)
 	}
 	auths := h.service.CMSUserService.QueryGroupAuths(groupId)
@@ -296,9 +302,9 @@ func (h *Handler) DoEditUserGroup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		groupDO := h.service.CMSUserService.QueryUserGroupByName(req.Name)
-		if groupDO.Id != 0 {
+		if groupDO.Id != defs.ZERO {
 			panic(errs.NewErrorGroup("分组名已存在！"))
 		}
 		groupDO.Name = req.Name
@@ -307,11 +313,11 @@ func (h *Handler) DoEditUserGroup(w http.ResponseWriter, r *http.Request) {
 		h.service.CMSUserService.RefreshGroupAuths(groupId, req.Auths)
 	} else {
 		groupDO := h.service.CMSUserService.QueryUserGroupByName(req.Name)
-		if groupDO.Id != 0 && groupDO.Id != req.Id {
+		if groupDO.Id != defs.ZERO && groupDO.Id != req.Id {
 			panic(errs.NewErrorGroup("分组名已存在！"))
 		}
 		groupDO = h.service.CMSUserService.QueryUserGroupById(req.Id)
-		if groupDO.Id == 0 {
+		if groupDO.Id == defs.ZERO || groupDO.Del == defs.DELETE {
 			panic(errs.ErrorGroup)
 		}
 		groupDO.Name = req.Name
@@ -327,14 +333,14 @@ func (h *Handler) DoDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	groupId, _ := strconv.Atoi(vars["id"])
 	groupDO := h.service.CMSUserService.QueryUserGroupById(groupId)
-	if groupDO.Id == 0 {
+	if groupDO.Id == defs.ZERO || groupDO.Del == defs.DELETE {
 		panic(errs.ErrorGroup)
 	}
 	num := h.service.CMSUserService.CountGroupUser(groupId)
 	if num > 0 {
 		panic(errs.NewErrorGroup("分组中有用户，禁止删除！"))
 	}
-	groupDO.Del = 1
+	groupDO.Del = defs.DELETE
 	h.service.CMSUserService.UpdateUserGroup(groupDO)
 	defs.SendNormalResponse(w, "ok")
 }

@@ -53,7 +53,7 @@ func CountBanner(status int) (int, error) {
 }
 
 func QueryBannerById(id int) (*model.WechatMallBannerDO, error) {
-	sql := "SELECT " + bannerColumnList + " FROM wechat_mall_banner WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + bannerColumnList + " FROM wechat_mall_banner WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

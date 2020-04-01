@@ -62,7 +62,7 @@ func AddSpecification(spec *model.WechatMallSpecificationDO) error {
 }
 
 func QuerySpecificationById(id int) (*model.WechatMallSpecificationDO, error) {
-	sql := "SELECT " + specColumnList + " FROM wechat_mall_specification WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + specColumnList + " FROM wechat_mall_specification WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

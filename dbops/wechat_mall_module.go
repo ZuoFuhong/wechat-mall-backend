@@ -55,7 +55,7 @@ func ListModulePage(moduleId int) (*[]model.WechatMallModulePageDO, error) {
 }
 
 func QueryModulePageById(pageId int) (*model.WechatMallModulePageDO, error) {
-	sql := "SELECT " + modulePageColumnList + " FROM wechat_mall_module_page WHERE is_del = 0 AND id = " + strconv.Itoa(pageId)
+	sql := "SELECT " + modulePageColumnList + " FROM wechat_mall_module_page WHERE id = " + strconv.Itoa(pageId)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func AddGroupPagePermission(pageId, groupId int) error {
 }
 
 func RemoveGroupAllPagePermission(groupId int) error {
-	sql := "UPDATE wechat_mall_group_page_permission SET is_del = 1 WHERE group_id = " + strconv.Itoa(groupId)
+	sql := "UPDATE wechat_mall_group_page_permission SET update_time = now(), is_del = 1 WHERE group_id = " + strconv.Itoa(groupId)
 	_, err := dbConn.Exec(sql)
 	return err
 }

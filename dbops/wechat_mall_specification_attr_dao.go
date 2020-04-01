@@ -42,7 +42,7 @@ func AddSpecificationAttr(spec *model.WechatMallSpecificationAttrDO) error {
 }
 
 func QuerySpecificationAttrById(id int) (*model.WechatMallSpecificationAttrDO, error) {
-	sql := "SELECT " + specAttrColumnList + " FROM wechat_mall_specification_attr WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + specAttrColumnList + " FROM wechat_mall_specification_attr WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

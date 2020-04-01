@@ -2,6 +2,7 @@ package service
 
 import (
 	"math"
+	"strconv"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
 	"wechat-mall-backend/errs"
@@ -11,6 +12,8 @@ import (
 type ICartService interface {
 	DoEditCart(userId, goodsId, skuId, num int)
 	GetCartGoods(userId, page, size int) (*[]defs.PortalCartGoodsVO, int)
+	GetCartDOById(id int) *model.WechatMallUserCartDO
+	DeleteCartDOById(userId, id int)
 }
 
 type cartService struct {
@@ -22,29 +25,32 @@ func NewCartService() ICartService {
 }
 
 func (s *cartService) DoEditCart(userId, goodsId, skuId, num int) {
-	if num == 0 || math.Abs(float64(num)) > defs.CartMax {
+	if math.Abs(float64(num)) > defs.CartMax {
 		panic(errs.ErrorParameterValidate)
 	}
 	goodsDO, err := dbops.QueryGoodsById(goodsId)
 	if err != nil {
 		panic(err)
 	}
-	if goodsDO.Id == 0 {
+	if goodsDO.Id == defs.ZERO || goodsDO.Del == defs.DELETE || goodsDO.Online == defs.OFFLINE {
 		panic(errs.ErrorGoods)
 	}
 	skuDO, err := dbops.GetSKUById(skuId)
 	if err != nil {
 		panic(err)
 	}
-	if skuDO.Id == 0 {
+	if skuDO.Id == defs.ZERO || skuDO.Del == defs.DELETE || skuDO.Online == defs.OFFLINE {
 		panic(errs.ErrorSKU)
+	}
+	if skuDO.Stock <= 0 {
+		panic(errs.NewErrorGoodsCart("库存不足！"))
 	}
 	cartDO, err := dbops.QueryCartByParams(userId, goodsId, skuId)
 	if err != nil {
 		panic(err)
 	}
 	if num > 0 {
-		if cartDO.Id == 0 {
+		if cartDO.Id == defs.ZERO {
 			userCartDO := model.WechatMallUserCartDO{}
 			userCartDO.UserId = userId
 			userCartDO.GoodsId = goodsId
@@ -52,6 +58,9 @@ func (s *cartService) DoEditCart(userId, goodsId, skuId, num int) {
 			userCartDO.Num = num
 			err = dbops.AddUserCart(&userCartDO)
 		} else {
+			if skuDO.Stock < cartDO.Num+num {
+				panic(errs.NewErrorGoodsCart("库存不足！"))
+			}
 			if cartDO.Num+num > defs.CartMax {
 				cartDO.Num = defs.CartMax
 			} else {
@@ -60,7 +69,7 @@ func (s *cartService) DoEditCart(userId, goodsId, skuId, num int) {
 			err = dbops.UpdateCartById(cartDO)
 		}
 	} else {
-		if cartDO.Id == 0 {
+		if cartDO.Id == defs.ZERO {
 			panic(errs.ErrorGoodsCart)
 		}
 		if cartDO.Num+num >= 1 {
@@ -93,7 +102,8 @@ func (s *cartService) GetCartGoods(userId, page, size int) (*[]defs.PortalCartGo
 			panic(err)
 		}
 		status := 0
-		if goodsDO.Id == 0 || goodsDO.Online == 0 || skuDO.Id == 0 || skuDO.Online == 0 {
+		if goodsDO.Id == defs.ZERO || goodsDO.Del == defs.DELETE || goodsDO.Online == defs.OFFLINE ||
+			skuDO.Id == defs.ZERO || skuDO.Del == defs.DELETE || skuDO.Online == defs.OFFLINE {
 			status = 2
 		} else {
 			if skuDO.Stock < v.Num {
@@ -101,17 +111,39 @@ func (s *cartService) GetCartGoods(userId, page, size int) (*[]defs.PortalCartGo
 			}
 		}
 		cartGoodsVO := defs.PortalCartGoodsVO{}
-		cartGoodsVO.GoodsId = v.Id
-		cartGoodsVO.Title = goodsDO.Title
-		cartGoodsVO.Price = goodsDO.Price
-		cartGoodsVO.DiscountPrice = goodsDO.DiscountPrice
-		cartGoodsVO.Picture = goodsDO.Picture
-		cartGoodsVO.Tags = goodsDO.Tags
+		cartGoodsVO.Id = v.Id
+		cartGoodsVO.GoodsId = v.GoodsId
 		cartGoodsVO.SkuId = v.SkuId
+		cartGoodsVO.Title = goodsDO.Title
+		cartGoodsVO.Price, _ = strconv.ParseFloat(skuDO.Price, 2)
+		cartGoodsVO.Picture = skuDO.Picture
 		cartGoodsVO.Specs = skuDO.Specs
 		cartGoodsVO.Num = v.Num
 		cartGoodsVO.Status = status
 		cartGoodsVOList = append(cartGoodsVOList, cartGoodsVO)
 	}
 	return &cartGoodsVOList, total
+}
+
+func (s *cartService) GetCartDOById(id int) *model.WechatMallUserCartDO {
+	cartDO, err := dbops.SelectCartById(id)
+	if err != nil {
+		panic(err)
+	}
+	return cartDO
+}
+
+func (s *cartService) DeleteCartDOById(userId, id int) {
+	cartDO, err := dbops.SelectCartById(id)
+	if err != nil {
+		panic(err)
+	}
+	if cartDO.Id == defs.ZERO || cartDO.Del == defs.DELETE || cartDO.UserId != userId {
+		panic(errs.ErrorGoodsCart)
+	}
+	cartDO.Del = defs.DELETE
+	err = dbops.UpdateCartById(cartDO)
+	if err != nil {
+		panic(err)
+	}
 }

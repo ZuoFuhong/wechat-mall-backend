@@ -20,11 +20,20 @@ func (h *Handler) GetGoodsList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(vars["page"])
 	size, _ := strconv.Atoi(vars["size"])
 
-	goodsVOList := []defs.CMSGoodsListVO{}
+	if categoryId == 0 {
+		categoryId = defs.ALL
+	}
+	if online == -1 {
+		online = defs.ALL
+	}
 	goodsList, total := h.service.GoodsService.GetGoodsList(keyword, categoryId, online, page, size)
+	goodsVOList := []defs.CMSGoodsListVO{}
 	for _, v := range *goodsList {
 		categoryDO, err := dbops.QueryCategoryById(v.CategoryId)
 		if err != nil {
+			panic(err)
+		}
+		if categoryDO.Id == defs.ZERO || categoryDO.Del == defs.DELETE {
 			panic(errs.ErrorCategory)
 		}
 		goodsVO := defs.CMSGoodsListVO{}
@@ -48,12 +57,18 @@ func (h *Handler) GetGoodsList(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetGoods(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	goodsDO := h.service.GoodsService.GetGoodsById(id)
-	if goodsDO.Id == 0 {
+	goodsDO, err := dbops.QueryGoodsById(id)
+	if err != nil {
+		panic(err)
+	}
+	if goodsDO.Id == defs.ZERO || goodsDO.Del == defs.DELETE {
 		panic(errs.ErrorGoods)
 	}
 	categoryDO, err := dbops.QueryCategoryById(goodsDO.CategoryId)
 	if err != nil {
+		panic(errs.ErrorCategory)
+	}
+	if categoryDO.Id == defs.ZERO || categoryDO.Del == defs.DELETE {
 		panic(errs.ErrorCategory)
 	}
 	goodsVO := defs.CMSGoodsVO{}
@@ -81,10 +96,10 @@ func (h *Handler) DoEditGoods(w http.ResponseWriter, r *http.Request) {
 		panic(errs.ErrorParameterValidate)
 	}
 	category := h.service.CategoryService.GetCategoryById(req.CategoryId)
-	if category.Id == 0 {
+	if category.Id == defs.ZERO || category.Del == defs.DELETE {
 		panic(errs.ErrorCategory)
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		goodsDO := model.WechatMallGoodsDO{}
 		goodsDO.BrandName = req.BrandName
 		goodsDO.Title = req.Title
@@ -100,7 +115,7 @@ func (h *Handler) DoEditGoods(w http.ResponseWriter, r *http.Request) {
 		h.service.GoodsService.AddGoodsSpec(goodsId, req.SpecList)
 	} else {
 		goodsDO := h.service.GoodsService.GetGoodsById(req.Id)
-		if goodsDO.Id == 0 {
+		if goodsDO.Id == defs.ZERO || goodsDO.Del == defs.DELETE {
 			panic(errs.ErrorGoods)
 		}
 		goodsDO.BrandName = req.BrandName
@@ -124,15 +139,17 @@ func (h *Handler) DoDeleteGoods(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	goodsDO := h.service.GoodsService.GetGoodsById(id)
-	if goodsDO.Id == 0 {
+	if goodsDO.Id == defs.ZERO || goodsDO.Del == defs.DELETE {
 		panic(errs.ErrorGoods)
 	}
 	_, total := h.service.SKUService.GetSKUList("", id, defs.ALL, 1, 1)
 	if total > 0 {
 		panic(errs.NewErrorGoods("该商品下有SKU，不能删除！"))
 	}
-	goodsDO.Del = 1
+	goodsDO.Del = defs.DELETE
 	h.service.GoodsService.UpdateGoodsById(goodsDO)
+	// 同步：清理关联的规格
+	h.service.GoodsService.AddGoodsSpec(id, []int{})
 	defs.SendNormalResponse(w, "ok")
 }
 
@@ -153,7 +170,7 @@ func (h *Handler) GetChooseCategoryGoods(w http.ResponseWriter, r *http.Request)
 		subCategoryList, _ := h.service.CategoryService.GetCategoryList(v.Id, 0, 0)
 		for _, sv := range *subCategoryList {
 			tmpGoodsList := []map[string]interface{}{}
-			goodsList, _ := h.service.GoodsService.GetGoodsList("", sv.Id, -1, 0, 0)
+			goodsList, _ := h.service.GoodsService.GetGoodsList("", sv.Id, defs.ALL, 0, 0)
 			for _, g := range *goodsList {
 				goodsItem := map[string]interface{}{}
 				goodsItem["value"] = g.Id

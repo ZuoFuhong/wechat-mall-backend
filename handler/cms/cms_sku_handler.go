@@ -46,15 +46,15 @@ func (h *Handler) GetSKU(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	sku := h.service.SKUService.GetSKUById(id)
-	if sku.Id == 0 {
+	if sku.Id == defs.ZERO || sku.Del == defs.DELETE {
 		panic(errs.ErrorSKU)
 	}
 	goodsDO := h.service.GoodsService.GetGoodsById(sku.GoodsId)
-	if goodsDO.Id == 0 {
+	if goodsDO.Id == defs.ZERO || goodsDO.Del == defs.DELETE {
 		panic(errs.ErrorGoods)
 	}
 	categoryDO := h.service.CategoryService.GetCategoryById(goodsDO.CategoryId)
-	if categoryDO.Id == 0 {
+	if categoryDO.Id == defs.ZERO || categoryDO.Del == defs.DELETE {
 		panic(errs.ErrorCategory)
 	}
 	skuVO := defs.CMSSkuDetailVO{}
@@ -84,10 +84,10 @@ func (h *Handler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 		panic(errs.NewParameterError(err.Error()))
 	}
 	goods := h.service.GoodsService.GetGoodsById(req.GoodsId)
-	if goods.Id == 0 {
+	if goods.Id == defs.ZERO || goods.Del == defs.DELETE {
 		panic(errs.ErrorGoods)
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		sku := model.WechatMallSkuDO{}
 		sku.Title = req.Title
 		sku.Price = req.Price
@@ -100,7 +100,7 @@ func (h *Handler) DoEditSKU(w http.ResponseWriter, r *http.Request) {
 		h.service.SKUService.AddSKU(&sku)
 	} else {
 		sku := h.service.SKUService.GetSKUById(req.Id)
-		if sku.Id == 0 {
+		if sku.Id == defs.ZERO || sku.Del == defs.DELETE {
 			panic(errs.ErrorSKU)
 		}
 		sku.Title = req.Title
@@ -121,10 +121,10 @@ func (h *Handler) DoDeleteSKU(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	sku := h.service.SKUService.GetSKUById(id)
-	if sku.Id == 0 {
+	if sku.Id == defs.ZERO || sku.Del == defs.DELETE {
 		panic(errs.ErrorSKU)
 	}
-	sku.Del = 1
+	sku.Del = defs.DELETE
 	h.service.SKUService.UpdateSKUById(sku)
 	defs.SendNormalResponse(w, "ok")
 }

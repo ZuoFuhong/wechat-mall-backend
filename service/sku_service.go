@@ -1,7 +1,9 @@
 package service
 
 import (
+	"encoding/json"
 	"wechat-mall-backend/dbops"
+	"wechat-mall-backend/defs"
 	"wechat-mall-backend/model"
 )
 
@@ -13,6 +15,7 @@ type ISKUService interface {
 	UpdateSKUById(sku *model.WechatMallSkuDO)
 	CountSellOutSKU() int
 	QuerySellOutSKU(page, size int) (*[]model.WechatMallSkuDO, int)
+	CountAttrRelatedSku(attrId int) int
 }
 
 type sKUService struct {
@@ -52,16 +55,48 @@ func (s *sKUService) GetSKUByCode(code string) *model.WechatMallSkuDO {
 }
 
 func (s *sKUService) AddSKU(sku *model.WechatMallSkuDO) {
-	err := dbops.AddSKU(sku)
+	skuId, err := dbops.AddSKU(sku)
 	if err != nil {
 		panic(err)
 	}
+	syncSkuSpecAttrRecord(int(skuId), sku.Specs)
 }
 
 func (s *sKUService) UpdateSKUById(sku *model.WechatMallSkuDO) {
 	err := dbops.UpdateSKUById(sku)
 	if err != nil {
 		panic(err)
+	}
+	if sku.Del == 1 {
+		err = dbops.RemoveRelatedBySkuId(sku.Id)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		syncSkuSpecAttrRecord(sku.Id, sku.Specs)
+	}
+}
+
+// 同步-关联SKU属性
+func syncSkuSpecAttrRecord(skuId int, specs string) {
+	err := dbops.RemoveRelatedBySkuId(skuId)
+	if err != nil {
+		panic(err)
+	}
+	skuSpecList := []defs.SkuSpecs{}
+	err = json.Unmarshal([]byte(specs), &skuSpecList)
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range skuSpecList {
+		attrDO := model.WechatMallSkuSpecAttrDO{}
+		attrDO.SkuId = model.ID(skuId)
+		attrDO.SpecId = v.KeyId
+		attrDO.AttrId = v.ValueId
+		err := dbops.InsertSkuSpecAttr(&attrDO)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -85,4 +120,12 @@ func (s *sKUService) QuerySellOutSKU(page, size int) (*[]model.WechatMallSkuDO, 
 		panic(err)
 	}
 	return skuList, total
+}
+
+func (s *sKUService) CountAttrRelatedSku(attrId int) int {
+	total, err := dbops.CountRelatedByAttrId(attrId)
+	if err != nil {
+		panic(err)
+	}
+	return total
 }

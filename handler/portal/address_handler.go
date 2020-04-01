@@ -48,7 +48,7 @@ func (h *Handler) EditAddress(w http.ResponseWriter, r *http.Request) {
 		panic(errs.ErrorParameterValidate)
 	}
 	userId := r.Context().Value(defs.ContextKey).(int)
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		address := model.WechatMallUserAddressDO{}
 		address.UserId = userId
 		address.Contacts = req.Contacts
@@ -64,7 +64,7 @@ func (h *Handler) EditAddress(w http.ResponseWriter, r *http.Request) {
 		h.service.AddressService.AddAddress(&address)
 	} else {
 		address := h.service.AddressService.GetAddress(req.Id)
-		if address.Id == 0 {
+		if address.Id == defs.ZERO || address.Del == defs.DELETE {
 			panic(errs.ErrorAddress)
 		}
 		address.UserId = userId
@@ -89,10 +89,10 @@ func (h *Handler) DoDeleteAddress(w http.ResponseWriter, r *http.Request) {
 	addressId, _ := strconv.Atoi(vars["id"])
 
 	address := h.service.AddressService.GetAddress(addressId)
-	if address.Id == 0 {
+	if address.Id == defs.ZERO || address.Del == defs.DELETE {
 		panic(errs.ErrorAddress)
 	}
-	address.Del = 1
+	address.Del = defs.DELETE
 	h.service.AddressService.UpdateAddress(address)
 	defs.SendNormalResponse(w, "ok")
 }

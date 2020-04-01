@@ -61,7 +61,7 @@ func InsertGridCategory(gridC *model.WechatMallGridCategoryDO) error {
 }
 
 func QueryGridCategoryById(id int) (*model.WechatMallGridCategoryDO, error) {
-	sql := "SELECT " + gridCategoryColumnList + " FROM wechat_mall_grid_category WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + gridCategoryColumnList + " FROM wechat_mall_grid_category WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

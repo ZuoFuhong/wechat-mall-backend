@@ -89,6 +89,9 @@ func (s *UserService) DoWxUserPhoneSignature(userId int, sessionKey, encryptedDa
 	if err != nil {
 		panic(err)
 	}
+	if userDO.Id == defs.ZERO {
+		panic(errs.ErrorMiniappUser)
+	}
 	userDO.Mobile = decrypt["phoneNumber"].(string)
 	err = dbops.UpdateUserById(userDO)
 	if err != nil {
@@ -100,6 +103,9 @@ func (s *UserService) DoUserAuthInfo(userId int, req defs.WxappAuthUserInfoReq) 
 	userDO, err := dbops.GetUserById(userId)
 	if err != nil {
 		panic(err)
+	}
+	if userDO.Id == defs.ZERO {
+		panic(errs.ErrorMiniappUser)
 	}
 	userDO.Nickname = req.NickName
 	userDO.Avatar = req.AvatarUrl
@@ -139,7 +145,7 @@ func (s *UserService) QueryUserInfo(userId int) *model.WechatMallUserDO {
 		panic(err)
 	}
 	if userDO.Id == 0 {
-		panic(errs.ErrorCMSUser)
+		panic(errs.ErrorMiniappUser)
 	}
 	return userDO
 }

@@ -4,6 +4,7 @@ import (
 	"time"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
+	"wechat-mall-backend/errs"
 	"wechat-mall-backend/model"
 	"wechat-mall-backend/utils"
 )
@@ -76,6 +77,9 @@ func (cs *couponService) RecordCouponLog(userId, couponId int) {
 	if err != nil {
 		panic(err)
 	}
+	if coupon.Id == defs.ZERO || coupon.Del == defs.DELETE || coupon.Online == defs.OFFLINE {
+		panic(errs.ErrorCoupon)
+	}
 	couponLog := model.WechatMallCouponLogDO{}
 	couponLog.CouponId = couponId
 	couponLog.UserId = userId
@@ -99,6 +103,9 @@ func (cs *couponService) QueryUserCoupon(userId, status, page, size int) (*[]def
 		couponDO, err := dbops.QueryCouponById(v.CouponId)
 		if err != nil {
 			panic(err)
+		}
+		if couponDO.Id == defs.ZERO {
+			panic(errs.ErrorCoupon)
 		}
 		couponVO := defs.PortalUserCouponVO{}
 		couponVO.CLogId = v.Id

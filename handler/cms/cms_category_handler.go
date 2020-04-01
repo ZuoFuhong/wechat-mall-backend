@@ -42,7 +42,7 @@ func (h *Handler) GetCategoryById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	category := h.service.CategoryService.GetCategoryById(id)
-	if category.Id == 0 {
+	if category.Id == defs.ZERO || category.Del == defs.DELETE {
 		panic(errs.ErrorCategory)
 	}
 	cateVO := defs.CMSCategoryVO{}
@@ -67,9 +67,9 @@ func (h *Handler) DoEditCategory(w http.ResponseWriter, r *http.Request) {
 	if err = validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		category := h.service.CategoryService.GetCategoryByName(req.Name)
-		if category.Id != 0 {
+		if category.Id != defs.ZERO {
 			panic(errs.NewCategoryError("分类名已存在！"))
 		}
 		category.ParentId = req.ParentId
@@ -81,11 +81,11 @@ func (h *Handler) DoEditCategory(w http.ResponseWriter, r *http.Request) {
 		h.service.CategoryService.AddCategory(category)
 	} else {
 		category := h.service.CategoryService.GetCategoryByName(req.Name)
-		if category.Id != 0 && category.Id != req.Id {
+		if category.Id != defs.ZERO && category.Id != req.Id {
 			panic(errs.NewCategoryError("分类名已存在！"))
 		}
 		category = h.service.CategoryService.GetCategoryById(req.Id)
-		if category.Id == 0 {
+		if category.Id == defs.ZERO || category.Del == defs.DELETE {
 			panic(errs.ErrorCategory)
 		}
 		category.ParentId = req.ParentId
@@ -104,10 +104,10 @@ func (h *Handler) DoDeleteCategory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	category := h.service.CategoryService.GetCategoryById(id)
-	if category.Id == 0 {
+	if category.Id == defs.ZERO || category.Del == defs.DELETE {
 		panic(errs.ErrorCategory)
 	}
-	if category.ParentId == 0 {
+	if category.ParentId == defs.ZERO {
 		_, total := h.service.CategoryService.GetCategoryList(id, 1, 1)
 		if total > 0 {
 			panic(errs.NewCategoryError("该分类下有子分类，不能删除！"))
@@ -122,7 +122,7 @@ func (h *Handler) DoDeleteCategory(w http.ResponseWriter, r *http.Request) {
 			panic(errs.NewCategoryError("该分类绑定了宫格，不能删除！"))
 		}
 	}
-	category.Del = 1
+	category.Del = defs.DELETE
 	h.service.CategoryService.UpdateCategory(category)
 	defs.SendNormalResponse(w, "ok")
 }

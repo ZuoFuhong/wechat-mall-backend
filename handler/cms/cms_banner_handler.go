@@ -38,15 +38,18 @@ func (h *Handler) GetBanner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	banner := h.service.BannerService.GetBannerById(id)
-	if banner.Id == 0 {
+	if banner.Id == defs.ZERO || banner.Del == defs.DELETE {
 		panic(errs.ErrorBannerNotExist)
 	}
+	// 关联商品：可选
 	goodsDO := h.service.GoodsService.GetGoodsById(banner.BusinessId)
 	categoryDO := model.WechatMallCategoryDO{}
-	if goodsDO.Id != 0 {
+	if goodsDO.Id != defs.ZERO {
 		categoryDO = *h.service.CategoryService.GetCategoryById(goodsDO.CategoryId)
+		if categoryDO.Id == defs.ZERO || categoryDO.Del == defs.DELETE {
+			panic(errs.ErrorCategory)
+		}
 	}
-
 	bVO := defs.CMSGoodsBannerVO{}
 	bVO.Id = banner.Id
 	bVO.Picture = banner.Picture
@@ -69,7 +72,7 @@ func (h *Handler) DoEditBanner(w http.ResponseWriter, r *http.Request) {
 	if err = validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
-	if req.Id == 0 {
+	if req.Id == defs.ZERO {
 		banner := model.WechatMallBannerDO{}
 		banner.Picture = req.Picture
 		banner.Name = req.Name
@@ -79,7 +82,7 @@ func (h *Handler) DoEditBanner(w http.ResponseWriter, r *http.Request) {
 		h.service.BannerService.AddBanner(&banner)
 	} else {
 		banner := h.service.BannerService.GetBannerById(req.Id)
-		if banner.Id == 0 {
+		if banner.Id == defs.ZERO || banner.Del == defs.DELETE {
 			panic(errs.ErrorBannerNotExist)
 		}
 		banner.Picture = req.Picture
@@ -97,10 +100,10 @@ func (h *Handler) DoDeleteBanner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	banner := h.service.BannerService.GetBannerById(id)
-	if banner.Id == 0 {
+	if banner.Id == defs.ZERO || banner.Del == defs.DELETE {
 		panic(errs.ErrorBannerNotExist)
 	}
-	banner.Del = 1
+	banner.Del = defs.DELETE
 	h.service.BannerService.UpdateBannerById(banner)
 	defs.SendNormalResponse(w, "ok")
 }

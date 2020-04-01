@@ -95,7 +95,7 @@ func CountGroupUser(groupId int) (int, error) {
 }
 
 func QueryCMSUser(id int) (*model.WechatMallCMSUserDO, error) {
-	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -178,7 +178,7 @@ func AddUserGroup(group *model.WechatMallUserGroupDO) (int64, error) {
 }
 
 func QueryUserGroupById(id int) (*model.WechatMallUserGroupDO, error) {
-	sql := "SELECT " + cmsUserGroupColumnList + " FROM wechat_mall_user_group WHERE is_del = 0 AND id = " + strconv.Itoa(id)
+	sql := "SELECT " + cmsUserGroupColumnList + " FROM wechat_mall_user_group WHERE id = " + strconv.Itoa(id)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
