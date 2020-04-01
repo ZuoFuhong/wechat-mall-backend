@@ -9,6 +9,7 @@ import (
 type IBrowseRecordService interface {
 	AddBrowseRecord(record *model.WechatMallGoodsBrowseRecord)
 	ListBrowseRecord(userId, page, size int) (*[]defs.PortalBrowseRecordVO, int)
+	ClearBrowseHistory(ids []int)
 }
 
 type browseRecordService struct {
@@ -45,10 +46,11 @@ func (s *browseRecordService) ListBrowseRecord(userId, page, size int) (*[]defs.
 	for _, recordDO := range *records {
 		recordVO := defs.PortalBrowseRecordVO{}
 		recordVO.Id = recordDO.Id
+		recordVO.GoodsId = recordDO.GoodsId
 		recordVO.Picture = recordDO.Picture
 		recordVO.Title = recordDO.Title
 		recordVO.Price = recordDO.Price
-		recordVO.CreateTime = recordDO.CreateTime
+		recordVO.BrowseTime = recordDO.UpdateTime
 		recordVOs = append(recordVOs, recordVO)
 	}
 	total, err := dbops.CountGoodsBrowseByUserId(userId)
@@ -56,4 +58,13 @@ func (s *browseRecordService) ListBrowseRecord(userId, page, size int) (*[]defs.
 		panic(err)
 	}
 	return &recordVOs, total
+}
+
+func (s *browseRecordService) ClearBrowseHistory(ids []int) {
+	for _, v := range ids {
+		err := dbops.DeleteBrowseRecordById(v)
+		if err != nil {
+			panic(err)
+		}
+	}
 }

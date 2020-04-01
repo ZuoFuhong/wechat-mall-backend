@@ -148,7 +148,7 @@ type PortalAddressVO struct {
 	CityStr     string `json:"cityStr"`     // 城市
 	AreaStr     string `json:"areaStr"`     // 地区
 	Address     string `json:"address"`     // 详细地址
-	IsDefault   int    `json:"is_default"`  // 默认收货地址：0-否 1-是
+	IsDefault   int    `json:"isDefault"`   // 默认收货地址：0-否 1-是
 }
 
 type PortalAddressReq struct {
@@ -209,8 +209,9 @@ type PortalOrderDetailVO struct {
 
 type PortalBrowseRecordVO struct {
 	Id         int    `json:"id"`         // 记录ID
+	GoodsId    int    `json:"goodsId"`    // 商品ID
 	Picture    string `json:"picture"`    // 商品图片
 	Title      string `json:"title"`      // 商品标题
 	Price      string `json:"price"`      // 商品价格
-	CreateTime string `json:"createTime"` // 浏览时间，格式：yyyy-MM-dd HH:mm:ss
+	BrowseTime string `json:"browseTime"` // 浏览时间，格式：yyyy-MM-dd HH:mm:ss
 }

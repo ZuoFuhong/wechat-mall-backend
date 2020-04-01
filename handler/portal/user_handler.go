@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"wechat-mall-backend/dbops/rediscli"
 	"wechat-mall-backend/defs"
@@ -100,4 +101,19 @@ func (h *Handler) AuthUserInfo(w http.ResponseWriter, r *http.Request) {
 
 	h.service.UserService.DoUserAuthInfo(userId, req)
 	defs.SendNormalResponse(w, "ok")
+}
+
+// 用户-历史浏览
+func (h *Handler) UserBrowseHistory(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	page, _ := strconv.Atoi(vars["page"])
+	size, _ := strconv.Atoi(vars["size"])
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	recordList, total := h.service.BrowseRecordService.ListBrowseRecord(userId, page, size)
+
+	resp := map[string]interface{}{}
+	resp["list"] = recordList
+	resp["total"] = total
+	defs.SendNormalResponse(w, resp)
 }

@@ -48,7 +48,7 @@ func DeleteBrowseRecordById(id int) error {
 func SelectGoodsBrowseByUserId(userId, page, size int) (*[]model.WechatMallGoodsBrowseRecord, error) {
 	sql := "SELECT " + browseColumnList + " FROM wechat_mall_goods_browse_record WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
 	if page > 0 && size > 0 {
-		sql += " LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
+		sql += " ORDER BY update_time DESC LIMIT " + strconv.Itoa((page-1)*size) + ", " + strconv.Itoa(size)
 	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
@@ -68,7 +68,7 @@ func SelectGoodsBrowseByUserId(userId, page, size int) (*[]model.WechatMallGoods
 }
 
 func CountGoodsBrowseByUserId(userId int) (int, error) {
-	sql := "SELECT COUNT(*) FROM wechat_mall_goods_browse_record WHERE is_del = 0 AND user_id " + strconv.Itoa(userId)
+	sql := "SELECT COUNT(*) FROM wechat_mall_goods_browse_record WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return 0, err

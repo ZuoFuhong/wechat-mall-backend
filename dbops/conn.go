@@ -11,7 +11,7 @@ type ID model.ID
 var dbConn *sql.DB
 
 func InitDbConn(username, password, addr string) {
-	conn, err := sql.Open("mysql", username+":"+password+"@tcp("+addr+")/wechat_mall")
+	conn, err := sql.Open("mysql", username+":"+password+"@tcp("+addr+")/wechat_mall?loc=Local")
 	if err != nil {
 		panic("Connect to mysql error：" + err.Error())
 	}

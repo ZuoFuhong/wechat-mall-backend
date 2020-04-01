@@ -40,6 +40,29 @@ func (h *Handler) GetAddressList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 查询-单个地址
+func (h *Handler) GetAddress(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	addressId, _ := strconv.Atoi(vars["id"])
+	addressDO := h.service.AddressService.GetAddress(addressId)
+	if addressDO.Id == defs.ZERO || addressDO.Del == defs.DELETE {
+		panic(errs.ErrorAddress)
+	}
+	addressVO := defs.PortalAddressVO{}
+	addressVO.Id = addressDO.Id
+	addressVO.Contacts = addressDO.Contacts
+	addressVO.Mobile = addressDO.Mobile
+	addressVO.ProvinceId = addressDO.ProvinceId
+	addressVO.CityId = addressDO.CityId
+	addressVO.AreaId = addressDO.AreaId
+	addressVO.ProvinceStr = addressDO.ProvinceStr
+	addressVO.CityStr = addressDO.CityStr
+	addressVO.AreaStr = addressDO.AreaStr
+	addressVO.Address = addressDO.Address
+	addressVO.IsDefault = addressDO.IsDefault
+	defs.SendNormalResponse(w, addressVO)
+}
+
 // 新增/更新-收货地址
 func (h *Handler) EditAddress(w http.ResponseWriter, r *http.Request) {
 	req := defs.PortalAddressReq{}

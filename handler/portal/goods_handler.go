@@ -1,6 +1,7 @@
 package portal
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"github.com/shopspring/decimal"
 	"log"
@@ -56,4 +57,15 @@ func (h *Handler) recordGoodsBrowse(userId int, goods *defs.PortalGoodsInfo) {
 	browse.Title = goods.Title
 	browse.Price = decimal.NewFromFloat(goods.Price).String()
 	h.service.BrowseRecordService.AddBrowseRecord(&browse)
+}
+
+// 清理-浏览历史
+func (h *Handler) ClearBrowseHistory(w http.ResponseWriter, r *http.Request) {
+	ids := []int{}
+	err := json.NewDecoder(r.Body).Decode(&ids)
+	if err != nil {
+		panic(err)
+	}
+	h.service.BrowseRecordService.ClearBrowseHistory(ids)
+	defs.SendNormalResponse(w, "ok")
 }
