@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/shopspring/decimal"
 	"log"
+	"strconv"
 	"time"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
@@ -15,11 +16,15 @@ import (
 type IOrderService interface {
 	GenerateOrder(userId, addressId, couponLogId int, dispatchAmount, expectAmount decimal.Decimal, goodsList []defs.PortalCartGoods) defs.PortalPlaceOrderVO
 	QueryOrderList(userId, status, page, size int) (*[]defs.PortalOrderListVO, int)
-	QueryOrderDetail(userId, orderId int) *defs.PortalOrderDetailVO
+	QueryOrderDetail(userId int, orderNo string) *defs.PortalOrderDetailVO
 	OrderPaySuccessNotify(orderNo string)
 	QueryOrderSaleData(page, size int) *[]defs.OrderSaleData
 	CountWaitingOrderNum(status int) int
 	CountPendingOrderRefund() int
+	CancelOrder(userId, orderId int)
+	DeleteOrderRecord(userId, orderId int)
+	ConfirmTakeGoods(userId, orderId int)
+	RefundApply(userId int, orderNo, reason string) string
 }
 
 type orderService struct {
@@ -48,7 +53,9 @@ func (s *orderService) GenerateOrder(userId, addressId, couponLogId int, dispatc
 	orderDO.GoodsAmount = goodsAmount.String()
 	orderDO.DiscountAmount = discountAmount.String()
 	orderDO.DispatchAmount = dispatchAmount.String()
-	orderDO.PayTime = time.Now().Format("2006-01-02 15:04:05")
+	orderDO.PayTime = "2006-01-02 15:04:05"
+	orderDO.DeliverTime = "2006-01-02 15:04:05"
+	orderDO.FinishTime = "2006-01-02 15:04:05"
 	orderDO.Status = 0
 	orderDO.AddressId = addressId
 	orderDO.AddressSnapshot = addressSnap
@@ -276,35 +283,50 @@ func (s *orderService) QueryOrderList(userId, status, page, size int) (*[]defs.P
 		orderVO.Id = v.Id
 		orderVO.OrderNo = v.OrderNo
 		orderVO.PlaceTime = v.CreateTime
+		orderVO.PayAmount, _ = strconv.ParseFloat(v.PayAmount, 2)
 		orderVO.Status = v.Status
-		orderVO.GoodsList = extraceOrderGoods(v.OrderNo)
+		orderVO.GoodsList, orderVO.GoodsNum = extraceOrderGoods(v.OrderNo)
 		orderVOList = append(orderVOList, orderVO)
 	}
 	return &orderVOList, total
 }
 
-func extraceOrderGoods(orderNo string) []defs.PortalOrderGoodsVO {
+func extraceOrderGoods(orderNo string) ([]defs.PortalOrderGoodsVO, int) {
 	orderGoodsList, err := dbops.QueryOrderGoods(orderNo)
 	if err != nil {
 		panic(err)
 	}
+	goodsNum := 0
 	goodsVOList := []defs.PortalOrderGoodsVO{}
 	for _, v := range *orderGoodsList {
+		specList := []defs.SkuSpecs{}
+		err := json.Unmarshal([]byte(v.Specs), &specList)
+		if err != nil {
+			panic(err)
+		}
+		specs := ""
+		for _, v := range specList {
+			specs += v.Value + "; "
+		}
+		if len(specs) > 2 {
+			specs = specs[0 : len(specs)-2]
+		}
 		goodsVO := defs.PortalOrderGoodsVO{}
 		goodsVO.GoodsId = v.GoodsId
 		goodsVO.Title = v.Title
-		goodsVO.Price = v.Price
-		goodsVO.Picture = v.Price
+		goodsVO.Price, _ = strconv.ParseFloat(v.Price, 2)
+		goodsVO.Picture = v.Picture
 		goodsVO.SkuId = v.SkuId
-		goodsVO.Specs = v.Specs
+		goodsVO.Specs = specs
 		goodsVO.Num = v.Num
 		goodsVOList = append(goodsVOList, goodsVO)
+		goodsNum += v.Num
 	}
-	return goodsVOList
+	return goodsVOList, goodsNum
 }
 
-func (s *orderService) QueryOrderDetail(userId, orderId int) *defs.PortalOrderDetailVO {
-	orderDO, err := dbops.QueryOrderById(orderId)
+func (s *orderService) QueryOrderDetail(userId int, orderNo string) *defs.PortalOrderDetailVO {
+	orderDO, err := dbops.QueryOrderByOrderNo(orderNo)
 	if err != nil {
 		panic(err)
 	}
@@ -322,9 +344,16 @@ func (s *orderService) QueryOrderDetail(userId, orderId int) *defs.PortalOrderDe
 	orderVO := defs.PortalOrderDetailVO{}
 	orderVO.Id = orderDO.Id
 	orderVO.OrderNo = orderDO.OrderNo
-	orderVO.PlaceTime = orderDO.CreateTime
+	orderVO.GoodsAmount, _ = strconv.ParseFloat(orderDO.GoodsAmount, 2)
+	orderVO.DiscountAmount, _ = strconv.ParseFloat(orderDO.DiscountAmount, 2)
+	orderVO.DispatchAmount, _ = strconv.ParseFloat(orderDO.DispatchAmount, 2)
+	orderVO.PayAmount, _ = strconv.ParseFloat(orderDO.PayAmount, 2)
 	orderVO.Status = orderDO.Status
-	orderVO.GoodsList = extraceOrderGoods(orderDO.OrderNo)
+	orderVO.PlaceTime = orderDO.CreateTime
+	orderVO.PayTime = orderDO.PayTime
+	orderVO.DeliverTime = orderDO.DeliverTime
+	orderVO.FinishTime = orderDO.FinishTime
+	orderVO.GoodsList, orderVO.GoodsNum = extraceOrderGoods(orderDO.OrderNo)
 	orderVO.Address = snapshot
 	return &orderVO
 }
@@ -342,6 +371,7 @@ func (s *orderService) OrderPaySuccessNotify(orderNo string) {
 		return
 	}
 	orderDO.Status = 1
+	orderDO.PayTime = time.Now().Format("2006-01-02 15:04:05")
 	err = dbops.UpdateOrderById(orderDO)
 	if err != nil {
 		panic(err)
@@ -372,4 +402,105 @@ func (s *orderService) CountPendingOrderRefund() int {
 		panic(err)
 	}
 	return total
+}
+
+// 订单-取消订单
+func (s *orderService) CancelOrder(userId, orderId int) {
+	orderDO, err := dbops.QueryOrderById(orderId)
+	if err != nil {
+		panic(err)
+	}
+	if orderDO.Id == defs.ZERO || orderDO.Del == defs.DELETE {
+		panic(errs.ErrorOrder)
+	}
+	if orderDO.UserId != userId {
+		panic(errs.NewErrorOrder("非法操作"))
+	}
+	if orderDO.Status != 0 {
+		panic(errs.NewErrorOrder("进行中的订单，无法取消"))
+	}
+	orderDO.Status = -1
+	orderDO.FinishTime = time.Now().Format("2006-01-02 15:04:05")
+	err = dbops.UpdateOrderById(orderDO)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// 订单-删除记录
+func (s *orderService) DeleteOrderRecord(userId, orderId int) {
+	orderDO, err := dbops.QueryOrderById(orderId)
+	if err != nil {
+		panic(err)
+	}
+	if orderDO.Id == defs.ZERO || orderDO.Del == defs.DELETE {
+		panic(errs.ErrorOrder)
+	}
+	if orderDO.UserId != userId {
+		panic(errs.NewErrorOrder("非法操作"))
+	}
+	if orderDO.Status == -1 || orderDO.Status == 3 || orderDO.Status == 5 {
+		orderDO.Del = 1
+		err := dbops.UpdateOrderById(orderDO)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		panic(errs.NewErrorOrder("进行中的订单，无法删除"))
+	}
+}
+
+// 订单-确认收货
+func (s *orderService) ConfirmTakeGoods(userId, orderId int) {
+	orderDO, err := dbops.QueryOrderById(orderId)
+	if err != nil {
+		panic(err)
+	}
+	if orderDO.Id == defs.ZERO || orderDO.Del == defs.DELETE {
+		panic(errs.ErrorOrder)
+	}
+	if orderDO.UserId != userId {
+		panic(errs.NewErrorOrder("非法操作"))
+	}
+	if orderDO.Status == 2 {
+		orderDO.Status = 3
+		orderDO.FinishTime = time.Now().Format("2006-01-02 15:04:05")
+		err := dbops.UpdateOrderById(orderDO)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func (s *orderService) RefundApply(userId int, orderNo, reason string) string {
+	orderDO, err := dbops.QueryOrderByOrderNo(orderNo)
+	if err != nil {
+		panic(err)
+	}
+	if orderDO.Id == defs.ZERO || orderDO.Del == defs.DELETE {
+		panic(errs.ErrorOrder)
+	}
+	if orderDO.UserId != userId {
+		panic(errs.NewErrorOrder("非法操作"))
+	}
+	if orderDO.Status != 1 {
+		panic(errs.NewErrorOrder("非法操作"))
+	}
+	refundNo := time.Now().Format("20060102150405") + utils.RandomNumberStr(6)
+	refund := model.WechatMallOrderRefund{}
+	refund.RefundNo = refundNo
+	refund.UserId = userId
+	refund.OrderNo = orderNo
+	refund.Reason = reason
+	refund.RefundAmount = orderDO.PayAmount
+	err = dbops.AddRefundRecord(&refund)
+	if err != nil {
+		panic(err)
+	}
+	orderDO.Status = 4
+	err = dbops.UpdateOrderById(orderDO)
+	if err != nil {
+		panic(err)
+	}
+	return refundNo
 }

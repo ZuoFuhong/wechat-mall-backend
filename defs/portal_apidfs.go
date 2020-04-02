@@ -189,29 +189,46 @@ type PortalOrderListVO struct {
 	Id        int                  `json:"id"`        // 订单ID
 	OrderNo   string               `json:"orderNo"`   // 订单号
 	PlaceTime string               `json:"placeTime"` // 下单时间
-	PayAmount string               `json:"payAmount"` // 支付金额
+	PayAmount float64              `json:"payAmount"` // 支付金额
 	Status    int                  `json:"status"`    // 订单状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成
+	GoodsNum  int                  `json:"goodsNum"`  // 商品数量
 	GoodsList []PortalOrderGoodsVO `json:"goodsList"`
 }
 
 type PortalOrderGoodsVO struct {
-	GoodsId int    `json:"goodsId"` // 商品ID
-	Title   string `json:"title"`   // 标题
-	Price   string `json:"price"`   // 价格
-	Picture string `json:"picture"` // 图片
-	SkuId   int    `json:"skuId"`   // skuId
-	Specs   string `json:"specs"`   // specs值
-	Num     int    `json:"num"`     // 数量
+	GoodsId int     `json:"goodsId"` // 商品ID
+	Title   string  `json:"title"`   // 标题
+	Price   float64 `json:"price"`   // 价格
+	Picture string  `json:"picture"` // 图片
+	SkuId   int     `json:"skuId"`   // skuId
+	Specs   string  `json:"specs"`   // specs值
+	Num     int     `json:"num"`     // 数量
 }
 
 type PortalOrderDetailVO struct {
-	Id        int                  `json:"id"`        // 订单ID
-	OrderNo   string               `json:"orderNo"`   // 订单号
-	PlaceTime string               `json:"placeTime"` // 下单时间
-	PayAmount string               `json:"payAmount"` // 支付金额
-	Status    int                  `json:"status"`    // 订单状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成
-	GoodsList []PortalOrderGoodsVO `json:"goodsList"`
-	Address   AddressSnapshot      `json:"address"`
+	Id             int                  `json:"id"`             // 订单ID
+	OrderNo        string               `json:"orderNo"`        // 订单号
+	GoodsAmount    float64              `json:"goodsAmount"`    // 商品小计
+	DiscountAmount float64              `json:"discountAmount"` // 优惠金额
+	DispatchAmount float64              `json:"dispatchAmount"` // 运费
+	PayAmount      float64              `json:"payAmount"`      // 实付款
+	Status         int                  `json:"status"`         // 订单状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成
+	GoodsNum       int                  `json:"goodsNum"`       // 商品数量
+	PlaceTime      string               `json:"placeTime"`      // 下单时间
+	PayTime        string               `json:"payTime"`        // 付款时间
+	DeliverTime    string               `json:"deliverTime"`    // 发货时间
+	FinishTime     string               `json:"finishTime"`     // 完成时间
+	GoodsList      []PortalOrderGoodsVO `json:"goodsList"`      // 订单商品
+	Address        AddressSnapshot      `json:"address"`        // 收货地址
+}
+
+type OrderRefundApplyReq struct {
+	OrderNo string `json:"orderNo" validate:"required"` // 订单号
+	Reason  string `json:"reason" validate:"required"`  // 退款原因
+}
+
+type OrderRefundApplyVO struct {
+	RefundNo string `json:"refundNo"` // 退款编号
 }
 
 type PortalBrowseRecordVO struct {

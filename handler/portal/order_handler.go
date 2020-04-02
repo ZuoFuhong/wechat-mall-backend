@@ -2,6 +2,7 @@ package portal
 
 import (
 	"encoding/json"
+	"github.com/go-playground/validator"
 	"github.com/gorilla/mux"
 	"github.com/shopspring/decimal"
 	"net/http"
@@ -46,18 +47,65 @@ func (h *Handler) GetOrderList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
+// 取消订单
+func (h *Handler) CancelOrder(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	orderId, _ := strconv.Atoi(vars["id"])
+	h.service.OrderService.CancelOrder(userId, orderId)
+	defs.SendNormalResponse(w, "ok")
+}
+
+// 删除订单
+func (h *Handler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	orderId, _ := strconv.Atoi(vars["id"])
+	h.service.OrderService.DeleteOrderRecord(userId, orderId)
+	defs.SendNormalResponse(w, "ok")
+}
+
+// 订单-确认收货
+func (h *Handler) ConfirmTakeGoods(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	orderId, _ := strconv.Atoi(vars["id"])
+	h.service.OrderService.ConfirmTakeGoods(userId, orderId)
+	defs.SendNormalResponse(w, "ok")
+}
+
+// 订单-退款申请
+func (h *Handler) RefundApply(w http.ResponseWriter, r *http.Request) {
+	req := defs.OrderRefundApplyReq{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		panic(err)
+	}
+	validate := validator.New()
+	if err = validate.Struct(req); err != nil {
+		panic(errs.NewParameterError(err.Error()))
+	}
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	refundNo := h.service.OrderService.RefundApply(userId, req.OrderNo, req.Reason)
+	resp := defs.OrderRefundApplyVO{RefundNo: refundNo}
+	defs.SendNormalResponse(w, resp)
+}
+
 // 查询订单详情
 func (h *Handler) GetOrderDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	orderId, _ := strconv.Atoi(vars["id"])
+	orderNo := vars["orderNo"]
 	userId := r.Context().Value(defs.ContextKey).(int)
-	orderDetail := h.service.OrderService.QueryOrderDetail(userId, orderId)
+	orderDetail := h.service.OrderService.QueryOrderDetail(userId, orderNo)
 	defs.SendNormalResponse(w, orderDetail)
 }
 
 // 微信支付回调通知
 func (h *Handler) WxPayNotify(w http.ResponseWriter, r *http.Request) {
 	// todo: 解析数据，从 attach 字段获取订单号，响应微信服务器
-
 	h.service.OrderService.OrderPaySuccessNotify("")
 }

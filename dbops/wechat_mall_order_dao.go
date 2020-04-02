@@ -8,8 +8,8 @@ import (
 )
 
 const orderColumnList = `
-id, order_no, user_id, pay_amount, goods_amount, discount_amount, dispatch_amount, pay_time, status, address_id,
-address_snapshot, wxapp_prepay_id, is_del, create_time, update_time
+id, order_no, user_id, pay_amount, goods_amount, discount_amount, dispatch_amount, pay_time, deliver_time,
+finish_time, status, address_id, address_snapshot, wxapp_prepay_id, is_del, create_time, update_time
 `
 
 func QueryOrderByOrderNo(orderNo string) (*model.WechatMallOrderDO, error) {
@@ -21,8 +21,9 @@ func QueryOrderByOrderNo(orderNo string) (*model.WechatMallOrderDO, error) {
 	order := model.WechatMallOrderDO{}
 	for rows.Next() {
 		err := rows.Scan(&order.Id, &order.OrderNo, &order.UserId, &order.PayAmount, &order.GoodsAmount,
-			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.Status, &order.AddressId,
-			&order.AddressSnapshot, &order.WxappPrePayId, &order.Del, &order.CreateTime, &order.UpdateTime)
+			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.DeliverTime, &order.FinishTime,
+			&order.Status, &order.AddressId, &order.AddressSnapshot, &order.WxappPrePayId, &order.Del,
+			&order.CreateTime, &order.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -39,8 +40,9 @@ func QueryOrderById(id int) (*model.WechatMallOrderDO, error) {
 	order := model.WechatMallOrderDO{}
 	for rows.Next() {
 		err := rows.Scan(&order.Id, &order.OrderNo, &order.UserId, &order.PayAmount, &order.GoodsAmount,
-			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.Status, &order.AddressId,
-			&order.AddressSnapshot, &order.WxappPrePayId, &order.Del, &order.CreateTime, &order.UpdateTime)
+			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.DeliverTime, &order.FinishTime,
+			&order.Status, &order.AddressId, &order.AddressSnapshot, &order.WxappPrePayId, &order.Del,
+			&order.CreateTime, &order.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +52,7 @@ func QueryOrderById(id int) (*model.WechatMallOrderDO, error) {
 
 func ListOrderByParams(userId, status, page, size int) (*[]model.WechatMallOrderDO, error) {
 	sql := "SELECT " + orderColumnList + " FROM wechat_mall_order WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
-	if status != 999 {
+	if status != defs.ALL {
 		sql += " AND status = " + strconv.Itoa(status)
 	}
 	if page > 0 && size > 0 {
@@ -64,8 +66,9 @@ func ListOrderByParams(userId, status, page, size int) (*[]model.WechatMallOrder
 	for rows.Next() {
 		order := model.WechatMallOrderDO{}
 		err := rows.Scan(&order.Id, &order.OrderNo, &order.UserId, &order.PayAmount, &order.GoodsAmount,
-			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.Status, &order.AddressId,
-			&order.AddressSnapshot, &order.WxappPrePayId, &order.Del, &order.CreateTime, &order.UpdateTime)
+			&order.DiscountAmount, &order.DispatchAmount, &order.PayTime, &order.DeliverTime, &order.FinishTime,
+			&order.Status, &order.AddressId, &order.AddressSnapshot, &order.WxappPrePayId, &order.Del,
+			&order.CreateTime, &order.UpdateTime)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +79,7 @@ func ListOrderByParams(userId, status, page, size int) (*[]model.WechatMallOrder
 
 func CountOrderByParams(userId, status int) (int, error) {
 	sql := "SELECT COUNT(*) FROM wechat_mall_order WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
-	if status != 999 {
+	if status != defs.ALL {
 		sql += " AND status = " + strconv.Itoa(status)
 	}
 	rows, err := dbConn.Query(sql)
@@ -94,31 +97,32 @@ func CountOrderByParams(userId, status int) (int, error) {
 }
 
 func AddOrder(order *model.WechatMallOrderDO) error {
-	sql := "INSERT INTO wechat_mall_order (" + orderColumnList[4:] + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql := "INSERT INTO wechat_mall_order (" + orderColumnList[4:] + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
 	_, err = stmt.Exec(order.OrderNo, order.UserId, order.PayAmount, &order.GoodsAmount, &order.DiscountAmount,
-		&order.DispatchAmount, &order.PayTime, &order.Status, &order.AddressId, &order.AddressSnapshot,
-		&order.WxappPrePayId, 0, time.Now(), time.Now())
+		&order.DispatchAmount, &order.PayTime, &order.DeliverTime, &order.FinishTime, &order.Status, &order.AddressId,
+		&order.AddressSnapshot, &order.WxappPrePayId, 0, time.Now(), time.Now())
 	return err
 }
 
 func UpdateOrderById(order *model.WechatMallOrderDO) error {
 	sql := `
 UPDATE wechat_mall_order
-SET order_no = ?, user_id = ?, pay_amount = ?, discount_amount = ?, dispatch_amount = ?, pay_time = ?, status = ?, 
-address_id = ?, address_snapshot = ?, wxapp_prepay_id = ?, is_del = ?, update_time = ?
+SET order_no = ?, user_id = ?, pay_amount = ?, goods_amount = ?, discount_amount = ?, dispatch_amount = ?, pay_time = ?, 
+    deliver_time = ?, finish_time = ?, status = ?, address_id = ?, address_snapshot = ?, wxapp_prepay_id = ?, is_del = ?, 
+    update_time = ?
 WHERE id = ?
 `
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
 	}
-	_, err = stmt.Exec(order.OrderNo, order.UserId, order.PayAmount, order.DiscountAmount, order.DispatchAmount,
-		order.PayTime, order.Status, order.AddressId, order.AddressSnapshot, order.WxappPrePayId, order.Del,
-		time.Now(), order.Id)
+	_, err = stmt.Exec(order.OrderNo, order.UserId, order.PayAmount, order.GoodsAmount, order.DiscountAmount,
+		order.DispatchAmount, order.PayTime, order.DeliverTime, order.FinishTime, order.Status, order.AddressId,
+		order.AddressSnapshot, order.WxappPrePayId, order.Del, time.Now(), order.Id)
 	return err
 }
 

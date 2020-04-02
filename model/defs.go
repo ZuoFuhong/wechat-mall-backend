@@ -264,6 +264,8 @@ type WechatMallOrderDO struct {
 	DiscountAmount  string // 优惠金额
 	DispatchAmount  string // 运费
 	PayTime         string // 支付时间
+	DeliverTime     string // 发货时间
+	FinishTime      string // 完成时间
 	Status          int    // 状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成 4-（待发货）退款申请 5-已退款
 	AddressId       int    // 地址ID
 	AddressSnapshot string // 地址快照

@@ -312,6 +312,8 @@ CREATE TABLE `wechat_mall_order` (
     `discount_amount` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '优惠金额',
     `dispatch_amount` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '运费',
     `pay_time` datetime NOT NULL COMMENT '支付时间',
+    `deliver_time` datetime NOT NULL COMMENT '发货时间',
+    `finish_time` datetime NOT NULL COMMENT '成交时间',
     `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成 4-（待发货）退款申请 5-已退款',
     `address_id` int(11) NOT NULL DEFAULT '0' COMMENT '收货地址ID',
     `address_snapshot` varchar(200) NOT NULL DEFAULT '' COMMENT '收货地址快照',
