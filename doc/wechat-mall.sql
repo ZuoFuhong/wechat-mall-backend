@@ -195,7 +195,7 @@ CREATE TABLE `wechat_mall_goods_spec` (
 -- 商城-SKU表
 CREATE TABLE `wechat_mall_sku` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `title` varchar(10) NOT NULL DEFAULT '' COMMENT '标题',
+    `title` varchar(20) NOT NULL DEFAULT '' COMMENT '标题',
     `price` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '价格',
     `code` varchar(30) NOT NULL DEFAULT '' COMMENT '编码',
     `stock` int(11) NOT NULL DEFAULT '0' COMMENT '库存量',
@@ -328,6 +328,7 @@ CREATE TABLE `wechat_mall_order` (
 CREATE TABLE `wechat_mall_order_goods` (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
     `order_no` varchar(30) NOT NULL DEFAULT '' COMMENT '订单号',
+    `user_id` int(11) NOT NULL DEFAULT '0' COMMENT '用户ID',
     `goods_id` int(11) NOT NULL DEFAULT '0' COMMENT '商品ID',
     `sku_id` int(11) NOT NULL DEFAULT '0' COMMENT 'sku ID',
     `picture` varchar(200) NOT NULL  DEFAULT '' COMMENT '商品图片',

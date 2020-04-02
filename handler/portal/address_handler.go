@@ -72,6 +72,11 @@ func (h *Handler) EditAddress(w http.ResponseWriter, r *http.Request) {
 	}
 	userId := r.Context().Value(defs.ContextKey).(int)
 	if req.Id == defs.ZERO {
+		addressDO := h.service.AddressService.GetDefaultAddress(userId)
+		isDefault := 0
+		if addressDO.Id == 0 {
+			isDefault = 1
+		}
 		address := model.WechatMallUserAddressDO{}
 		address.UserId = userId
 		address.Contacts = req.Contacts
@@ -83,7 +88,7 @@ func (h *Handler) EditAddress(w http.ResponseWriter, r *http.Request) {
 		address.CityStr = req.CityStr
 		address.AreaStr = req.AreaStr
 		address.Address = req.Address
-		address.IsDefault = req.IsDefault
+		address.IsDefault = isDefault
 		h.service.AddressService.AddAddress(&address)
 	} else {
 		address := h.service.AddressService.GetAddress(req.Id)
@@ -118,4 +123,25 @@ func (h *Handler) DoDeleteAddress(w http.ResponseWriter, r *http.Request) {
 	address.Del = defs.DELETE
 	h.service.AddressService.UpdateAddress(address)
 	defs.SendNormalResponse(w, "ok")
+}
+
+// 查询-默认收货地址
+func (h *Handler) GetDefaultAddress(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	addressDO := h.service.AddressService.GetDefaultAddress(userId)
+	addressVO := defs.PortalAddressVO{}
+	addressVO.Id = addressDO.Id
+	addressVO.Contacts = addressDO.Contacts
+	addressVO.Mobile = addressDO.Mobile
+	addressVO.ProvinceId = addressDO.ProvinceId
+	addressVO.CityId = addressDO.CityId
+	addressVO.AreaId = addressDO.AreaId
+	addressVO.ProvinceStr = addressDO.ProvinceStr
+	addressVO.CityStr = addressDO.CityStr
+	addressVO.AreaStr = addressDO.AreaStr
+	addressVO.Address = addressDO.Address
+	addressVO.IsDefault = addressDO.IsDefault
+
+	defs.SendNormalResponse(w, addressVO)
 }

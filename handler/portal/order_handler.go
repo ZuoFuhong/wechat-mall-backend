@@ -27,8 +27,8 @@ func (h *Handler) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	prepayId := h.service.OrderService.GenerateOrder(userId, req.AddressId, req.CouponLogId, dispatchAmount, expectAmount, req.GoodsList)
-	defs.SendNormalResponse(w, prepayId)
+	resp := h.service.OrderService.GenerateOrder(userId, req.AddressId, req.CouponLogId, dispatchAmount, expectAmount, req.GoodsList)
+	defs.SendNormalResponse(w, resp)
 }
 
 // 查询订单列表

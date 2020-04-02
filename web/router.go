@@ -42,6 +42,7 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	router.Handle("/api/user/address/edit", chain.ThenFunc(portalHandler.EditAddress)).Methods("POST")
 	router.Handle("/api/user/address", chain.ThenFunc(portalHandler.GetAddress)).Methods("GET").Queries("id", "{id}")
 	router.Handle("/api/user/address", chain.ThenFunc(portalHandler.DoDeleteAddress)).Methods("DELETE").Queries("id", "{id}")
+	router.Handle("/api/user/default_address", chain.ThenFunc(portalHandler.GetDefaultAddress)).Methods("GET")
 	router.Handle("/api/placeorder", chain.ThenFunc(portalHandler.PlaceOrder)).Methods("POST")
 	router.Handle("/api/order/list", chain.ThenFunc(portalHandler.GetOrderList)).Methods("GET").Queries("status", "{status}").Queries("page", "{page}").Queries("size", "{size}")
 	router.Handle("/api/order/detail", chain.ThenFunc(portalHandler.GetOrderDetail)).Methods("GET").Queries("id", "{id}")

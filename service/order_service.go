@@ -13,7 +13,7 @@ import (
 )
 
 type IOrderService interface {
-	GenerateOrder(userId, addressId, couponLogId int, dispatchAmount, expectAmount decimal.Decimal, goodsList []defs.PortalCartGoods) string
+	GenerateOrder(userId, addressId, couponLogId int, dispatchAmount, expectAmount decimal.Decimal, goodsList []defs.PortalCartGoods) defs.PortalPlaceOrderVO
 	QueryOrderList(userId, status, page, size int) (*[]defs.PortalOrderListVO, int)
 	QueryOrderDetail(userId, orderId int) *defs.PortalOrderDetailVO
 	OrderPaySuccessNotify(orderNo string)
@@ -31,8 +31,8 @@ func NewOrderService() IOrderService {
 }
 
 func (s *orderService) GenerateOrder(userId, addressId, couponLogId int, dispatchAmount, expectAmount decimal.Decimal,
-	goodsList []defs.PortalCartGoods) string {
-	goodsAmount := checkGoodsStock(goodsList)
+	goodsList []defs.PortalCartGoods) defs.PortalPlaceOrderVO {
+	goodsAmount := checkCartGoodsAndStock(goodsList)
 	discountAmount := calcGoodsDiscountAmount(goodsAmount, userId, couponLogId)
 	if !goodsAmount.Sub(discountAmount).Add(dispatchAmount).Equal(expectAmount) {
 		panic(errs.NewErrorOrder("订单金额不符！"))
@@ -57,30 +57,33 @@ func (s *orderService) GenerateOrder(userId, addressId, couponLogId int, dispatc
 	if err != nil {
 		panic(err)
 	}
-	orderGoodsSnapshot(orderNo, goodsList)
+	orderGoodsSnapshot(userId, orderNo, goodsList)
 	clearUserCart(goodsList)
 	couponCannel(couponLogId)
-	return prepayId
+	return defs.PortalPlaceOrderVO{OrderNo: orderNo, PrepayId: prepayId}
 }
 
-func checkGoodsStock(goodsList []defs.PortalCartGoods) decimal.Decimal {
+// 检查-购物车以及商品的库存
+func checkCartGoodsAndStock(goodsList []defs.PortalCartGoods) decimal.Decimal {
 	goodsAmount := decimal.NewFromInt(0)
 	for _, v := range goodsList {
-		cartDO, err := dbops.SelectCartById(v.CartId)
-		if err != nil {
-			panic(err)
+		if v.CartId != 0 {
+			cartDO, err := dbops.SelectCartById(v.CartId)
+			if err != nil {
+				panic(err)
+			}
+			if cartDO.Id == defs.ZERO || cartDO.Del == defs.DELETE {
+				panic(errs.ErrorGoodsCart)
+			}
 		}
-		if cartDO.Id == defs.ZERO || cartDO.Del == defs.DELETE {
-			panic(errs.ErrorGoodsCart)
-		}
-		goodsDO, err := dbops.QueryGoodsById(cartDO.GoodsId)
+		goodsDO, err := dbops.QueryGoodsById(v.GoodsId)
 		if err != nil {
 			panic(err)
 		}
 		if goodsDO.Id == defs.ZERO || goodsDO.Del == defs.DELETE || goodsDO.Online == defs.OFFLINE {
 			panic(errs.NewErrorOrder("商品下架，无法售出"))
 		}
-		skuDO, err := dbops.GetSKUById(cartDO.SkuId)
+		skuDO, err := dbops.GetSKUById(v.SkuId)
 		if err != nil {
 			panic(err)
 		}
@@ -139,7 +142,7 @@ func calcGoodsDiscountAmount(goodsAmount decimal.Decimal, userId, couponLogId in
 		if err != nil {
 			panic(err)
 		}
-		discountAmount = goodsAmount.Mul(rate).Round(2)
+		discountAmount = goodsAmount.Sub(goodsAmount.Mul(rate).Round(2))
 	case 3:
 		minus, err := decimal.NewFromString(coupon.Minus)
 		if err != nil {
@@ -158,7 +161,7 @@ func calcGoodsDiscountAmount(goodsAmount decimal.Decimal, userId, couponLogId in
 		if err != nil {
 			panic(err)
 		}
-		discountAmount = goodsAmount.Mul(rate).Round(2)
+		discountAmount = goodsAmount.Sub(goodsAmount.Mul(rate).Round(2))
 	default:
 		discountAmount = decimal.NewFromInt(0)
 	}
@@ -200,16 +203,16 @@ func (s *orderService) generateWxpayPrepayId(orderNo string, payAmount string) s
 }
 
 // 订单详情-快照
-func orderGoodsSnapshot(orderNo string, goodsList []defs.PortalCartGoods) {
+func orderGoodsSnapshot(userId int, orderNo string, goodsList []defs.PortalCartGoods) {
 	for _, v := range goodsList {
-		cartDO, _ := dbops.SelectCartById(v.CartId)
-		goodsDO, _ := dbops.QueryGoodsById(cartDO.GoodsId)
-		skuDO, _ := dbops.GetSKUById(cartDO.SkuId)
+		goodsDO, _ := dbops.QueryGoodsById(v.GoodsId)
+		skuDO, _ := dbops.GetSKUById(v.SkuId)
 
 		orderGoodsDO := model.WechatMallOrderGoodsDO{}
 		orderGoodsDO.OrderNo = orderNo
-		orderGoodsDO.GoodsId = cartDO.GoodsId
-		orderGoodsDO.SkuId = cartDO.SkuId
+		orderGoodsDO.UserId = userId
+		orderGoodsDO.GoodsId = v.GoodsId
+		orderGoodsDO.SkuId = v.SkuId
 		orderGoodsDO.Picture = skuDO.Picture
 		orderGoodsDO.Title = goodsDO.Title
 		orderGoodsDO.Price = skuDO.Price
@@ -220,7 +223,7 @@ func orderGoodsSnapshot(orderNo string, goodsList []defs.PortalCartGoods) {
 		if err != nil {
 			panic(err)
 		}
-		err = dbops.UpdateSkuStockById(cartDO.SkuId, v.Num)
+		err = dbops.UpdateSkuStockById(v.SkuId, v.Num)
 		if err != nil {
 			panic(err)
 		}
@@ -247,6 +250,9 @@ func clearUserCart(goodsList []defs.PortalCartGoods) {
 // 优惠券-核销
 func couponCannel(couponLogId int) {
 	couponLogDO, _ := dbops.QueryCouponLogById(couponLogId)
+	if couponLogDO.Id == 0 {
+		return
+	}
 	couponLogDO.Del = 1
 	couponLogDO.UseTime = time.Now().Format("2006-01-02 15:04:05")
 	err := dbops.UpdateCouponLogById(couponLogDO)

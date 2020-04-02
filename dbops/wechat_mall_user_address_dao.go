@@ -26,7 +26,7 @@ func AddUserAddress(address *model.WechatMallUserAddressDO) error {
 func ListUserAddress(userId, page, size int) (*[]model.WechatMallUserAddressDO, error) {
 	sql := "SELECT " + userAddressColumnList + " FROM wechat_mall_user_address WHERE is_del = 0 AND user_id = " + strconv.Itoa(userId)
 	if page > 0 && size > 0 {
-		sql += " LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
+		sql += " ORDER BY update_time DESC LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
 	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {

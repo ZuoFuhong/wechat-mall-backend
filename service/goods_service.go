@@ -140,7 +140,7 @@ func (s *goodsService) QueryPortalGoodsList(keyword string, sort, categoryId, pa
 	}
 	goodsVOList := []defs.PortalGoodsListVO{}
 	for _, v := range *goodsList {
-		saleNum, err := dbops.SumGoodsSaleNum(v.Id, defs.ALL)
+		humanNum, err := dbops.CountBuyGoodsUserNum(v.Id)
 		if err != nil {
 			panic(err)
 		}
@@ -149,7 +149,7 @@ func (s *goodsService) QueryPortalGoodsList(keyword string, sort, categoryId, pa
 		goodsVO.Title = v.Title
 		goodsVO.Price, _ = strconv.ParseFloat(v.Price, 2)
 		goodsVO.Picture = v.Picture
-		goodsVO.SaleNum = saleNum
+		goodsVO.HumanNum = humanNum
 		goodsVOList = append(goodsVOList, goodsVO)
 	}
 	return &goodsVOList, total

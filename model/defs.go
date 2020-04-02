@@ -276,6 +276,7 @@ type WechatMallOrderDO struct {
 type WechatMallOrderGoodsDO struct {
 	Id         ID
 	OrderNo    string // 订单号
+	UserId     int    // 用户ID
 	GoodsId    int    // 商品ID
 	SkuId      int    // sku ID
 	Picture    string // 图片

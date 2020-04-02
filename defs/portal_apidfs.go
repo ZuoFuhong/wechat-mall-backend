@@ -73,11 +73,11 @@ type PortalUserCouponVO struct {
 }
 
 type PortalGoodsListVO struct {
-	Id      int     `json:"id"`      // 商品ID
-	Title   string  `json:"title"`   // 标题
-	Price   float64 `json:"price"`   // 价格
-	Picture string  `json:"picture"` // 图片
-	SaleNum int     `json:"saleNum"` // 销量
+	Id       int     `json:"id"`       // 商品ID
+	Title    string  `json:"title"`    // 标题
+	Price    float64 `json:"price"`    // 价格
+	Picture  string  `json:"picture"`  // 图片
+	HumanNum int     `json:"humanNum"` // 购买人数
 }
 
 type PortalGoodsInfo struct {
@@ -174,8 +174,15 @@ type PortalCartPlaceOrderReq struct {
 }
 
 type PortalCartGoods struct {
-	Num    int `json:"num"`    // 数量
-	CartId int `json:"cartId"` // 购物车ID
+	Num     int `json:"num"`     // 数量
+	CartId  int `json:"cartId"`  // 购物车ID
+	GoodsId int `json:"goodsId"` // 商品ID
+	SkuId   int `json:"skuId"`   // skuID
+}
+
+type PortalPlaceOrderVO struct {
+	OrderNo  string `json:"orderNo"`  // 订单号
+	PrepayId string `json:"prepayId"` // 预支付ID
 }
 
 type PortalOrderListVO struct {
