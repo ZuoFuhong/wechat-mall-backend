@@ -60,3 +60,14 @@ func (h *Handler) EditCartGoods(w http.ResponseWriter, r *http.Request) {
 	}
 	defs.SendNormalResponse(w, "ok")
 }
+
+// 查询-购物车商品数量
+func (h *Handler) GetCartGoodsNum(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	goodsNum := h.service.CartService.CountCartGoodsNum(userId)
+
+	resp := map[string]interface{}{}
+	resp["num"] = goodsNum
+	defs.SendNormalResponse(w, resp)
+}

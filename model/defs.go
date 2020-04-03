@@ -286,7 +286,7 @@ type WechatMallOrderGoodsDO struct {
 	Price      string // 价格
 	Specs      string // sku属性
 	Num        int    // 数量
-	LockStatus int    // 锁定状态：0-预定 1-付款 2-取消
+	LockStatus int    // 锁定状态：0-锁定 1-解锁
 	CreateTime string
 	UpdateTime string
 }

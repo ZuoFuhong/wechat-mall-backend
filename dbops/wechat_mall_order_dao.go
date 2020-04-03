@@ -56,7 +56,7 @@ func ListOrderByParams(userId, status, page, size int) (*[]model.WechatMallOrder
 		sql += " AND status = " + strconv.Itoa(status)
 	}
 	if page > 0 && size > 0 {
-		sql += " LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
+		sql += " ORDER BY create_time DESC LIMIT " + strconv.Itoa((page-1)*page) + " , " + strconv.Itoa(size)
 	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
@@ -156,8 +156,11 @@ ORDER BY createTime DESC
 	return &saleDataList, nil
 }
 
-func CountOrderNum(status int) (int, error) {
-	sql := "SELECT COUNT(*) FROM wechat_mall_order WHERE status = " + strconv.Itoa(status)
+func CountOrderNum(userId, status int) (int, error) {
+	sql := "SELECT COUNT(*) FROM wechat_mall_order WHERE is_del = 0 AND status = " + strconv.Itoa(status)
+	if userId != defs.ALL {
+		sql += " AND user_id = " + strconv.Itoa(userId)
+	}
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return 0, err

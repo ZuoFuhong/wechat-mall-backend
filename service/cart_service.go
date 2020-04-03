@@ -14,6 +14,7 @@ type ICartService interface {
 	GetCartGoods(userId, page, size int) (*[]defs.PortalCartGoodsVO, int)
 	GetCartDOById(id int) *model.WechatMallUserCartDO
 	DeleteCartDOById(userId, id int)
+	CountCartGoodsNum(userId int) int
 }
 
 type cartService struct {
@@ -146,4 +147,12 @@ func (s *cartService) DeleteCartDOById(userId, id int) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (s *cartService) CountCartGoodsNum(userId int) int {
+	goodsNum, err := dbops.CoundCartGoodsNum(userId)
+	if err != nil {
+		panic(err)
+	}
+	return goodsNum
 }

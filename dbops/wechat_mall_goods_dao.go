@@ -152,3 +152,9 @@ func UpdateCategoryGoodsOnlineStatus(categoryId, online int) error {
 	_, err := dbConn.Exec(sql)
 	return err
 }
+
+func UpdateGoodsSaleNum(goodsId, num int) error {
+	sql := "UPDATE wechat_mall_goods SET sale_num = sale_num + " + strconv.Itoa(num) + " WHERE id = " + strconv.Itoa(goodsId)
+	_, err := dbConn.Exec(sql)
+	return err
+}

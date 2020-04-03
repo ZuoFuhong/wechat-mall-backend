@@ -180,6 +180,12 @@ type PortalCartGoods struct {
 	SkuId   int `json:"skuId"`   // skuID
 }
 
+type OrderRemindVO struct {
+	WaitPay     int `json:"waitPay"`     // 待付款
+	NotExpress  int `json:"notExpress"`  // 待发货
+	WaitReceive int `json:"waitReceive"` // 待收货
+}
+
 type PortalPlaceOrderVO struct {
 	OrderNo  string `json:"orderNo"`  // 订单号
 	PrepayId string `json:"prepayId"` // 预支付ID

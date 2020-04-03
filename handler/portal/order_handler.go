@@ -11,7 +11,7 @@ import (
 	"wechat-mall-backend/errs"
 )
 
-// 商城-下订单
+// 订单-C端下订单
 func (h *Handler) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	req := &defs.PortalCartPlaceOrderReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -32,7 +32,7 @@ func (h *Handler) PlaceOrder(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
-// 查询订单列表
+// 订单-C端列表
 func (h *Handler) GetOrderList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	status, _ := strconv.Atoi(vars["status"])
@@ -47,7 +47,7 @@ func (h *Handler) GetOrderList(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
-// 取消订单
+// 订单-C端取消订单
 func (h *Handler) CancelOrder(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := r.Context().Value(defs.ContextKey).(int)
@@ -57,7 +57,7 @@ func (h *Handler) CancelOrder(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
-// 删除订单
+// 订单-C端删除订单
 func (h *Handler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := r.Context().Value(defs.ContextKey).(int)
@@ -67,7 +67,7 @@ func (h *Handler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
-// 订单-确认收货
+// 订单-C端确认收货
 func (h *Handler) ConfirmTakeGoods(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := r.Context().Value(defs.ContextKey).(int)
@@ -77,7 +77,7 @@ func (h *Handler) ConfirmTakeGoods(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
-// 查询订单详情
+// 订单-C端订单详情
 func (h *Handler) GetOrderDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	orderNo := vars["orderNo"]
@@ -86,13 +86,24 @@ func (h *Handler) GetOrderDetail(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, orderDetail)
 }
 
-// 微信支付回调通知
+// 订单-红点提醒
+func (h *Handler) GetOrderRemind(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	remindVO := defs.OrderRemindVO{}
+	remindVO.WaitPay = h.service.OrderService.CountOrderNum(userId, 0)
+	remindVO.NotExpress = h.service.OrderService.CountOrderNum(userId, 1)
+	remindVO.WaitReceive = h.service.OrderService.CountOrderNum(userId, 2)
+	defs.SendNormalResponse(w, remindVO)
+}
+
+// 订单-微信支付回调
 func (h *Handler) WxPayNotify(w http.ResponseWriter, r *http.Request) {
 	// todo: 解析数据，从 attach 字段获取订单号，响应微信服务器
 	h.service.OrderService.OrderPaySuccessNotify("")
 }
 
-// 订单-退款申请
+// 退款-C端退款申请
 func (h *Handler) RefundApply(w http.ResponseWriter, r *http.Request) {
 	req := defs.OrderRefundApplyReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -110,7 +121,7 @@ func (h *Handler) RefundApply(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
-// 退款详情
+// 退款-C端退款详情
 func (h *Handler) RefundDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	refundNo := vars["refundNo"]
@@ -120,7 +131,7 @@ func (h *Handler) RefundDetail(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, refundDetail)
 }
 
-// 撤销-退款申请
+// 退款-C端撤销申请
 func (h *Handler) UndoRefundApply(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	refundNo := vars["refundNo"]

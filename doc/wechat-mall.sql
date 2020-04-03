@@ -338,7 +338,7 @@ CREATE TABLE `wechat_mall_order_goods` (
     `price` decimal(10, 2) NOT NULL DEFAULT '0.00' COMMENT '价格',
     `specs` varchar(500) NOT NULL DEFAULT '' COMMENT 'sku规格属性',
     `num` int(11) NOT NULL DEFAULT '0' COMMENT '数量',
-    `lock_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '锁定状态：0-预定 1-付款 2-取消',
+    `lock_status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '锁定状态：0-锁定 1-解锁',
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
     PRIMARY KEY (`id`),

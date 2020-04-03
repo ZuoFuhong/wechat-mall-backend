@@ -19,7 +19,7 @@ type IOrderService interface {
 	QueryOrderDetail(userId int, orderNo string) *defs.PortalOrderDetailVO
 	OrderPaySuccessNotify(orderNo string)
 	QueryOrderSaleData(page, size int) *[]defs.OrderSaleData
-	CountWaitingOrderNum(status int) int
+	CountOrderNum(userId, status int) int
 	CountPendingOrderRefund() int
 	CancelOrder(userId, orderId int)
 	DeleteOrderRecord(userId, orderId int)
@@ -232,7 +232,13 @@ func orderGoodsSnapshot(userId int, orderNo string, goodsList []defs.PortalCartG
 		if err != nil {
 			panic(err)
 		}
+		// 减库存
 		err = dbops.UpdateSkuStockById(v.SkuId, v.Num)
+		if err != nil {
+			panic(err)
+		}
+		// 商品销量
+		err = dbops.UpdateGoodsSaleNum(v.GoodsId, v.Num)
 		if err != nil {
 			panic(err)
 		}
@@ -262,7 +268,7 @@ func couponCannel(couponLogId int) {
 	if couponLogDO.Id == 0 {
 		return
 	}
-	couponLogDO.Del = 1
+	couponLogDO.Status = 1
 	couponLogDO.UseTime = time.Now().Format("2006-01-02 15:04:05")
 	err := dbops.UpdateCouponLogById(couponLogDO)
 	if err != nil {
@@ -389,25 +395,6 @@ func (s *orderService) OrderPaySuccessNotify(orderNo string) {
 	if err != nil {
 		panic(err)
 	}
-	updateGoodsStock(orderNo)
-}
-
-// 减库存（锁定订单商品）
-func updateGoodsStock(orderNo string) {
-	orderGoods, err := dbops.QueryOrderGoods(orderNo)
-	if err != nil {
-		panic(err)
-	}
-	for _, v := range *orderGoods {
-		err := dbops.UpdateSkuStockById(v.SkuId, v.Num)
-		if err != nil {
-			panic(err)
-		}
-		err = dbops.UpdateOrderGoodsLockStatus(v.Id, 1)
-		if err != nil {
-			panic(err)
-		}
-	}
 }
 
 func (s *orderService) QueryOrderSaleData(page, size int) *[]defs.OrderSaleData {
@@ -418,9 +405,9 @@ func (s *orderService) QueryOrderSaleData(page, size int) *[]defs.OrderSaleData 
 	return saleData
 }
 
-// 统计-待发货订单数量
-func (s *orderService) CountWaitingOrderNum(status int) int {
-	orderNum, err := dbops.CountOrderNum(status)
+// 统计-订单数量
+func (s *orderService) CountOrderNum(userId, status int) int {
+	orderNum, err := dbops.CountOrderNum(userId, status)
 	if err != nil {
 		return 0
 	}
@@ -456,6 +443,26 @@ func (s *orderService) CancelOrder(userId, orderId int) {
 	err = dbops.UpdateOrderById(orderDO)
 	if err != nil {
 		panic(err)
+	}
+	orderStockRollback(orderDO.OrderNo)
+}
+
+// 订单-库存回滚
+// 场景：取消订单（手动取消、超时未支付）、订单退款
+func orderStockRollback(orderNo string) {
+	orderGoods, err := dbops.QueryOrderGoods(orderNo)
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range *orderGoods {
+		err := dbops.UpdateSkuStockById(v.SkuId, -v.Num)
+		if err != nil {
+			panic(err)
+		}
+		err = dbops.UpdateGoodsSaleNum(v.GoodsId, -v.Num)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 

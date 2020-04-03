@@ -46,7 +46,7 @@ func UpdateOrderGoodsLockStatus(id, status int) error {
 	return err
 }
 
-// 统计-购买人数
+// 商品-统计购买人数
 func CountBuyGoodsUserNum(goodsId int) (int, error) {
 	sql := "SELECT COUNT(DISTINCT(user_id)) FROM wechat_mall_order_goods WHERE lock_status = 1 AND goods_id = " + strconv.Itoa(goodsId)
 	rows, err := dbConn.Query(sql)

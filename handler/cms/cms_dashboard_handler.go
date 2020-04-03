@@ -11,7 +11,7 @@ import (
 func (h *Handler) GetMarketMetrics(w http.ResponseWriter, r *http.Request) {
 	visitorNum := h.service.UserService.QueryTodayUniqueVisitor()
 	sellOutSKU := h.service.SKUService.CountSellOutSKU()
-	waitingOrder := h.service.OrderService.CountWaitingOrderNum(1)
+	waitingOrder := h.service.OrderService.CountOrderNum(defs.ALL, 1)
 	refundOrder := h.service.OrderService.CountPendingOrderRefund()
 
 	metricsVO := defs.CMSMarketMetricsVO{}
