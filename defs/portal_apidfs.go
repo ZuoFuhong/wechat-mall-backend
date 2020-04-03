@@ -212,7 +212,7 @@ type PortalOrderDetailVO struct {
 	DiscountAmount float64              `json:"discountAmount"` // 优惠金额
 	DispatchAmount float64              `json:"dispatchAmount"` // 运费
 	PayAmount      float64              `json:"payAmount"`      // 实付款
-	Status         int                  `json:"status"`         // 订单状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成
+	Status         int                  `json:"status"`         // 订单状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成 4-（待发货）退款申请 5-已退款
 	GoodsNum       int                  `json:"goodsNum"`       // 商品数量
 	PlaceTime      string               `json:"placeTime"`      // 下单时间
 	PayTime        string               `json:"payTime"`        // 付款时间
@@ -220,6 +220,7 @@ type PortalOrderDetailVO struct {
 	FinishTime     string               `json:"finishTime"`     // 完成时间
 	GoodsList      []PortalOrderGoodsVO `json:"goodsList"`      // 订单商品
 	Address        AddressSnapshot      `json:"address"`        // 收货地址
+	RefundApply    OrderRefundApplyVO   `json:"refundApply"`    // 退款申请
 }
 
 type OrderRefundApplyReq struct {
@@ -229,6 +230,16 @@ type OrderRefundApplyReq struct {
 
 type OrderRefundApplyVO struct {
 	RefundNo string `json:"refundNo"` // 退款编号
+}
+
+type OrderRefundDetailVO struct {
+	RefundNo     string               `json:"refundNo"`     // 退款编号
+	Reason       string               `json:"reason"`       // 退款原因
+	RefundAmount float64              `json:"refundAmount"` // 退款金额
+	Status       int                  `json:"status"`       // 状态：0-退款申请 1-商家处理申请 2-退款完成
+	ApplyTime    string               `json:"applyTime"`    // 申请时间
+	RefundTime   string               `json:"refundTime"`   // 退款时间
+	GoodsList    []PortalOrderGoodsVO `json:"goodsList"`    // 订单商品
 }
 
 type PortalBrowseRecordVO struct {

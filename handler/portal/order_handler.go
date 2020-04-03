@@ -77,6 +77,21 @@ func (h *Handler) ConfirmTakeGoods(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 查询订单详情
+func (h *Handler) GetOrderDetail(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	orderNo := vars["orderNo"]
+	userId := r.Context().Value(defs.ContextKey).(int)
+	orderDetail := h.service.OrderService.QueryOrderDetail(userId, orderNo)
+	defs.SendNormalResponse(w, orderDetail)
+}
+
+// 微信支付回调通知
+func (h *Handler) WxPayNotify(w http.ResponseWriter, r *http.Request) {
+	// todo: 解析数据，从 attach 字段获取订单号，响应微信服务器
+	h.service.OrderService.OrderPaySuccessNotify("")
+}
+
 // 订单-退款申请
 func (h *Handler) RefundApply(w http.ResponseWriter, r *http.Request) {
 	req := defs.OrderRefundApplyReq{}
@@ -95,17 +110,22 @@ func (h *Handler) RefundApply(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, resp)
 }
 
-// 查询订单详情
-func (h *Handler) GetOrderDetail(w http.ResponseWriter, r *http.Request) {
+// 退款详情
+func (h *Handler) RefundDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	orderNo := vars["orderNo"]
+	refundNo := vars["refundNo"]
 	userId := r.Context().Value(defs.ContextKey).(int)
-	orderDetail := h.service.OrderService.QueryOrderDetail(userId, orderNo)
-	defs.SendNormalResponse(w, orderDetail)
+
+	refundDetail := h.service.OrderService.QueryRefundDetail(userId, refundNo)
+	defs.SendNormalResponse(w, refundDetail)
 }
 
-// 微信支付回调通知
-func (h *Handler) WxPayNotify(w http.ResponseWriter, r *http.Request) {
-	// todo: 解析数据，从 attach 字段获取订单号，响应微信服务器
-	h.service.OrderService.OrderPaySuccessNotify("")
+// 撤销-退款申请
+func (h *Handler) UndoRefundApply(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	refundNo := vars["refundNo"]
+	userId := r.Context().Value(defs.ContextKey).(int)
+
+	h.service.OrderService.UndoRefundApply(userId, refundNo)
+	defs.SendNormalResponse(w, "ok")
 }

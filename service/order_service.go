@@ -25,6 +25,8 @@ type IOrderService interface {
 	DeleteOrderRecord(userId, orderId int)
 	ConfirmTakeGoods(userId, orderId int)
 	RefundApply(userId int, orderNo, reason string) string
+	QueryRefundDetail(userId int, refundNo string) *defs.OrderRefundDetailVO
+	UndoRefundApply(userId int, refundNo string)
 }
 
 type orderService struct {
@@ -336,11 +338,20 @@ func (s *orderService) QueryOrderDetail(userId int, orderNo string) *defs.Portal
 	if orderDO.UserId != userId {
 		panic(errs.ErrorOrder)
 	}
+	// 订单信息
 	snapshot := defs.AddressSnapshot{}
 	err = json.Unmarshal([]byte(orderDO.AddressSnapshot), &snapshot)
 	if err != nil {
 		panic(err)
 	}
+	orderGoods, orderGoodsNum := extraceOrderGoods(orderDO.OrderNo)
+	// 退款信息
+	refundDO, err := dbops.QueryOrderRefundRecord(orderNo)
+	if err != nil {
+		panic(err)
+	}
+	refundApply := defs.OrderRefundApplyVO{RefundNo: refundDO.RefundNo}
+
 	orderVO := defs.PortalOrderDetailVO{}
 	orderVO.Id = orderDO.Id
 	orderVO.OrderNo = orderDO.OrderNo
@@ -353,8 +364,10 @@ func (s *orderService) QueryOrderDetail(userId int, orderNo string) *defs.Portal
 	orderVO.PayTime = orderDO.PayTime
 	orderVO.DeliverTime = orderDO.DeliverTime
 	orderVO.FinishTime = orderDO.FinishTime
-	orderVO.GoodsList, orderVO.GoodsNum = extraceOrderGoods(orderDO.OrderNo)
+	orderVO.GoodsList = orderGoods
+	orderVO.GoodsNum = orderGoodsNum
 	orderVO.Address = snapshot
+	orderVO.RefundApply = refundApply
 	return &orderVO
 }
 
@@ -375,6 +388,25 @@ func (s *orderService) OrderPaySuccessNotify(orderNo string) {
 	err = dbops.UpdateOrderById(orderDO)
 	if err != nil {
 		panic(err)
+	}
+	updateGoodsStock(orderNo)
+}
+
+// 减库存（锁定订单商品）
+func updateGoodsStock(orderNo string) {
+	orderGoods, err := dbops.QueryOrderGoods(orderNo)
+	if err != nil {
+		panic(err)
+	}
+	for _, v := range *orderGoods {
+		err := dbops.UpdateSkuStockById(v.SkuId, v.Num)
+		if err != nil {
+			panic(err)
+		}
+		err = dbops.UpdateOrderGoodsLockStatus(v.Id, 1)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -492,6 +524,7 @@ func (s *orderService) RefundApply(userId int, orderNo, reason string) string {
 	refund.UserId = userId
 	refund.OrderNo = orderNo
 	refund.Reason = reason
+	refund.RefundTime = "2006-01-02 15:04:05"
 	refund.RefundAmount = orderDO.PayAmount
 	err = dbops.AddRefundRecord(&refund)
 	if err != nil {
@@ -503,4 +536,56 @@ func (s *orderService) RefundApply(userId int, orderNo, reason string) string {
 		panic(err)
 	}
 	return refundNo
+}
+
+func (s *orderService) QueryRefundDetail(userId int, refundNo string) *defs.OrderRefundDetailVO {
+	refundDO, err := dbops.QueryRefundRecord(refundNo)
+	if err != nil {
+		panic(err)
+	}
+	if refundDO.Id == defs.ZERO || refundDO.Del == defs.DELETE {
+		panic(errs.ErrorOrderRefund)
+	}
+	if refundDO.UserId != userId {
+		panic(errs.NewErrorOrder("非法操作"))
+	}
+	refundVO := defs.OrderRefundDetailVO{}
+	refundVO.RefundNo = refundDO.RefundNo
+	refundVO.Reason = refundDO.Reason
+	refundVO.RefundAmount, _ = strconv.ParseFloat(refundDO.RefundAmount, 2)
+	refundVO.Status = refundDO.Status
+	refundVO.ApplyTime = refundDO.CreateTime
+	refundVO.RefundTime = refundDO.RefundTime
+	refundVO.GoodsList, _ = extraceOrderGoods(refundDO.OrderNo)
+	return &refundVO
+}
+
+func (s *orderService) UndoRefundApply(userId int, refundNo string) {
+	refundDO, err := dbops.QueryRefundRecord(refundNo)
+	if err != nil {
+		panic(err)
+	}
+	if refundDO.Id == defs.ZERO || refundDO.Del == defs.DELETE {
+		panic(errs.ErrorOrderRefund)
+	}
+	if refundDO.UserId != userId {
+		panic(errs.NewErrorOrderRefund("非法操作"))
+	}
+	if refundDO.Status != 0 {
+		panic(errs.NewErrorOrderRefund("状态异常"))
+	}
+	// 订单：待收货
+	orderDO, err := dbops.QueryOrderByOrderNo(refundDO.OrderNo)
+	if err != nil {
+		panic(err)
+	}
+	orderDO.Status = 1
+	err = dbops.UpdateOrderById(orderDO)
+	if err != nil {
+		panic(err)
+	}
+	err = dbops.UpdateRefundApply(refundDO.Id, 2)
+	if err != nil {
+		panic(err)
+	}
 }

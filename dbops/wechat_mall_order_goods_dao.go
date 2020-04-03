@@ -40,6 +40,12 @@ func AddOrderGoods(goods *model.WechatMallOrderGoodsDO) error {
 	return err
 }
 
+func UpdateOrderGoodsLockStatus(id, status int) error {
+	sql := "UPDATE SET lock_status = " + strconv.Itoa(status) + " WHERE id = " + strconv.Itoa(id)
+	_, err := dbConn.Exec(sql)
+	return err
+}
+
 // 统计-购买人数
 func CountBuyGoodsUserNum(goodsId int) (int, error) {
 	sql := "SELECT COUNT(DISTINCT(user_id)) FROM wechat_mall_order_goods WHERE lock_status = 1 AND goods_id = " + strconv.Itoa(goodsId)

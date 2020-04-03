@@ -17,7 +17,6 @@ func (err Err) Error() string {
 }
 
 var (
-	ErrorRedisError          = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10003, ErrMsg: "Redis ops failed"}}
 	ErrorInternalFaults      = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10004, ErrMsg: "Internal service error"}}
 	ErrorWechatError         = HttpErr{HttpSC: http.StatusInternalServerError, Err: Err{Code: 10007, ErrMsg: "微信内部异常！"}}
 	ErrorTokenInvalid        = HttpErr{HttpSC: http.StatusUnauthorized, Err: Err{Code: 10008, ErrMsg: "Token is invalid"}}
@@ -38,6 +37,7 @@ var (
 	ErrorCMSUser             = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10024, ErrMsg: "用户不存在！"}}
 	ErrorModulePage          = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10025, ErrMsg: "页面不存在！"}}
 	ErrorMiniappUser         = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10026, ErrMsg: "用户不存在"}}
+	ErrorOrderRefund         = HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10027, ErrMsg: "退款单不存在"}}
 )
 
 func NewParameterError(errMsg string) HttpErr {
@@ -90,4 +90,8 @@ func NewErrorGroup(errMsg string) HttpErr {
 
 func NewErrorCMSUser(errMsg string) HttpErr {
 	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10024, ErrMsg: errMsg}}
+}
+
+func NewErrorOrderRefund(errMsg string) HttpErr {
+	return HttpErr{HttpSC: http.StatusOK, Err: Err{Code: 10027, ErrMsg: errMsg}}
 }

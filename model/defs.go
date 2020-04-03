@@ -300,6 +300,7 @@ type WechatMallOrderRefund struct {
 	RefundAmount string // 退款金额
 	Status       int    // 状态：0-退款申请 1-商家处理申请 2-退款完成
 	Del          int    // 是否删除：0-否 1-是
+	RefundTime   string // 退款时间
 	CreateTime   string
 	UpdateTime   string
 }
