@@ -5,6 +5,7 @@ type WxappLoginVO struct {
 }
 
 type WxappUserInfoVO struct {
+	Uid      int    `json:"uid"`
 	Nickname string `json:"nickName"`
 	Avatar   string `json:"avatar"`
 	Mobile   string `json:"mobile"`

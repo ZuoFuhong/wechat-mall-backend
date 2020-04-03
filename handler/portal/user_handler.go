@@ -15,6 +15,7 @@ import (
 	"wechat-mall-backend/utils"
 )
 
+// 小程序-用户登录
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	code := vars["code"]
@@ -39,12 +40,13 @@ func (h *Handler) recordVisitorRecod(userId int, r *http.Request) {
 	h.service.UserService.DoAddVisitorRecord(userId, userIP)
 }
 
-// 查询用户信息
+// 小程序-查询用户信息
 func (h *Handler) UserInfo(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(defs.ContextKey).(int)
 
 	userDO := h.service.UserService.QueryUserInfo(userId)
 	userVO := defs.WxappUserInfoVO{}
+	userVO.Uid = userDO.Id
 	userVO.Nickname = userDO.Nickname
 	userVO.Avatar = userDO.Avatar
 	if userDO.Mobile != "" {
@@ -53,6 +55,7 @@ func (h *Handler) UserInfo(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, userVO)
 }
 
+// 小程序-授权手机号
 func (h *Handler) AuthPhone(w http.ResponseWriter, r *http.Request) {
 	req := defs.WxappAuthPhone{}
 	err := json.NewDecoder(r.Body).Decode(&req)
@@ -86,6 +89,7 @@ func (h *Handler) AuthPhone(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
+// 小程序-授权用户信息
 func (h *Handler) AuthUserInfo(w http.ResponseWriter, r *http.Request) {
 	req := defs.WxappAuthUserInfoReq{}
 	err := json.NewDecoder(r.Body).Decode(&req)
