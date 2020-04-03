@@ -14,10 +14,10 @@ type WxappUserInfoVO struct {
 type WxappAuthUserInfoReq struct {
 	NickName  string `json:"nickName" validate:"required"`
 	AvatarUrl string `jsoN:"avatarUrl" validate:"required"`
-	Gender    int    `json:"gender" validate:"required"`
-	Country   string `json:"country" validate:"required"`
-	Province  string `json:"province" validate:"required"`
-	City      string `json:"city" validate:"required"`
+	Gender    int    `json:"gender"`
+	Country   string `json:"country"`
+	Province  string `json:"province"`
+	City      string `json:"city"`
 }
 
 type WxappAuthPhone struct {
