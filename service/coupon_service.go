@@ -94,6 +94,11 @@ func (cs *couponService) RecordCouponLog(userId, couponId int) {
 }
 
 func (cs *couponService) QueryUserCoupon(userId, status, page, size int) (*[]defs.PortalUserCouponVO, int) {
+	// 刷新券的过期状态（优于调度任务）
+	err := dbops.UpdateCouponLogOverdueStatus(userId)
+	if err != nil {
+		panic(err)
+	}
 	couponLogList, err := dbops.QueryCouponLogList(userId, status, page, size)
 	if err != nil {
 		panic(err)

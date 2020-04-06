@@ -17,7 +17,7 @@ func AddVisitorRecord(userId int, ip string) error {
 }
 
 func CountUniqueVisitor(startTime, endTime time.Time) (int, error) {
-	sql := "SELECT COUNT(*) FROM wechat_mall_visitor_record WHERE create_time BETWEEN ? AND ?  GROUP BY(user_id)"
+	sql := "SELECT COUNT(DISTINCT(user_id)) FROM wechat_mall_visitor_record WHERE create_time BETWEEN ? AND ?"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return 0, err

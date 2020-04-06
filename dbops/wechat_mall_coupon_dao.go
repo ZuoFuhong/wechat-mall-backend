@@ -16,6 +16,9 @@ func QueryCouponList(page, size, online int) (*[]model.WechatMallCouponDO, error
 	if online != defs.ALL {
 		sql += " AND online = " + strconv.Itoa(online)
 	}
+	if online == 1 {
+		sql += " AND start_time < now() AND end_time > now()"
+	}
 	if page > 0 && size > 0 {
 		sql += " LIMIT " + strconv.Itoa((page-1)*page) + " ," + strconv.Itoa(size)
 	}

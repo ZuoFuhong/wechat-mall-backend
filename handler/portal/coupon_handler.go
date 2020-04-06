@@ -9,7 +9,7 @@ import (
 	"wechat-mall-backend/errs"
 )
 
-// 查询优惠券列表
+// 店铺-优惠券列表
 func (h *Handler) GetCouponList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	page, _ := strconv.Atoi(vars["page"])
@@ -62,7 +62,7 @@ func (h *Handler) TakeCoupon(w http.ResponseWriter, r *http.Request) {
 	defs.SendNormalResponse(w, "ok")
 }
 
-// 查询用户领取的优惠券
+// 用户领取的优惠券
 // status: 0-未使用 1-已使用 2-已过期
 func (h *Handler) GetUserCouponList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

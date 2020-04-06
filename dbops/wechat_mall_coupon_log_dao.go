@@ -108,3 +108,10 @@ func AddCouponLog(couponLog *model.WechatMallCouponLogDO) error {
 		couponLog.Code, "", 0, time.Now(), time.Now())
 	return err
 }
+
+// 刷新券的过期状态
+func UpdateCouponLogOverdueStatus(userId int) error {
+	sql := "UPDATE wechat_mall_coupon_log SET status = 2 WHERE is_del = 0 AND expire_time < now() AND user_id = " + strconv.Itoa(userId)
+	_, err := dbConn.Exec(sql)
+	return err
+}
