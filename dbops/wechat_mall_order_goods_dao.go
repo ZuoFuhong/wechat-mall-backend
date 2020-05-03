@@ -40,8 +40,14 @@ func AddOrderGoods(goods *model.WechatMallOrderGoodsDO) error {
 	return err
 }
 
-func UpdateOrderGoodsLockStatus(id, status int) error {
-	sql := "UPDATE SET lock_status = " + strconv.Itoa(status) + " WHERE id = " + strconv.Itoa(id)
+func UpdateOrderGoods(goods *model.WechatMallOrderGoodsDO) error {
+	sql := "UPDATE wechat_mall_order_goods SET update_time = now()"
+	if goods.Price != "" {
+		sql += ", price = '" + goods.Price + "'"
+	}
+	if goods.LockStatus != 0 {
+		sql += ", lock_status = " + strconv.Itoa(goods.LockStatus)
+	}
 	_, err := dbConn.Exec(sql)
 	return err
 }

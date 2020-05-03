@@ -27,6 +27,12 @@ type IOrderService interface {
 	RefundApply(userId int, orderNo, reason string) string
 	QueryRefundDetail(userId int, refundNo string) *defs.OrderRefundDetailVO
 	UndoRefundApply(userId int, refundNo string)
+	QueryCMSOrderList(status, searchType int, keyword, startTime, endTime string, page, size int) (*[]defs.CMSOrderInfoVO, int)
+	ExportCMSOrderExcel(status, searchType int, keyword, startTime, endTime string) string
+	QueryCMSOrderDetail(orderNo string) *defs.CMSOrderInfoVO
+	ModifyOrderStatus(orderNo string, otype int)
+	ModifyOrderRemark(orderNo, remark string)
+	ModifyOrderGoods(orderNo string, goodsId int, price string)
 }
 
 type orderService struct {
@@ -61,7 +67,7 @@ func (s *orderService) GenerateOrder(userId, addressId, couponLogId int, dispatc
 	orderDO.Status = 0
 	orderDO.AddressId = addressId
 	orderDO.AddressSnapshot = addressSnap
-	orderDO.WxappPrePayId = prepayId
+	orderDO.WxappPrepayId = prepayId
 	err := dbops.AddOrder(&orderDO)
 	if err != nil {
 		panic(err)
@@ -592,6 +598,178 @@ func (s *orderService) UndoRefundApply(userId int, refundNo string) {
 		panic(err)
 	}
 	err = dbops.UpdateRefundApply(refundDO.Id, 2)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (s *orderService) QueryCMSOrderList(status, searchType int, keyword, startTime, endTime string, page, size int) (*[]defs.CMSOrderInfoVO, int) {
+	orderList, err := dbops.SelectCMSOrderList(status, searchType, keyword, startTime, endTime, page, size)
+	if err != nil {
+		panic(err)
+	}
+	total, err := dbops.SelectCMSOrderNum(status, searchType, keyword, startTime, endTime)
+	if err != nil {
+		panic(err)
+	}
+	orderVOList := []defs.CMSOrderInfoVO{}
+	for _, v := range *orderList {
+		orderVO := defs.CMSOrderInfoVO{}
+		orderVO.OrderNo = v.OrderNo
+		orderVO.PlaceTime = v.CreateTime
+		orderVO.Address = v.AddressSnapshot
+		orderVO.PayAmount, _ = strconv.ParseFloat(v.PayAmount, 2)
+		orderVO.GoodsAmount, _ = strconv.ParseFloat(v.GoodsAmount, 2)
+		orderVO.DiscountAmount, _ = strconv.ParseFloat(v.DiscountAmount, 2)
+		orderVO.DispatchAmount, _ = strconv.ParseFloat(v.DispatchAmount, 2)
+		orderVO.Status = v.Status
+		orderVO.TransactionId = v.TransactionId
+		orderVO.PayTime = v.PayTime
+		orderVO.DeliverTime = v.DeliverTime
+		orderVO.FinishTime = v.FinishTime
+		orderVOList = append(orderVOList, orderVO)
+	}
+	return &orderVOList, total
+}
+
+func (s *orderService) ExportCMSOrderExcel(status, searchType int, keyword, startTime, endTime string) string {
+
+	// todo: 生成表格，上传OSS，返回下载地址
+
+	ossLink := "http://123.xls"
+
+	return ossLink
+}
+
+func (s *orderService) QueryCMSOrderDetail(orderNo string) *defs.CMSOrderInfoVO {
+	orderDO, err := dbops.QueryOrderByOrderNo(orderNo)
+	if err != nil {
+		panic(err)
+	}
+	goodsDOList, err := dbops.QueryOrderGoods(orderNo)
+	if err != nil {
+		panic(err)
+	}
+	orderVO := defs.CMSOrderInfoVO{}
+	orderVO.OrderNo = orderDO.OrderNo
+	orderVO.PlaceTime = orderDO.CreateTime
+	orderVO.Address = orderDO.AddressSnapshot
+	orderVO.PayAmount, _ = strconv.ParseFloat(orderDO.PayAmount, 2)
+	orderVO.GoodsAmount, _ = strconv.ParseFloat(orderDO.GoodsAmount, 2)
+	orderVO.DiscountAmount, _ = strconv.ParseFloat(orderDO.DiscountAmount, 2)
+	orderVO.DispatchAmount, _ = strconv.ParseFloat(orderDO.DispatchAmount, 2)
+	orderVO.Status = orderDO.Status
+	orderVO.TransactionId = orderDO.TransactionId
+	orderVO.PayTime = orderDO.PayTime
+	orderVO.DeliverTime = orderDO.DeliverTime
+	orderVO.FinishTime = orderDO.FinishTime
+
+	goodsVOList := []defs.CMSOrderGoodsVO{}
+	for _, v := range *goodsDOList {
+		goodsVO := defs.CMSOrderGoodsVO{}
+		goodsVO.Picture = v.Picture
+		goodsVO.Title = v.Title
+		goodsVO.Price, _ = strconv.ParseFloat(v.Price, 2)
+		goodsVO.Specs = v.Specs
+		goodsVO.Num = v.Num
+		goodsVOList = append(goodsVOList, goodsVO)
+	}
+	orderVO.GoodsList = goodsVOList
+	return &orderVO
+}
+
+func (s *orderService) ModifyOrderStatus(orderNo string, otype int) {
+	/*
+		待发货：1-确认发货
+		待收货：2-确认收货
+		待付款：3-确认付款
+	*/
+	orderDO, err := dbops.QueryOrderByOrderNo(orderNo)
+	if err != nil {
+		panic(errs.NewErrorOrder("订单不存在"))
+	}
+	newStatus := 0
+	switch otype {
+	case 1:
+		if orderDO.Status != 1 {
+			panic(errs.NewErrorOrder("非法操作"))
+		}
+		newStatus = 2
+	case 2:
+		if orderDO.Status != 2 {
+			panic(errs.NewErrorOrder("非法操作"))
+		}
+		newStatus = 3
+	case 3:
+		if orderDO.Status != 0 {
+			panic(errs.NewErrorOrder("非法操作"))
+		}
+		newStatus = 1
+	default:
+		panic(errs.NewErrorOrder("非法操作"))
+	}
+	params := model.WechatMallOrderDO{}
+	params.Id = orderDO.Id
+	params.Status = newStatus
+	err = dbops.UpdateOrderById(&params)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (s *orderService) ModifyOrderRemark(orderNo, remark string) {
+	orderDO, err := dbops.QueryOrderByOrderNo(orderNo)
+	if err != nil {
+		panic(errs.NewErrorOrder("订单不存在"))
+	}
+	err = dbops.UpdateOrderRemark(orderDO.Id, remark)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (s *orderService) ModifyOrderGoods(orderNo string, goodsId int, price string) {
+	orderDO, err := dbops.QueryOrderByOrderNo(orderNo)
+	if err != nil {
+		panic(errs.NewErrorOrder("订单不存在"))
+	}
+	if orderDO.Status != 0 {
+		panic(errs.NewErrorOrder("非法操作"))
+	}
+	goodsList, err := dbops.QueryOrderGoods(orderNo)
+	if err != nil {
+		panic(err)
+	}
+	orderGoods := model.WechatMallOrderGoodsDO{}
+	for _, v := range *goodsList {
+		if v.GoodsId == goodsId {
+			orderGoods = v
+		}
+	}
+	if orderGoods.Id == 0 {
+		panic(errs.NewErrorOrder("订单商品异常！"))
+	}
+	// 更新商品价格
+	params := model.WechatMallOrderGoodsDO{}
+	params.Id = orderGoods.Id
+	params.Price = price
+	err = dbops.UpdateOrderGoods(&params)
+	if err != nil {
+		panic(err)
+	}
+	// 订单金额，计算差价
+	newGoodsPrice, _ := decimal.NewFromString(price)
+	oldGoodsPrice, _ := decimal.NewFromString(orderGoods.Price)
+	diffAmount := newGoodsPrice.Sub(oldGoodsPrice).Mul(decimal.NewFromInt(int64(orderGoods.Num)))
+
+	payAmount, _ := decimal.NewFromString(orderDO.PayAmount)
+	goodsAmount, _ := decimal.NewFromString(orderDO.GoodsAmount)
+
+	orderParams := model.WechatMallOrderDO{}
+	orderParams.Id = orderDO.Id
+	orderParams.PayAmount = payAmount.Add(diffAmount).String()
+	orderParams.GoodsAmount = goodsAmount.Add(diffAmount).String()
+	err = dbops.UpdateOrderById(&orderParams)
 	if err != nil {
 		panic(err)
 	}

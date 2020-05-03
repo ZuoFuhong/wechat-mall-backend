@@ -318,6 +318,8 @@ CREATE TABLE `wechat_mall_order` (
     `address_id` int(11) NOT NULL DEFAULT '0' COMMENT '收货地址ID',
     `address_snapshot` varchar(200) NOT NULL DEFAULT '' COMMENT '收货地址快照',
     `wxapp_prepay_id` varchar(50) NOT NULL DEFAULT '' COMMENT '微信预支付ID',
+    `transaction_id` varchar(50) NOT NULL DEFAULT '' COMMENT '微信支付单号',
+    `remark` varchar(100) NOT NULL DEFAULT '' COMMENT '订单备注',
     `is_del` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否删除：0-否 1-是',
     `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',

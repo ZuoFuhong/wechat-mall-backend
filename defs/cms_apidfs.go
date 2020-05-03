@@ -294,3 +294,43 @@ type CMSMarketMetricsVO struct {
 	WaitingOrder  int `json:"waitingOrder"`
 	ActivistOrder int `json:"activistOrder"`
 }
+
+type CMSOrderInfoVO struct {
+	OrderNo        string            `json:"orderNo"`
+	PlaceTime      string            `json:"placeTime"`
+	Address        string            `json:"address"`
+	PayAmount      float64           `json:"payAmount"`
+	GoodsAmount    float64           `json:"goodsAmount"`
+	DiscountAmount float64           `json:"discountAmount"`
+	DispatchAmount float64           `json:"dispatchAmount"`
+	Status         int               `json:"status"`
+	TransactionId  string            `json:"transactionId"`
+	PayTime        string            `json:"payTime"`
+	DeliverTime    string            `json:"deliverTime"`
+	FinishTime     string            `json:"finishTime"`
+	GoodsList      []CMSOrderGoodsVO `json:"goodsList"`
+}
+
+type CMSOrderGoodsVO struct {
+	Picture string  `json:"picture"`
+	Title   string  `json:"title"`
+	Price   float64 `json:"price"`
+	Specs   string  `json:"specs"`
+	Num     int     `json:"num"`
+}
+
+type CMSModifyOrderStatusReq struct {
+	OrderNo string `json:"orderNo" validate:"required"` // 订单号
+	Otype   int    `json:"otype" validate:"required"`   // 操作方式：1-确认发货，2-确认收货，3-确认付款
+}
+
+type CMSModifyOrderRemarkReq struct {
+	OrderNo string `json:"orderNo" validate:"required"` // 订单号
+	Remark  string `json:"remark" validate:"required"`  // 备注
+}
+
+type CMSModifyOrderGoodsReq struct {
+	OrderNo string `json:"orderNo" validate:"required"` // 订单号
+	GoodsId int    `json:"goodsId" validate:"required"` // 关联订单商品ID
+	Price   string `json:"price" validate:"required"`   // 价格
+}

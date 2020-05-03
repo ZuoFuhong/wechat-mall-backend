@@ -109,4 +109,10 @@ func registerHandler(router *mux.Router, cmsHandler *cms.Handler, portalHandler 
 	router.Handle("/cms/oss/policy-token", chain.ThenFunc(cmsHandler.GetOSSPolicyToken)).Methods("GET", "OPTIONS").Queries("dir", "{dir}")
 	router.Handle("/cms/market_metrics", chain.ThenFunc(cmsHandler.GetMarketMetrics)).Methods("GET", "OPTIONS")
 	router.Handle("/cms/order/order_statement", chain.ThenFunc(cmsHandler.GetSaleTableData)).Methods("GET", "OPTIONS").Queries("page", "{page}").Queries("size", "{size}")
+	router.Handle("/cms/order/list", chain.ThenFunc(cmsHandler.GetOrderList)).Methods("GET", "OPTIONS").Queries("status", "{status}").Queries("stype", "{stype}").Queries("k", "{k}").Queries("st", "{st}").Queries("et", "{et}").Queries("p", "{p}").Queries("s", "{s}")
+	router.Handle("/cms/order", chain.ThenFunc(cmsHandler.GetOrderDetail)).Methods("GET", "OPTIONS").Queries("orderNo", "{orderNo}")
+	router.Handle("/cms/order/export", chain.ThenFunc(cmsHandler.ExportOrder)).Methods("GET", "OPTIONS").Queries("status", "{status}").Queries("stype", "{stype}").Queries("k", "{k}").Queries("st", "{st}").Queries("et", "{et}")
+	router.Handle("/cms/order/modify_status", chain.ThenFunc(cmsHandler.ModifyOrderStatus)).Methods("PUT", "OPTIONS")
+	router.Handle("/cms/order/modify_remark", chain.ThenFunc(cmsHandler.ModifyOrderRemark)).Methods("PUT", "OPTIONS")
+	router.Handle("/cms/order/modify_goods", chain.ThenFunc(cmsHandler.ModifyOrderGoods)).Methods("PUT", "OPTIONS")
 }

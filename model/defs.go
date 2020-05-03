@@ -269,7 +269,9 @@ type WechatMallOrderDO struct {
 	Status          int    // 状态 -1 已取消 0-待付款 1-待发货 2-待收货 3-已完成 4-（待发货）退款申请 5-已退款
 	AddressId       int    // 地址ID
 	AddressSnapshot string // 地址快照
-	WxappPrePayId   string // 微信预支付ID
+	WxappPrepayId   string // 微信预支付ID
+	TransactionId   string // 微信支付单号
+	Remark          string // 订单备注
 	Del             int
 	CreateTime      string
 	UpdateTime      string
