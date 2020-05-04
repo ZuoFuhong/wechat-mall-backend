@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -42,4 +44,32 @@ func Md5Encrpyt(passwd string) string {
 
 func PhoneMark(phone string) string {
 	return phone[0:3] + "****" + phone[7:]
+}
+
+// 判断文件夹是否存在
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+// 检查目录是否存在，并创建
+func CheckFileDirExists(filepath string) {
+	index := strings.LastIndex(filepath, "/")
+	dirPath := filepath[0:index]
+	exists, e := PathExists(dirPath)
+	if e != nil {
+		panic(e)
+	}
+	if !exists {
+		err := os.MkdirAll(dirPath, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+	}
 }

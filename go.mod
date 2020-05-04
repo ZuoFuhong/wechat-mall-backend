@@ -3,6 +3,8 @@ module wechat-mall-backend
 go 1.13
 
 require (
+	github.com/360EntSecGroup-Skylar/excelize v1.4.1
+	github.com/aliyun/aliyun-oss-go-sdk v2.1.0+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible

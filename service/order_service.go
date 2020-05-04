@@ -2,12 +2,16 @@ package service
 
 import (
 	"encoding/json"
+	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/shopspring/decimal"
 	"log"
+	"os"
 	"strconv"
 	"time"
 	"wechat-mall-backend/dbops"
 	"wechat-mall-backend/defs"
+	"wechat-mall-backend/env"
 	"wechat-mall-backend/errs"
 	"wechat-mall-backend/model"
 	"wechat-mall-backend/utils"
@@ -624,6 +628,7 @@ func (s *orderService) QueryCMSOrderList(status, searchType int, keyword, startT
 		orderVO.DispatchAmount, _ = strconv.ParseFloat(v.DispatchAmount, 2)
 		orderVO.Status = v.Status
 		orderVO.TransactionId = v.TransactionId
+		orderVO.Remark = v.Remark
 		orderVO.PayTime = v.PayTime
 		orderVO.DeliverTime = v.DeliverTime
 		orderVO.FinishTime = v.FinishTime
@@ -633,12 +638,140 @@ func (s *orderService) QueryCMSOrderList(status, searchType int, keyword, startT
 }
 
 func (s *orderService) ExportCMSOrderExcel(status, searchType int, keyword, startTime, endTime string) string {
-
-	// todo: 生成表格，上传OSS，返回下载地址
-
-	ossLink := "http://123.xls"
+	orderList, err := dbops.SelectCMSOrderList(status, searchType, keyword, startTime, endTime, 0, 0)
+	if err != nil {
+		panic(err)
+	}
+	excelData := extractOrderExcelData(*orderList)
+	filepath, filename := generateExcel(excelData)
+	ossLink := uploadFileToOSS(filepath, filename)
+	_ = os.Remove(filepath)
 
 	return ossLink
+}
+
+func uploadFileToOSS(filepath, filename string) string {
+	conf := env.LoadConf()
+	ossConf := conf.Oss
+	endpoint := "https://oss-cn-hangzhou.aliyuncs.com"
+
+	client, e := oss.New(endpoint, ossConf.AccessKeyId, ossConf.AccessKeySecret)
+	if e != nil {
+		panic(e)
+	}
+	bucket, e := client.Bucket(ossConf.BucketName)
+	if e != nil {
+		panic(e)
+	}
+	objectKey := "order-excel/" + filename
+	e = bucket.PutObjectFromFile(objectKey, filepath)
+	if e != nil {
+		panic(e)
+	}
+	ossLink := "https://" + ossConf.BucketName + ".oss-cn-hangzhou.aliyuncs.com/" + objectKey
+	return ossLink
+}
+
+// 订单-提取Excel数据
+func extractOrderExcelData(orderList []model.WechatMallOrderDO) *map[string]string {
+	excelData := map[string]string{}
+	excelData["A1"] = "订单号"
+	excelData["B1"] = "微信支付单号"
+	excelData["C1"] = "下单时间"
+	excelData["D1"] = "订单金额"
+	excelData["E1"] = "实付金额"
+	excelData["F1"] = "订单状态"
+	excelData["G1"] = "买家信息"
+	excelData["H1"] = "收货地址"
+	excelData["I1"] = "备注"
+	excelData["J1"] = "商品名称"
+	excelData["K1"] = "规格"
+	excelData["L1"] = "数量"
+	rowNum := 1
+	for _, v := range orderList {
+		goodsList := extractOrderGoodsVO(v.OrderNo)
+		goodsAmount, _ := decimal.NewFromString(v.GoodsAmount)
+		dispatchAmount, _ := decimal.NewFromString(v.DispatchAmount)
+		orderAmount := goodsAmount.Add(dispatchAmount).String()
+		statusStr := extractOrderStatus(v.Status)
+		addressSnap := extractOrderBuyer(v.AddressSnapshot)
+		for _, g := range goodsList {
+			specs := extractOrderGoodsSpecs(g.Specs)
+			rowNum += 1
+			rowNumStr := strconv.Itoa(rowNum)
+			excelData["A"+rowNumStr] = v.OrderNo
+			excelData["B"+rowNumStr] = v.TransactionId
+			excelData["C"+rowNumStr] = v.CreateTime
+			excelData["D"+rowNumStr] = orderAmount
+			excelData["E"+rowNumStr] = v.PayAmount
+			excelData["F"+rowNumStr] = statusStr
+			excelData["G"+rowNumStr] = addressSnap.Contacts + "（" + addressSnap.Mobile + "）"
+			excelData["H"+rowNumStr] = addressSnap.ProvinceStr + addressSnap.CityStr + addressSnap.AreaStr + addressSnap.Address
+			excelData["I"+rowNumStr] = v.Remark
+			excelData["J"+rowNumStr] = g.Title
+			excelData["K"+rowNumStr] = specs
+			excelData["L"+rowNumStr] = strconv.Itoa(g.Num)
+		}
+	}
+	return &excelData
+}
+
+// 生成Excel文件，保存在本地
+func generateExcel(excelData *map[string]string) (string, string) {
+	xlsx := excelize.NewFile()
+	sheet := xlsx.NewSheet("sheet1")
+	for k, v := range *excelData {
+		xlsx.SetCellValue("sheet1", k, v)
+	}
+	xlsx.SetActiveSheet(sheet)
+	filename := "订单列表_" + utils.FormatDatetime(time.Now(), utils.YYYYMMDDHHMMSS) + ".xlsx"
+	filepath := "/tmp/wechat-mall/" + filename
+	utils.CheckFileDirExists(filepath)
+	err := xlsx.SaveAs(filepath)
+	if err != nil {
+		panic(err)
+	}
+	return filepath, filename
+}
+
+// 订单-状态
+func extractOrderStatus(status int) string {
+	statusStr := ""
+	switch status {
+	case 0:
+		statusStr = "待付款"
+	case 1:
+		statusStr = "待发货"
+	case 2:
+		statusStr = "待收货"
+	case 3:
+		statusStr = "已完成"
+	}
+	return statusStr
+}
+
+// 订单-提取买家信息
+func extractOrderBuyer(addressSnapshot string) defs.AddressSnapshot {
+	snapshot := defs.AddressSnapshot{}
+	err := json.Unmarshal([]byte(addressSnapshot), &snapshot)
+	if err != nil {
+		panic(err)
+	}
+	return snapshot
+}
+
+// 订单-商品规格
+func extractOrderGoodsSpecs(specs string) string {
+	specList := []defs.SkuSpecs{}
+	err := json.Unmarshal([]byte(specs), &specList)
+	if err != nil {
+		panic(err)
+	}
+	specStr := ""
+	for _, v := range specList {
+		specStr += v.Value + ";"
+	}
+	return specStr
 }
 
 func (s *orderService) QueryCMSOrderDetail(orderNo string) *defs.CMSOrderInfoVO {
@@ -646,10 +779,8 @@ func (s *orderService) QueryCMSOrderDetail(orderNo string) *defs.CMSOrderInfoVO 
 	if err != nil {
 		panic(err)
 	}
-	goodsDOList, err := dbops.QueryOrderGoods(orderNo)
-	if err != nil {
-		panic(err)
-	}
+	goodsList := extractOrderGoodsVO(orderNo)
+
 	orderVO := defs.CMSOrderInfoVO{}
 	orderVO.OrderNo = orderDO.OrderNo
 	orderVO.PlaceTime = orderDO.CreateTime
@@ -660,10 +791,20 @@ func (s *orderService) QueryCMSOrderDetail(orderNo string) *defs.CMSOrderInfoVO 
 	orderVO.DispatchAmount, _ = strconv.ParseFloat(orderDO.DispatchAmount, 2)
 	orderVO.Status = orderDO.Status
 	orderVO.TransactionId = orderDO.TransactionId
+	orderVO.Remark = orderDO.Remark
 	orderVO.PayTime = orderDO.PayTime
 	orderVO.DeliverTime = orderDO.DeliverTime
 	orderVO.FinishTime = orderDO.FinishTime
+	orderVO.GoodsList = goodsList
+	return &orderVO
+}
 
+// 提取订单中的商品
+func extractOrderGoodsVO(orderNo string) []defs.CMSOrderGoodsVO {
+	goodsDOList, err := dbops.QueryOrderGoods(orderNo)
+	if err != nil {
+		panic(err)
+	}
 	goodsVOList := []defs.CMSOrderGoodsVO{}
 	for _, v := range *goodsDOList {
 		goodsVO := defs.CMSOrderGoodsVO{}
@@ -674,8 +815,7 @@ func (s *orderService) QueryCMSOrderDetail(orderNo string) *defs.CMSOrderInfoVO 
 		goodsVO.Num = v.Num
 		goodsVOList = append(goodsVOList, goodsVO)
 	}
-	orderVO.GoodsList = goodsVOList
-	return &orderVO
+	return goodsVOList
 }
 
 func (s *orderService) ModifyOrderStatus(orderNo string, otype int) {

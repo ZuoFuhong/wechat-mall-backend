@@ -305,6 +305,7 @@ type CMSOrderInfoVO struct {
 	DispatchAmount float64           `json:"dispatchAmount"`
 	Status         int               `json:"status"`
 	TransactionId  string            `json:"transactionId"`
+	Remark         string            `json:"remark"`
 	PayTime        string            `json:"payTime"`
 	DeliverTime    string            `json:"deliverTime"`
 	FinishTime     string            `json:"finishTime"`
