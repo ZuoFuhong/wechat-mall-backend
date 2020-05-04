@@ -258,10 +258,10 @@ type CMSUserGroupReq struct {
 }
 
 type CMSUserGroupVO struct {
-	Id          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Auths       []int  `json:"auths"`
+	Id          int         `json:"id"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Auths       interface{} `json:"auths"`
 }
 
 type CMSModuleVO struct {
@@ -341,4 +341,9 @@ type CMSModifyOrderGoodsReq struct {
 	OrderNo string `json:"orderNo" validate:"required"` // 订单号
 	GoodsId int    `json:"goodsId" validate:"required"` // 关联订单商品ID
 	Price   string `json:"price" validate:"required"`   // 价格
+}
+
+type ModulePageAuth struct {
+	Auth   string `json:"auth"`
+	Module string `json:"module"`
 }

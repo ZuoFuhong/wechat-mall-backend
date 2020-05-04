@@ -20,7 +20,8 @@ type ICMSUserService interface {
 	QueryUserGroupByName(name string) *model.WechatMallUserGroupDO
 	AddUserGroup(group *model.WechatMallUserGroupDO) int
 	UpdateUserGroup(group *model.WechatMallUserGroupDO)
-	QueryGroupAuths(groupId int) []int
+	QueryGroupAuths(groupId int) *[]map[string][]defs.ModulePageAuth
+	QueryGroupPages(groupId int) []int
 	RefreshGroupAuths(groupId int, auths []int)
 	GetModuleList() *[]defs.CMSModuleVO
 }
@@ -192,7 +193,52 @@ func (s *CMSUserService) UpdateUserGroup(group *model.WechatMallUserGroupDO) {
 	}
 }
 
-func (s *CMSUserService) QueryGroupAuths(groupId int) []int {
+func (s *CMSUserService) QueryGroupAuths(groupId int) *[]map[string][]defs.ModulePageAuth {
+	permissionList, err := dbops.ListGroupPagePermission(groupId)
+	if err != nil {
+		panic(err)
+	}
+	moduleMap := map[int][]int{}
+	for _, v := range *permissionList {
+		pageDO, err := dbops.QueryModulePageById(v.PageId)
+		if err != nil {
+			panic(err)
+		}
+		pageList := moduleMap[pageDO.ModuleId]
+		moduleMap[pageDO.ModuleId] = append(pageList, v.PageId)
+	}
+
+	auths := []map[string][]defs.ModulePageAuth{}
+	for k, v := range moduleMap {
+		moduleDO, err := dbops.QueryModuleById(k)
+		if err != nil {
+			panic(err)
+		}
+		if moduleDO.Id == 0 || moduleDO.Del == defs.DELETE {
+			continue
+		}
+		authArr := []defs.ModulePageAuth{}
+		for _, g := range v {
+			pageDO, err := dbops.QueryModulePageById(g)
+			if err != nil {
+				panic(err)
+			}
+			if pageDO.Id == 0 || pageDO.Del == defs.DELETE {
+				continue
+			}
+			auth := defs.ModulePageAuth{}
+			auth.Module = moduleDO.Name
+			auth.Auth = pageDO.Name
+			authArr = append(authArr, auth)
+		}
+		auth := map[string][]defs.ModulePageAuth{}
+		auth[moduleDO.Name] = authArr
+		auths = append(auths, auth)
+	}
+	return &auths
+}
+
+func (s *CMSUserService) QueryGroupPages(groupId int) []int {
 	permissionList, err := dbops.ListGroupPagePermission(groupId)
 	if err != nil {
 		panic(err)

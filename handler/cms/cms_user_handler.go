@@ -67,6 +67,7 @@ func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 		panic(errs.ErrorCMSUser)
 	}
 	auths := h.service.CMSUserService.QueryGroupAuths(userDO.GroupId)
+	groupDO := h.service.CMSUserService.QueryUserGroupById(userDO.GroupId)
 
 	userVO := defs.CMSUserVO{}
 	userVO.Id = userDO.Id
@@ -75,6 +76,7 @@ func (h *Handler) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	userVO.Mobile = userDO.Mobile
 	userVO.Avatar = userDO.Avatar
 	userVO.GroupId = userDO.GroupId
+	userVO.GroupName = groupDO.Name
 
 	resp := make(map[string]interface{})
 	resp["user"] = userVO
@@ -281,7 +283,7 @@ func (h *Handler) GetUserGroup(w http.ResponseWriter, r *http.Request) {
 	if groupDO.Id == defs.ZERO || groupDO.Del == defs.DELETE {
 		panic(errs.ErrorGroup)
 	}
-	auths := h.service.CMSUserService.QueryGroupAuths(groupId)
+	auths := h.service.CMSUserService.QueryGroupPages(groupId)
 	groupVO := defs.CMSUserGroupVO{}
 	groupVO.Id = groupDO.Id
 	groupVO.Name = groupDO.Name

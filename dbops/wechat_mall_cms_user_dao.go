@@ -15,7 +15,7 @@ id, name, description, is_del, create_time, update_time
 `
 
 func GetCMSUserByUsername(username string) (*model.WechatMallCMSUserDO, error) {
-	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE username = '" + username + "'"
+	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE is_del = 0 AND username = '" + username + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func GetCMSUserByUsername(username string) (*model.WechatMallCMSUserDO, error) {
 }
 
 func GetCMSUserByMobile(mobile string) (*model.WechatMallCMSUserDO, error) {
-	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE mobile = '" + mobile + "'"
+	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE is_del = 0 AND mobile = '" + mobile + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func GetCMSUserByMobile(mobile string) (*model.WechatMallCMSUserDO, error) {
 }
 
 func GetCMSUserByEmail(email string) (*model.WechatMallCMSUserDO, error) {
-	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE email = '" + email + "'"
+	sql := "SELECT " + cmsUserColumnList + " FROM wechat_mall_cms_user WHERE is_del = 0 AND email = '" + email + "'"
 	rows, err := dbConn.Query(sql)
 	if err != nil {
 		return nil, err

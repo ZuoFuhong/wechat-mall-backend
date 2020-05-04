@@ -36,6 +36,22 @@ func QueryModuleList() (*[]model.WechatMallModuleDO, error) {
 	return &moduleList, nil
 }
 
+func QueryModuleById(moduleId int) (*model.WechatMallModuleDO, error) {
+	sql := "SELECT " + moduleColumnList + " FROM wechat_mall_module WHERE id = " + strconv.Itoa(moduleId)
+	rows, e := dbConn.Query(sql)
+	if e != nil {
+		panic(e)
+	}
+	moduleDO := model.WechatMallModuleDO{}
+	for rows.Next() {
+		err := rows.Scan(&moduleDO.Id, &moduleDO.Name, &moduleDO.Description, &moduleDO.Del, &moduleDO.CreateTime, &moduleDO.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &moduleDO, nil
+}
+
 func ListModulePage(moduleId int) (*[]model.WechatMallModulePageDO, error) {
 	sql := "SELECT " + modulePageColumnList + " FROM wechat_mall_module_page WHERE is_del = 0 AND module_id = " + strconv.Itoa(moduleId)
 	rows, err := dbConn.Query(sql)
