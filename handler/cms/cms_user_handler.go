@@ -174,7 +174,7 @@ func (h *Handler) DoEditUser(w http.ResponseWriter, r *http.Request) {
 	if err = validate.Struct(req); err != nil {
 		panic(errs.NewParameterError(err.Error()))
 	}
-	matched, _ := regexp.MatchString("^[a-zA-Z0-9]{6,16}$", req.Username)
+	matched, _ := regexp.MatchString("^[a-zA-Z0-9]{5,16}$", req.Username)
 	if !matched {
 		panic(errs.NewParameterError("用户名不符合规范！"))
 	}
