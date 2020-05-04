@@ -618,10 +618,13 @@ func (s *orderService) QueryCMSOrderList(status, searchType int, keyword, startT
 	}
 	orderVOList := []defs.CMSOrderInfoVO{}
 	for _, v := range *orderList {
+		address := extractOrderAddress(v.AddressSnapshot)
+		buyer := extractOrderBuyer(v.UserId)
+
 		orderVO := defs.CMSOrderInfoVO{}
 		orderVO.OrderNo = v.OrderNo
 		orderVO.PlaceTime = v.CreateTime
-		orderVO.Address = v.AddressSnapshot
+		orderVO.Address = *address
 		orderVO.PayAmount, _ = strconv.ParseFloat(v.PayAmount, 2)
 		orderVO.GoodsAmount, _ = strconv.ParseFloat(v.GoodsAmount, 2)
 		orderVO.DiscountAmount, _ = strconv.ParseFloat(v.DiscountAmount, 2)
@@ -632,6 +635,7 @@ func (s *orderService) QueryCMSOrderList(status, searchType int, keyword, startT
 		orderVO.PayTime = v.PayTime
 		orderVO.DeliverTime = v.DeliverTime
 		orderVO.FinishTime = v.FinishTime
+		orderVO.Buyer = *buyer
 		orderVOList = append(orderVOList, orderVO)
 	}
 	return &orderVOList, total
@@ -694,9 +698,9 @@ func extractOrderExcelData(orderList []model.WechatMallOrderDO) *map[string]stri
 		dispatchAmount, _ := decimal.NewFromString(v.DispatchAmount)
 		orderAmount := goodsAmount.Add(dispatchAmount).String()
 		statusStr := extractOrderStatus(v.Status)
-		addressSnap := extractOrderBuyer(v.AddressSnapshot)
+		addressSnap := extractOrderAddress(v.AddressSnapshot)
+
 		for _, g := range goodsList {
-			specs := extractOrderGoodsSpecs(g.Specs)
 			rowNum += 1
 			rowNumStr := strconv.Itoa(rowNum)
 			excelData["A"+rowNumStr] = v.OrderNo
@@ -709,7 +713,7 @@ func extractOrderExcelData(orderList []model.WechatMallOrderDO) *map[string]stri
 			excelData["H"+rowNumStr] = addressSnap.ProvinceStr + addressSnap.CityStr + addressSnap.AreaStr + addressSnap.Address
 			excelData["I"+rowNumStr] = v.Remark
 			excelData["J"+rowNumStr] = g.Title
-			excelData["K"+rowNumStr] = specs
+			excelData["K"+rowNumStr] = g.Specs
 			excelData["L"+rowNumStr] = strconv.Itoa(g.Num)
 		}
 	}
@@ -750,16 +754,6 @@ func extractOrderStatus(status int) string {
 	return statusStr
 }
 
-// 订单-提取买家信息
-func extractOrderBuyer(addressSnapshot string) defs.AddressSnapshot {
-	snapshot := defs.AddressSnapshot{}
-	err := json.Unmarshal([]byte(addressSnapshot), &snapshot)
-	if err != nil {
-		panic(err)
-	}
-	return snapshot
-}
-
 // 订单-商品规格
 func extractOrderGoodsSpecs(specs string) string {
 	specList := []defs.SkuSpecs{}
@@ -780,11 +774,13 @@ func (s *orderService) QueryCMSOrderDetail(orderNo string) *defs.CMSOrderInfoVO 
 		panic(err)
 	}
 	goodsList := extractOrderGoodsVO(orderNo)
+	address := extractOrderAddress(orderDO.AddressSnapshot)
+	buyer := extractOrderBuyer(orderDO.UserId)
 
 	orderVO := defs.CMSOrderInfoVO{}
 	orderVO.OrderNo = orderDO.OrderNo
 	orderVO.PlaceTime = orderDO.CreateTime
-	orderVO.Address = orderDO.AddressSnapshot
+	orderVO.Address = *address
 	orderVO.PayAmount, _ = strconv.ParseFloat(orderDO.PayAmount, 2)
 	orderVO.GoodsAmount, _ = strconv.ParseFloat(orderDO.GoodsAmount, 2)
 	orderVO.DiscountAmount, _ = strconv.ParseFloat(orderDO.DiscountAmount, 2)
@@ -795,6 +791,7 @@ func (s *orderService) QueryCMSOrderDetail(orderNo string) *defs.CMSOrderInfoVO 
 	orderVO.PayTime = orderDO.PayTime
 	orderVO.DeliverTime = orderDO.DeliverTime
 	orderVO.FinishTime = orderDO.FinishTime
+	orderVO.Buyer = *buyer
 	orderVO.GoodsList = goodsList
 	return &orderVO
 }
@@ -807,15 +804,40 @@ func extractOrderGoodsVO(orderNo string) []defs.CMSOrderGoodsVO {
 	}
 	goodsVOList := []defs.CMSOrderGoodsVO{}
 	for _, v := range *goodsDOList {
+		specs := extractOrderGoodsSpecs(v.Specs)
+
 		goodsVO := defs.CMSOrderGoodsVO{}
 		goodsVO.Picture = v.Picture
 		goodsVO.Title = v.Title
 		goodsVO.Price, _ = strconv.ParseFloat(v.Price, 2)
-		goodsVO.Specs = v.Specs
+		goodsVO.Specs = specs
 		goodsVO.Num = v.Num
 		goodsVOList = append(goodsVOList, goodsVO)
 	}
 	return goodsVOList
+}
+
+// 订单-提取收货人
+func extractOrderAddress(addressSnapshot string) *defs.AddressSnapshot {
+	address := defs.AddressSnapshot{}
+	err := json.Unmarshal([]byte(addressSnapshot), &address)
+	if err != nil {
+		panic(err)
+	}
+	return &address
+}
+
+// 订单-提取买家信息
+func extractOrderBuyer(uid int) *defs.BasicUser {
+	userDO, e := dbops.GetUserById(uid)
+	if e != nil {
+		panic(e)
+	}
+	basicUser := defs.BasicUser{}
+	basicUser.UserId = userDO.Id
+	basicUser.Nickname = userDO.Nickname
+	basicUser.Avatar = userDO.Avatar
+	return &basicUser
 }
 
 func (s *orderService) ModifyOrderStatus(orderNo string, otype int) {

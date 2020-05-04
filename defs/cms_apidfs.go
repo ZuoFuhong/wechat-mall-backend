@@ -298,7 +298,6 @@ type CMSMarketMetricsVO struct {
 type CMSOrderInfoVO struct {
 	OrderNo        string            `json:"orderNo"`
 	PlaceTime      string            `json:"placeTime"`
-	Address        string            `json:"address"`
 	PayAmount      float64           `json:"payAmount"`
 	GoodsAmount    float64           `json:"goodsAmount"`
 	DiscountAmount float64           `json:"discountAmount"`
@@ -309,7 +308,15 @@ type CMSOrderInfoVO struct {
 	PayTime        string            `json:"payTime"`
 	DeliverTime    string            `json:"deliverTime"`
 	FinishTime     string            `json:"finishTime"`
+	Buyer          BasicUser         `json:"buyer"`
+	Address        AddressSnapshot   `json:"address"`
 	GoodsList      []CMSOrderGoodsVO `json:"goodsList"`
+}
+
+type BasicUser struct {
+	UserId   int    `json:"userId"`
+	Nickname string `json:"nickname"`
+	Avatar   string `json:"avatar"`
 }
 
 type CMSOrderGoodsVO struct {
