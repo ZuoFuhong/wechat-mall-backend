@@ -8,7 +8,7 @@ username = "root"
 password = "123456"
 
 [redis]
-addr = "47.98.199.80:6379"
+addr = "127.0.0.1:6379"
 passwd = "myredis"
 db = 0
 
