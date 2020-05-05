@@ -13,6 +13,9 @@ go mod tidy
 
 # build the project
 ./build.sh
+
+# init the database
+./doc/init_wechat_mall.sql
 ```
 
 ### RoadMap
