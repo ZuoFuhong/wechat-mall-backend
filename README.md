@@ -6,7 +6,7 @@
 
 ```sh
 # clone the project
-git clone git@github.com:ZuoFuhong/wechat-mall-miniapp.git
+git clone git@github.com:ZuoFuhong/wechat-mall-backend.git
 
 # update dependency
 go mod tidy
