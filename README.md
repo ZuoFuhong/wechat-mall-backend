@@ -2,7 +2,7 @@
 
 本项目是 [wechat-mall](https://github.com/ZuoFuhong/wechat-mall-miniapp) 微信小程序商城 配套的`服务端`
 
-## Deployment
+### Development
 
 ```sh
 # clone the project
@@ -17,6 +17,21 @@ go mod tidy
 # init the database
 ./doc/init_wechat_mall.sql
 ```
+
+### Deployment
+
+1.在项目的[Release](https://github.com/ZuoFuhong/wechat-mall-backend/releases)页面，下载最新的包 wechat-mall-backend-${last-version}.tar.gz
+
+2.初始化数据库，下载项目 doc 目录下的`init_wechat_mall.sql`脚本（默认连接的数据库是`wechat_mall`）
+
+3.运行服务端前，需要修改配置文件，配置基本参数（redis、mysql、阿里云OSS、小程序配置等）
+
+4.本项目是一个web项目，默认运行在`8080`端口，启动命令：
+
+```
+$ ./wechat-mall-backend    # 根据环境变量 RUN_MODE，读取配置文件，默认读取 dev 环境 
+```
+
 
 ### RoadMap
 
