@@ -1,4 +1,4 @@
-NAME = wechat-mall-mall
+NAME = wechat-mall-backend
 VERSION = 1.0.0
 GOOS = linux
 GOARCH = amd64
