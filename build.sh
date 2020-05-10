@@ -15,5 +15,5 @@ GOOS=linux GOARCH=amd64 go build -o ./target/wechat-mall-backend main.go
 # macOS
 #go build -o ./target/wechat-mall-backend main.go
 cp -rf conf ./target/
-tar -zcvf ./target/wechat-mall-backend.tar.gz target/
+tar -zcvf ./target/wechat-mall-backend-1.0.0.tar.gz target/
 echo "build Done."
