@@ -12,10 +12,10 @@ git clone git@github.com:ZuoFuhong/wechat-mall-backend.git
 go mod tidy
 
 # build the project
-./build.sh
+make
 
 # init the database
-./doc/init_wechat_mall.sql
+/doc/init_wechat_mall.sql
 ```
 
 ### Deployment
