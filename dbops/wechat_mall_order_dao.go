@@ -97,7 +97,7 @@ func CountOrderByParams(userId, status int) (int, error) {
 }
 
 func AddOrder(order *model.WechatMallOrderDO) error {
-	sql := "INSERT INTO wechat_mall_order (" + orderColumnList[4:] + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	sql := "INSERT INTO wechat_mall_order (" + orderColumnList[4:] + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := dbConn.Prepare(sql)
 	if err != nil {
 		return err
