@@ -44,6 +44,17 @@ $ ./wechat-mall-backend    # 根据环境变量 RUN_MODE，读取配置文件，
 - 7.小程序分享，绘制canvas海报
 - 8.后端调度任务（退款调度、待付款调度）
 
+### 最佳实践
+
+- [腾讯云微搭低代码开发平台](https://cloud.tencent.com/product/weda) 推荐的最佳应用案例 [【云开发应用】麦兜小店-电商小程序](https://github.com/WeDaHub/incubator-mcdull-mall).
+
+### Backer and Sponsor
+> jetbrains
+
+<a href="https://www.jetbrains.com/?from=ZuoFuhong/bulb" target="_blank">
+<img src="https://github.com/ZuoFuhong/bulb/blob/master/doc/jetbrains-gold-reseller.svg" width="100px" height="100px">
+</a>
+
 ### License
 
 The project is licensed under the Apache 2 license.
