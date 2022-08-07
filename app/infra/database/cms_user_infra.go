@@ -92,7 +92,7 @@ func (c *CmsUserRepos) ListCMSUser(ctx context.Context, page, size int) ([]*enti
 func (c *CmsUserRepos) CountCMSUser(ctx context.Context) (int, error) {
 	empty := new(entity.WechatMallCMSUserDO)
 	var total int64
-	if err := c.db.Table(empty.TableName()).Where("is_del = 0 AND id != 1").Find(&total).Error; err != nil {
+	if err := c.db.Table(empty.TableName()).Where("is_del = 0 AND id != 1").Count(&total).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Count failed, err: %v", err)
 		return 0, err
 	}

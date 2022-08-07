@@ -1,7 +1,5 @@
 ## 微信小程序商城-服务端
 
-- Update 空值被忽略
-
 本项目是 [wechat-mall](https://github.com/ZuoFuhong/wechat-mall-miniapp) 微信小程序商城 配套的`服务端`
 
 ### Development

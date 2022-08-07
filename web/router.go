@@ -13,7 +13,7 @@ type Router struct {
 
 func NewRouter() *Router {
 	mw := Middleware{}
-	chain := alice.New(mw.LoggingHandler, mw.CORSHandler, mw.ValidateAuthToken)
+	chain := alice.New(mw.RequestTraceHandler, mw.LoggingHandler, mw.CORSHandler, mw.ValidateAuthToken)
 	return &Router{
 		Router: mux.NewRouter(),
 		ch:     &chain,

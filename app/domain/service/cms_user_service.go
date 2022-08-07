@@ -58,7 +58,7 @@ func NewCMSUserService(repos repository.ICmsUserRepos, moduleRepos repository.IC
 func (s *CMSUserService) CMSLoginValidate(ctx context.Context, username, password string) (*entity.WechatMallCMSUserDO, error) {
 	user, err := s.repos.GetCMSUserByUsername(ctx, username)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("系统繁忙")
 	}
 	if user.ID == 0 {
 		return nil, errors.New("用户不存在")
@@ -73,7 +73,7 @@ func (s *CMSUserService) CMSLoginValidate(ctx context.Context, username, passwor
 func (s *CMSUserService) AddCMSUser(ctx context.Context, userDO *entity.WechatMallCMSUserDO) error {
 	cmsUserDO, err := s.repos.GetCMSUserByUsername(ctx, userDO.Username)
 	if err != nil {
-		return err
+		return errors.New("系统繁忙")
 	}
 	if cmsUserDO.ID != 0 {
 		return errors.New("用户名已注册")
@@ -81,7 +81,7 @@ func (s *CMSUserService) AddCMSUser(ctx context.Context, userDO *entity.WechatMa
 	if userDO.Email != "" {
 		cmsUserDO, err = s.repos.GetCMSUserByEmail(ctx, userDO.Email)
 		if err != nil {
-			return err
+			return errors.New("系统繁忙")
 		}
 		if cmsUserDO.ID != 0 {
 			return errors.New("邮箱已注册")
@@ -90,7 +90,7 @@ func (s *CMSUserService) AddCMSUser(ctx context.Context, userDO *entity.WechatMa
 	if userDO.Mobile != "" {
 		cmsUserDO, err := s.repos.GetCMSUserByMobile(ctx, userDO.Mobile)
 		if err != nil {
-			return err
+			return errors.New("系统繁忙")
 		}
 		if cmsUserDO.ID != 0 {
 			return errors.New("手机号已注册")
@@ -98,10 +98,10 @@ func (s *CMSUserService) AddCMSUser(ctx context.Context, userDO *entity.WechatMa
 	}
 	groupDO, err := s.repos.QueryUserGroupById(ctx, userDO.GroupID)
 	if err != nil {
-		return err
+		return errors.New("系统繁忙")
 	}
 	if groupDO.ID == consts.ZERO || groupDO.Del == consts.DELETE {
-		return errors.New("not found user group record")
+		return errors.New("用户组不存在")
 	}
 	return s.repos.AddCMSUser(ctx, userDO)
 }
@@ -110,7 +110,7 @@ func (s *CMSUserService) UpdateCMSUser(ctx context.Context, userDO *entity.Wecha
 	if userDO.Email != "" {
 		cmsUserDO, err := s.repos.GetCMSUserByEmail(ctx, userDO.Email)
 		if err != nil {
-			return err
+			return errors.New("系统繁忙")
 		}
 		if cmsUserDO.ID != consts.ZERO && cmsUserDO.ID != userDO.ID {
 			return errors.New("邮箱已注册")
@@ -119,7 +119,7 @@ func (s *CMSUserService) UpdateCMSUser(ctx context.Context, userDO *entity.Wecha
 	if userDO.Mobile != "" {
 		cmsUserDO, err := s.repos.GetCMSUserByMobile(ctx, userDO.Mobile)
 		if err != nil {
-			return err
+			return errors.New("系统繁忙")
 		}
 		if cmsUserDO.ID != consts.ZERO && cmsUserDO.ID != userDO.ID {
 			return errors.New("手机号已注册")
@@ -128,16 +128,13 @@ func (s *CMSUserService) UpdateCMSUser(ctx context.Context, userDO *entity.Wecha
 	if userDO.GroupID != consts.ZERO {
 		groupDO, err := s.repos.QueryUserGroupById(ctx, userDO.GroupID)
 		if err != nil {
-			return err
+			return errors.New("系统繁忙")
 		}
 		if groupDO.ID == consts.ZERO || groupDO.Del == consts.DELETE {
-			return errors.New("not found user group record")
+			return errors.New("用户组不存在")
 		}
 	}
-	if err := s.repos.UpdateCMSUserById(ctx, userDO); err != nil {
-		return err
-	}
-	return nil
+	return s.repos.UpdateCMSUserById(ctx, userDO)
 }
 
 func (s *CMSUserService) GetCMSUserList(ctx context.Context, page, size int) ([]*entity.WechatMallCMSUserDO, int, error) {
@@ -203,7 +200,7 @@ func (s *CMSUserService) QueryGroupAuths(ctx context.Context, groupId int) ([]ma
 		moduleMap[pageDO.ModuleID] = append(pageList, v.PageID)
 	}
 
-	var auths []map[string][]*entity.ModulePageAuth
+	auths := make([]map[string][]*entity.ModulePageAuth, 0)
 	for k, v := range moduleMap {
 		moduleDO, err := s.moduleRepos.QueryModuleById(ctx, k)
 		if err != nil {
@@ -239,7 +236,7 @@ func (s *CMSUserService) QueryGroupPages(ctx context.Context, groupId int) ([]in
 	if err != nil {
 		return []int{}, err
 	}
-	var auths []int
+	auths := make([]int, 0)
 	for _, v := range permissionList {
 		auths = append(auths, v.PageID)
 	}

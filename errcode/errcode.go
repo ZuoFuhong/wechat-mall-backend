@@ -67,4 +67,7 @@ const (
 
 	// NotAllowOperation 不允许操作
 	NotAllowOperation = 10028
+
+	// CmsUserLoginFaults CMS-用户登录失败
+	CmsUserLoginFaults = 10029
 )

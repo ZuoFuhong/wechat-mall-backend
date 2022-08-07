@@ -3,7 +3,6 @@ package interfaces
 import (
 	"encoding/json"
 	"github.com/go-playground/validator"
-	"github.com/gorilla/mux"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -12,7 +11,8 @@ import (
 	"wechat-mall-backend/app/domain/view"
 	"wechat-mall-backend/consts"
 	"wechat-mall-backend/errcode"
-	utils2 "wechat-mall-backend/pkg/utils"
+	"wechat-mall-backend/pkg/log"
+	"wechat-mall-backend/pkg/utils"
 )
 
 // CmsUserLogin CMS-用户登录
@@ -28,11 +28,11 @@ func (m *MallHttpServiceImpl) CmsUserLogin(w http.ResponseWriter, r *http.Reques
 	}
 	cmsUser, err := m.cmsUserService.CMSLoginValidate(r.Context(), loginReq.Username, loginReq.Password)
 	if err != nil {
-		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
+		Error(w, errcode.CmsUserLoginFaults, err.Error())
 		return
 	}
-	accessToken, _ := utils2.CreateToken(cmsUser.ID, consts.AccessTokenExpire)
-	refreshToken, _ := utils2.CreateToken(cmsUser.ID, consts.RefreshTokenExpire)
+	accessToken, _ := utils.CreateToken(cmsUser.ID, consts.AccessTokenExpire)
+	refreshToken, _ := utils.CreateToken(cmsUser.ID, consts.RefreshTokenExpire)
 	data := CMSTokenResp{AccessToken: accessToken, RefreshToken: refreshToken}
 	Ok(w, data)
 }
@@ -50,17 +50,18 @@ func (m *MallHttpServiceImpl) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	refreshToken := tmpArr[1]
-	if !utils2.ValidateToken(refreshToken) {
-		Error(w, errcode.ErrorRefreshTokenInvalid, "刷新Token失败")
+	if !utils.ValidateToken(refreshToken) {
+		Error(w, errcode.ErrorRefreshTokenInvalid, "Token 无效")
 		return
 	}
-	payload, err := utils2.ParseToken(refreshToken)
+	payload, err := utils.ParseToken(refreshToken)
 	if err != nil {
-		Error(w, errcode.ErrorRefreshTokenInvalid, "刷新Token失败")
+		log.ErrorContextf(r.Context(), "parse token failed, err: %v", err)
+		Error(w, errcode.ErrorRefreshTokenInvalid, "Token 无效")
 		return
 	}
-	newAccessToken, _ := utils2.CreateToken(payload.Uid, consts.AccessTokenExpire)
-	newRefreshToken, _ := utils2.CreateToken(payload.Uid, consts.RefreshTokenExpire)
+	newAccessToken, _ := utils.CreateToken(payload.Uid, consts.AccessTokenExpire)
+	newRefreshToken, _ := utils.CreateToken(payload.Uid, consts.RefreshTokenExpire)
 
 	data := CMSTokenResp{AccessToken: newAccessToken, RefreshToken: newRefreshToken}
 	Ok(w, data)
@@ -75,7 +76,7 @@ func (m *MallHttpServiceImpl) GetUserInfo(w http.ResponseWriter, r *http.Request
 		return
 	}
 	if userDO.ID == consts.ZERO || userDO.Del == consts.DELETE {
-		Error(w, errcode.NotFoundCmsUser, "Not found cms user record")
+		Error(w, errcode.NotFoundCmsUser, "用户不存在")
 		return
 	}
 	auths, err := m.cmsUserService.QueryGroupAuths(r.Context(), userDO.GroupID)
@@ -121,14 +122,14 @@ func (m *MallHttpServiceImpl) DoChangePassword(w http.ResponseWriter, r *http.Re
 		return
 	}
 	if userDO.ID == consts.ZERO || userDO.Del == consts.DELETE {
-		Error(w, errcode.NotFoundCmsUser, "Not found cms user record")
+		Error(w, errcode.NotFoundCmsUser, "用户不存在")
 		return
 	}
-	if utils2.Md5Encrpyt(req.OldPassword) != userDO.Password {
+	if utils.Md5Encrpyt(req.OldPassword) != userDO.Password {
 		Error(w, errcode.NotAllowOperation, "原始密码错误")
 		return
 	}
-	userDO.Password = utils2.Md5Encrpyt(req.NewPassword)
+	userDO.Password = utils.Md5Encrpyt(req.NewPassword)
 	if err := m.cmsUserService.UpdateCMSUser(r.Context(), userDO); err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
@@ -138,9 +139,9 @@ func (m *MallHttpServiceImpl) DoChangePassword(w http.ResponseWriter, r *http.Re
 
 // GetUserList 查询-用户列表
 func (m *MallHttpServiceImpl) GetUserList(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	page, _ := strconv.Atoi(vars["page"])
-	size, _ := strconv.Atoi(vars["size"])
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
+
 	userList, total, err := m.cmsUserService.GetCMSUserList(r.Context(), page, size)
 	if err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
@@ -154,7 +155,7 @@ func (m *MallHttpServiceImpl) GetUserList(w http.ResponseWriter, r *http.Request
 			return
 		}
 		if groupDO.ID == consts.ZERO || groupDO.Del == consts.DELETE {
-			Error(w, errcode.NotFoundUserGroup, "Not found user group record")
+			Error(w, errcode.NotFoundUserGroup, "用户组不存在")
 			return
 		}
 		userVO := &view.CMSUserVO{
@@ -176,8 +177,7 @@ func (m *MallHttpServiceImpl) GetUserList(w http.ResponseWriter, r *http.Request
 
 // GetUser 查询-单个用户
 func (m *MallHttpServiceImpl) GetUser(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userId, _ := strconv.Atoi(vars["id"])
+	userId, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	userDO, err := m.cmsUserService.GetCMSUserById(r.Context(), userId)
 	if err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
@@ -234,15 +234,15 @@ func (m *MallHttpServiceImpl) DoEditUser(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if req.Id == consts.ZERO {
-		cmsUserDO := &entity.WechatMallCMSUserDO{}
-		cmsUserDO.Username = req.Username
-		cmsUserDO.Password = utils2.Md5Encrpyt(req.Mobile[6:])
-		cmsUserDO.Email = req.Email
-		cmsUserDO.Mobile = req.Mobile
-		cmsUserDO.Avatar = req.Avatar
-		cmsUserDO.GroupID = req.GroupId
+		cmsUserDO := &entity.WechatMallCMSUserDO{
+			Username: req.Username,
+			Password: utils.Md5Encrpyt(req.Mobile[6:]),
+			Mobile:   req.Mobile,
+			Avatar:   req.Avatar,
+			GroupID:  req.GroupId,
+		}
 		if err := m.cmsUserService.AddCMSUser(r.Context(), cmsUserDO); err != nil {
-			Error(w, errcode.ErrorInternalFaults, "系统繁忙")
+			Error(w, errcode.BadRequestParam, err.Error())
 			return
 		}
 	} else {
@@ -252,7 +252,7 @@ func (m *MallHttpServiceImpl) DoEditUser(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		if cmsUserDO.ID == consts.ZERO || cmsUserDO.Del == consts.DELETE {
-			Error(w, errcode.NotFoundCmsUser, "Not found cms user record")
+			Error(w, errcode.NotFoundCmsUser, "用户不存在")
 			return
 		}
 		if cmsUserDO.ID == consts.ADMIN {
@@ -264,7 +264,7 @@ func (m *MallHttpServiceImpl) DoEditUser(w http.ResponseWriter, r *http.Request)
 		cmsUserDO.Mobile = req.Mobile
 		cmsUserDO.GroupID = req.GroupId
 		if err := m.cmsUserService.UpdateCMSUser(r.Context(), cmsUserDO); err != nil {
-			Error(w, errcode.ErrorInternalFaults, "系统繁忙")
+			Error(w, errcode.BadRequestParam, err.Error())
 			return
 		}
 	}
@@ -301,7 +301,7 @@ func (m *MallHttpServiceImpl) DoResetCMSUserPassword(w http.ResponseWriter, r *h
 		Error(w, errcode.BadRequestParam, "密码不符合规范")
 		return
 	}
-	userDO.Password = utils2.Md5Encrpyt(req.Password)
+	userDO.Password = utils.Md5Encrpyt(req.Password)
 	if err := m.cmsUserService.UpdateCMSUser(r.Context(), userDO); err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
@@ -311,8 +311,7 @@ func (m *MallHttpServiceImpl) DoResetCMSUserPassword(w http.ResponseWriter, r *h
 
 // DoDeleteCMSUser 删除-用户
 func (m *MallHttpServiceImpl) DoDeleteCMSUser(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	userId, _ := strconv.Atoi(vars["id"])
+	userId, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	cmsUserDO, err := m.cmsUserService.GetCMSUserById(r.Context(), userId)
 	if err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
@@ -336,10 +335,8 @@ func (m *MallHttpServiceImpl) DoDeleteCMSUser(w http.ResponseWriter, r *http.Req
 
 // GetUserGroupList 查询-用户分组
 func (m *MallHttpServiceImpl) GetUserGroupList(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	page, _ := strconv.Atoi(vars["page"])
-	size, _ := strconv.Atoi(vars["size"])
-
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
 	groupList, total, err := m.cmsUserService.QueryUserGroupList(r.Context(), page, size)
 	if err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
@@ -368,15 +365,14 @@ func (m *MallHttpServiceImpl) GetUserGroupList(w http.ResponseWriter, r *http.Re
 
 // GetUserGroup 查询-单个分组
 func (m *MallHttpServiceImpl) GetUserGroup(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	groupId, _ := strconv.Atoi(vars["id"])
+	groupId, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	groupDO, err := m.cmsUserService.QueryUserGroupById(r.Context(), groupId)
 	if err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
 	}
 	if groupDO.ID == consts.ZERO || groupDO.Del == consts.DELETE {
-		Error(w, errcode.NotFoundUserGroup, "系统繁忙")
+		Error(w, errcode.NotFoundUserGroup, "分组不存在")
 		return
 	}
 	auths, err := m.cmsUserService.QueryGroupPages(r.Context(), groupId)
@@ -460,8 +456,7 @@ func (m *MallHttpServiceImpl) DoEditUserGroup(w http.ResponseWriter, r *http.Req
 
 // DoDeleteUserGroup 删除-用户分组
 func (m *MallHttpServiceImpl) DoDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	groupId, _ := strconv.Atoi(vars["id"])
+	groupId, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	groupDO, err := m.cmsUserService.QueryUserGroupById(r.Context(), groupId)
 	if err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")

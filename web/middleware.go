@@ -2,28 +2,30 @@ package web
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"log"
+	"io"
 	"net/http"
 	"strings"
 	"time"
 	"wechat-mall-backend/consts"
+	"wechat-mall-backend/pkg/log"
 	"wechat-mall-backend/pkg/utils"
 )
 
 type Middleware struct {
 }
 
-func (m Middleware) LoggingHandler(next http.Handler) http.Handler {
+func (m *Middleware) LoggingHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
 		next.ServeHTTP(w, r)
-		log.Printf("[%s] %q %v", r.Method, r.URL.String(), time.Now().Sub(startTime))
+		log.Infof("[%s] %q %v", r.Method, r.URL.String(), time.Now().Sub(startTime))
 	}
 	return http.HandlerFunc(fn)
 }
 
-func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
+func (m *Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		uri := r.URL.RequestURI()
 		if strings.HasPrefix(uri, "/cms") {
@@ -35,6 +37,8 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			}
 			payload, err := parseTokenAndValidate(r)
 			if err != nil {
+				w.Header().Add("Content-Type", "application/json; charset=utf-8")
+				_, _ = io.WriteString(w, `{"retcode":10008,"errmsg":"Token无效或已过期"}`)
 				return
 			}
 			// Inject the uid into the context
@@ -47,6 +51,8 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			}
 			payload, err := parseTokenAndValidate(r)
 			if err != nil {
+				w.Header().Add("Content-Type", "application/json; charset=utf-8")
+				_, _ = io.WriteString(w, `{"retcode":10008,"errmsg":"Token无效或已过期"}`)
 				return
 			}
 			// Inject the uid into the context
@@ -59,7 +65,7 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func (m Middleware) CORSHandler(next http.Handler) http.Handler {
+func (m *Middleware) CORSHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		header := w.Header()
 		header.Set("Access-Control-Allow-Origin", "*")
@@ -70,6 +76,16 @@ func (m Middleware) CORSHandler(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+		next.ServeHTTP(w, r)
+	}
+	return http.HandlerFunc(fn)
+}
+
+func (m *Middleware) RequestTraceHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		// Inject traceId to context
+		traceId, _ := uuid.NewUUID()
+		r = r.WithContext(context.WithValue(context.Background(), consts.TraceKey, traceId.String()))
 		next.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(fn)
