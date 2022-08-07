@@ -14,9 +14,8 @@ import (
 
 // GetBannerList 查询-Banner列表
 func (m *MallHttpServiceImpl) GetBannerList(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	page, _ := strconv.Atoi(vars["page"])
-	size, _ := strconv.Atoi(vars["size"])
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
 	bannerList, total, err := m.bannerService.GetBannerList(r.Context(), consts.ALL, page, size)
 	if err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")

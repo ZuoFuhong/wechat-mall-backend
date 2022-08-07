@@ -80,7 +80,7 @@ func (c *CmsModuleRepos) AddGroupPagePermission(ctx context.Context, pageId, gro
 
 func (c *CmsModuleRepos) RemoveGroupAllPagePermission(ctx context.Context, groupId int) error {
 	empty := new(entity.WechatMallGroupPagePermission)
-	if err := c.db.Table(empty.TableName()).Where("group_id = ?", groupId).Update("update_time", time.Now()).Update("is_del = ?", 1).Error; err != nil {
+	if err := c.db.Table(empty.TableName()).Where("group_id = ?", groupId).Update("update_time", time.Now()).Update("is_del", 1).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Update failed, err: %v", err)
 		return err
 	}

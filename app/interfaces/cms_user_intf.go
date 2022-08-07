@@ -141,7 +141,6 @@ func (m *MallHttpServiceImpl) DoChangePassword(w http.ResponseWriter, r *http.Re
 func (m *MallHttpServiceImpl) GetUserList(w http.ResponseWriter, r *http.Request) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	size, _ := strconv.Atoi(r.URL.Query().Get("size"))
-
 	userList, total, err := m.cmsUserService.GetCMSUserList(r.Context(), page, size)
 	if err != nil {
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
@@ -289,11 +288,11 @@ func (m *MallHttpServiceImpl) DoResetCMSUserPassword(w http.ResponseWriter, r *h
 	}
 	userDO, err := m.cmsUserService.GetCMSUserById(r.Context(), req.UserId)
 	if err != nil {
-		Error(w, errcode.NotAllowOperation, "权限拒绝")
+		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
 	}
 	if userDO.ID == consts.ZERO || userDO.Del == consts.DELETE {
-		Error(w, errcode.NotFoundCmsUser, "Not found cms user record")
+		Error(w, errcode.NotFoundCmsUser, "用户不存在")
 		return
 	}
 	matched, _ := regexp.MatchString("^[a-zA-Z0-9]{6,16}$", req.Password)
@@ -303,7 +302,7 @@ func (m *MallHttpServiceImpl) DoResetCMSUserPassword(w http.ResponseWriter, r *h
 	}
 	userDO.Password = utils.Md5Encrpyt(req.Password)
 	if err := m.cmsUserService.UpdateCMSUser(r.Context(), userDO); err != nil {
-		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
+		Error(w, errcode.ErrorInternalFaults, err.Error())
 		return
 	}
 	Ok(w, "ok")
@@ -318,7 +317,7 @@ func (m *MallHttpServiceImpl) DoDeleteCMSUser(w http.ResponseWriter, r *http.Req
 		return
 	}
 	if cmsUserDO.ID == consts.ZERO || cmsUserDO.Del == consts.DELETE {
-		Error(w, errcode.NotFoundCmsUser, "Not found cms user record")
+		Error(w, errcode.NotFoundCmsUser, "用户不存在")
 		return
 	}
 	if cmsUserDO.ID == consts.ADMIN {
@@ -437,7 +436,7 @@ func (m *MallHttpServiceImpl) DoEditUserGroup(w http.ResponseWriter, r *http.Req
 			return
 		}
 		if groupDO.ID == consts.ZERO || groupDO.Del == consts.DELETE {
-			Error(w, errcode.NotFoundUserGroup, "Not found user group record")
+			Error(w, errcode.NotFoundUserGroup, "分组不存在")
 			return
 		}
 		groupDO.Name = req.Name
@@ -463,7 +462,7 @@ func (m *MallHttpServiceImpl) DoDeleteUserGroup(w http.ResponseWriter, r *http.R
 		return
 	}
 	if groupDO.ID == consts.ZERO || groupDO.Del == consts.DELETE {
-		Error(w, errcode.NotFoundUserGroup, "Not found user group record")
+		Error(w, errcode.NotFoundUserGroup, "分组不存在")
 		return
 	}
 	num, err := m.cmsUserService.CountGroupUser(r.Context(), groupId)

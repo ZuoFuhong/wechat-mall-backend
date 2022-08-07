@@ -85,7 +85,7 @@ func (c *GoodsRepos) CountCategoryGoods(ctx context.Context, categoryId int) (in
 
 func (c *GoodsRepos) UpdateCategoryGoodsOnlineStatus(ctx context.Context, categoryId, online int) error {
 	goods := new(entity.WechatMallGoodsDO)
-	if err := c.db.Table(goods.TableName()).Where("is_del = 0 AND category_id = ?", categoryId).Update("update_time = ?", time.Now()).Update("online = ?", online).Error; err != nil {
+	if err := c.db.Table(goods.TableName()).Where("is_del = 0 AND category_id = ?", categoryId).Update("update_time", time.Now()).Update("online", online).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Update failed, err: %v", err)
 		return err
 	}

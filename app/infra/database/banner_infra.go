@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"wechat-mall-backend/app/domain/entity"
 	"wechat-mall-backend/app/domain/repository"
+	"wechat-mall-backend/consts"
 	"wechat-mall-backend/pkg/log"
 )
 
@@ -20,13 +21,17 @@ func NewBannerRepos(db *gorm.DB) repository.IBannerRepos {
 
 func (b *BannerRepos) QueryBannerList(ctx context.Context, status, page, size int) ([]*entity.WechatMallBannerDO, int, error) {
 	banners := make([]*entity.WechatMallBannerDO, 0)
-	if err := b.db.Where("status = ? AND is_del = 0", status).Offset((page - 1) * size).Limit(size).Find(&banners).Error; err != nil {
+	empty := new(entity.WechatMallBannerDO)
+	tx := b.db.Table(empty.TableName()).Where("is_del = 0")
+	if status != consts.ALL {
+		tx = tx.Where("status = ?", status)
+	}
+	if err := tx.Offset((page - 1) * size).Limit(size).Find(&banners).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Find failed, err: %v", err)
 		return nil, 0, err
 	}
-	empty := new(entity.WechatMallBannerDO)
 	var total int64
-	if err := b.db.Table(empty.TableName()).Where("is_del = 0 AND status = ?", status).Count(&total).Error; err != nil {
+	if err := tx.Count(&total).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Count failed, err: %v", err)
 		return nil, 0, err
 	}

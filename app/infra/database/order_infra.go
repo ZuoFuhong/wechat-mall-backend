@@ -204,7 +204,7 @@ func (c *OrderRepos) UpdateOrderGoods(ctx context.Context, goods *entity.WechatM
 }
 
 func (c *OrderRepos) CountBuyGoodsUserNum(ctx context.Context, goodsId int) (int, error) {
-	empty := new(entity.WechatMallOrderDO)
+	empty := new(entity.WechatMallOrderGoodsDO)
 	var total int64
 	if err := c.db.Table(empty.TableName()).Select("COUNT(DISTINCT(user_id))").Where("lock_status = 1 AND goods_id = ?", goodsId).Count(&total).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Count failed, err: %v", err)

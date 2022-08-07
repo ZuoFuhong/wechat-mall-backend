@@ -195,7 +195,7 @@ func (m *MallHttpServiceImpl) GetChooseCategory(w http.ResponseWriter, r *http.R
 	}
 	for _, v := range categoryList {
 		var tmpSubCategoryList []map[string]interface{}
-		subCategoryList, _, err := m.categoryService.GetCategoryList(r.Context(), v.ID, 0, 1000)
+		subCategoryList, _, err := m.categoryService.GetCategoryList(r.Context(), v.ID, 1, 1000)
 		if err != nil {
 			Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 			return

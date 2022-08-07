@@ -8,7 +8,7 @@ require (
 	github.com/allegro/bigcache/v3 v3.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/gorilla/mux v1.7.4
+	github.com/gorilla/mux v1.8.0
 	github.com/justinas/alice v1.2.0
 	github.com/pkg/errors v0.8.0
 	github.com/shopspring/decimal v0.0.0-20200227202807-02e2044944cc

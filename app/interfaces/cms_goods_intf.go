@@ -95,7 +95,7 @@ func (m *MallHttpServiceImpl) GetGoods(w http.ResponseWriter, r *http.Request) {
 	goodsVO.BannerPicture = goodsDO.BannerPicture
 	goodsVO.DetailPicture = goodsDO.DetailPicture
 	goodsVO.Tags = goodsDO.Tags
-	Ok(w, goodsDO)
+	Ok(w, goodsVO)
 }
 
 // DoEditGoods 新增/编辑商品

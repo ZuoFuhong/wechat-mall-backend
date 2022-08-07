@@ -85,7 +85,7 @@ func (m *Middleware) RequestTraceHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// Inject traceId to context
 		traceId, _ := uuid.NewUUID()
-		r = r.WithContext(context.WithValue(context.Background(), consts.TraceKey, traceId.String()))
+		r = r.WithContext(context.WithValue(r.Context(), consts.TraceKey, traceId.String()))
 		next.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(fn)
