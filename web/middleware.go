@@ -2,31 +2,30 @@ package web
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"io"
-	"log"
 	"net/http"
-	"runtime"
 	"strings"
 	"time"
-	"wechat-mall-backend/defs"
-	"wechat-mall-backend/errs"
-	"wechat-mall-backend/utils"
+	"wechat-mall-backend/consts"
+	"wechat-mall-backend/pkg/log"
+	"wechat-mall-backend/pkg/utils"
 )
 
 type Middleware struct {
 }
 
-func (m Middleware) LoggingHandler(next http.Handler) http.Handler {
+func (m *Middleware) LoggingHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
 		next.ServeHTTP(w, r)
-		log.Printf("[%s] %q %v", r.Method, r.URL.String(), time.Now().Sub(startTime))
+		log.Infof("[%s] %q %v", r.Method, r.URL.String(), time.Now().Sub(startTime))
 	}
 	return http.HandlerFunc(fn)
 }
 
-func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
+func (m *Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		uri := r.URL.RequestURI()
 		if strings.HasPrefix(uri, "/cms") {
@@ -36,18 +35,28 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			if uri == "/cms/user/refresh" {
 				goto nextHandler
 			}
-			payload := parseTokenAndValidate(r)
+			payload, err := parseTokenAndValidate(r)
+			if err != nil {
+				w.Header().Add("Content-Type", "application/json; charset=utf-8")
+				_, _ = io.WriteString(w, `{"error_code":10008,"msg":"Token无效或已过期"}`)
+				return
+			}
 			// Inject the uid into the context
-			ctx := context.WithValue(r.Context(), defs.ContextKey, payload.Uid)
+			ctx := context.WithValue(r.Context(), consts.ContextKey, payload.Uid)
 			r = r.WithContext(ctx)
 		}
 		if strings.HasPrefix(uri, "/api") {
 			if strings.HasPrefix(uri, "/api/wxapp/login") {
 				goto nextHandler
 			}
-			payload := parseTokenAndValidate(r)
+			payload, err := parseTokenAndValidate(r)
+			if err != nil {
+				w.Header().Add("Content-Type", "application/json; charset=utf-8")
+				_, _ = io.WriteString(w, `{"error_code":10008,"msg":"Token无效或已过期"}`)
+				return
+			}
 			// Inject the uid into the context
-			ctx := context.WithValue(r.Context(), defs.ContextKey, payload.Uid)
+			ctx := context.WithValue(r.Context(), consts.ContextKey, payload.Uid)
 			r = r.WithContext(ctx)
 		}
 	nextHandler:
@@ -56,7 +65,7 @@ func (m Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func (m Middleware) CORSHandler(next http.Handler) http.Handler {
+func (m *Middleware) CORSHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		header := w.Header()
 		header.Set("Access-Control-Allow-Origin", "*")
@@ -72,56 +81,35 @@ func (m Middleware) CORSHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func parseTokenAndValidate(r *http.Request) *utils.Payload {
-	authorization := r.Header.Get("Authorization")
-	if authorization == "" {
-		panic(errs.ErrorTokenInvalid)
-	}
-	if !strings.HasPrefix(authorization, "Bearer ") {
-		panic(errs.ErrorTokenInvalid)
-	}
-	tmpArr := strings.Split(authorization, " ")
-	if len(tmpArr) != 2 {
-		panic(errs.ErrorTokenInvalid)
-	}
-	token := tmpArr[1]
-	if !utils.ValidateToken(token) {
-		panic(errs.ErrorTokenInvalid)
-	}
-	payload, err := utils.ParseToken(token)
-	if err != nil {
-		panic(errs.ErrorTokenInvalid)
-	}
-	return payload
-}
-
-func (m Middleware) RecoverPanic(next http.Handler) http.Handler {
+func (m *Middleware) RequestTraceHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				var httpErr errs.HttpErr
-				log.Printf("Recover from panic:%+v", err)
-				printStack()
-				switch err.(type) {
-				case errs.HttpErr:
-					httpErr = err.(errs.HttpErr)
-				default:
-					httpErr = errs.ErrorInternalFaults
-				}
-
-				w.Header().Add("Content-Type", "application/json;charset=UTF-8")
-				w.WriteHeader(httpErr.HttpSC)
-				resStr, _ := json.Marshal(httpErr.Err)
-				_, _ = io.WriteString(w, string(resStr))
-			}
-		}()
+		// Inject traceId to context
+		traceId, _ := uuid.NewUUID()
+		r = r.WithContext(context.WithValue(r.Context(), consts.TraceKey, traceId.String()))
 		next.ServeHTTP(w, r)
 	}
 	return http.HandlerFunc(fn)
 }
 
-func printStack() {
-	var buf [4096]byte
-	n := runtime.Stack(buf[:], false)
-	log.Print(string(buf[:n]))
+func parseTokenAndValidate(r *http.Request) (*utils.Payload, error) {
+	authorization := r.Header.Get("Authorization")
+	if authorization == "" {
+		return nil, errors.New("token is invalid")
+	}
+	if !strings.HasPrefix(authorization, "Bearer ") {
+		return nil, errors.New("token is invalid")
+	}
+	tmpArr := strings.Split(authorization, " ")
+	if len(tmpArr) != 2 {
+		return nil, errors.New("token is invalid")
+	}
+	token := tmpArr[1]
+	if !utils.ValidateToken(token) {
+		return nil, errors.New("token is invalid")
+	}
+	payload, err := utils.ParseToken(token)
+	if err != nil {
+		return nil, errors.New("token is invalid")
+	}
+	return payload, nil
 }

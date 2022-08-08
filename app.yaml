@@ -1,0 +1,23 @@
+server:
+  name: wechat-mall-backend
+  addr: 127.0.0.1
+  port: 8888
+  domain: http://127.0.0.1:8888
+
+db:
+  dsn: root:123456@tcp(127.0.0.1:3306)/wechat_mall?charset=utf8mb4&parseTime=true&loc=Local&timeout=5s
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_lifetime: 1800
+  log_level: 3
+  slow_threshold: 100
+
+wxapp:
+  appid: wxa36fea40b02677d0
+  appsecret: xxx
+
+oss:
+  access_key_id: LTAI5tFrgCsnDZT3oJKidGqL
+  access_key_secret: xxx
+  endpoint: oss-cn-guangzhou.aliyuncs.com
+  bucket_name: wechat-mall-image
