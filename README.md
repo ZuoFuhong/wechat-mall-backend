@@ -4,6 +4,8 @@
 
 ### Development
 
+<img src="https://img.shields.io/badge/node-v8.11.0 ~ v12.22.12-blue" alt="Version">
+
 ```sh
 # clone the project
 git clone git@github.com:ZuoFuhong/wechat-mall-backend.git
