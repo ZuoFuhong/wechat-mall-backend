@@ -14,10 +14,10 @@ db:
 
 wxapp:
   appid: wxa36fea40b02677d0
-  appsecret: 4cec8431ec6eac438bab553566f4a1d8
+  appsecret: xxx
 
 oss:
   access_key_id: LTAI5tFrgCsnDZT3oJKidGqL
-  access_key_secret: DnCv0IL5chvjwMAtLbUAE4F8XdJdEm
+  access_key_secret: xxx
   endpoint: oss-cn-guangzhou.aliyuncs.com
-  bucket_name: camera2021
+  bucket_name: wechat-mall-image
