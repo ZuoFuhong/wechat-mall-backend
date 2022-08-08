@@ -8,17 +8,13 @@ import (
 
 // Result 统一的回包结构
 type Result struct {
-	Retcode int         `json:"retcode"`
-	Errmsg  string      `json:"errmsg"`
-	Data    interface{} `json:"data"`
+	Retcode int    `json:"error_code"`
+	Errmsg  string `json:"msg"`
 }
 
 // Ok 响应
 func Ok(w http.ResponseWriter, data interface{}) {
-	result := &Result{
-		Data: data,
-	}
-	writeToResponse(w, result)
+	writeToResponse(w, data)
 }
 
 // Error 响应
@@ -30,10 +26,10 @@ func Error(w http.ResponseWriter, errcode int, errmsg string) {
 	writeToResponse(w, result)
 }
 
-func writeToResponse(w http.ResponseWriter, result *Result) {
+func writeToResponse(w http.ResponseWriter, rspBody interface{}) {
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	// 理论上不会失败
-	retstr, _ := json.Marshal(&result)
-	_, _ = io.WriteString(w, string(retstr))
+	bodyBytes, _ := json.Marshal(&rspBody)
+	_, _ = io.WriteString(w, string(bodyBytes))
 }

@@ -38,7 +38,7 @@ func (m *Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			payload, err := parseTokenAndValidate(r)
 			if err != nil {
 				w.Header().Add("Content-Type", "application/json; charset=utf-8")
-				_, _ = io.WriteString(w, `{"retcode":10008,"errmsg":"Token无效或已过期"}`)
+				_, _ = io.WriteString(w, `{"error_code":10008,"msg":"Token无效或已过期"}`)
 				return
 			}
 			// Inject the uid into the context
@@ -52,7 +52,7 @@ func (m *Middleware) ValidateAuthToken(next http.Handler) http.Handler {
 			payload, err := parseTokenAndValidate(r)
 			if err != nil {
 				w.Header().Add("Content-Type", "application/json; charset=utf-8")
-				_, _ = io.WriteString(w, `{"retcode":10008,"errmsg":"Token无效或已过期"}`)
+				_, _ = io.WriteString(w, `{"error_code":10008,"msg":"Token无效或已过期"}`)
 				return
 			}
 			// Inject the uid into the context
