@@ -78,7 +78,8 @@ func (c *GoodsSkuRepos) UpdateSKUById(ctx context.Context, skuDO *entity.WechatM
 }
 
 func (c *GoodsSkuRepos) UpdateSkuStockById(ctx context.Context, id, num int) error {
-	if err := c.db.Where("id = ? AND stock >= ?", id, num).Update("update_time = ?", time.Now()).Update("stock = stock - ?", num).Error; err != nil {
+	empty := new(entity.WechatMallSkuDO)
+	if err := c.db.Table(empty.TableName()).Where("id = ? AND stock >= ?", id, num).Update("update_time", time.Now()).Update("stock", gorm.Expr("stock - ?", num)).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Update failed, err: %v", err)
 		return err
 	}

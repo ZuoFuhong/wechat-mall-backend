@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"wechat-mall-backend/consts"
 	"wechat-mall-backend/errcode"
+	"wechat-mall-backend/pkg/log"
 )
 
 // GetCartGoodsList 查询-购物车商品
@@ -40,7 +41,8 @@ func (m *MallHttpServiceImpl) AddCartGoods(w http.ResponseWriter, r *http.Reques
 	}
 	userId := r.Context().Value(consts.ContextKey).(int)
 	if err := m.cartService.DoEditCart(r.Context(), userId, req.GoodsId, req.SkuId, req.Num); err != nil {
-		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
+		log.ErrorContextf(r.Context(), "call DoEditCart failed, err: %v", err)
+		Error(w, errcode.NotAllowOperation, err.Error())
 		return
 	}
 	Ok(w, "ok")
@@ -70,7 +72,7 @@ func (m *MallHttpServiceImpl) EditCartGoods(w http.ResponseWriter, r *http.Reque
 		}
 	} else {
 		if err := m.cartService.DoEditCart(r.Context(), userId, cartDO.GoodsID, cartDO.SkuID, req.Num); err != nil {
-			Error(w, errcode.ErrorInternalFaults, "系统繁忙")
+			Error(w, errcode.NotAllowOperation, err.Error())
 			return
 		}
 	}

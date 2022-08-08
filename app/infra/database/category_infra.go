@@ -92,7 +92,7 @@ func (c *CategoryRepos) UpdateSubCategoryOnline(ctx context.Context, categoryId,
 
 func (c *CategoryRepos) QueryAllSubCategory(ctx context.Context) ([]*entity.WechatMallCategoryDO, error) {
 	categorys := make([]*entity.WechatMallCategoryDO, 0)
-	if err := c.db.Where("is_del = 0 AND online = 1 AND patent_id != 0").Find(&categorys).Error; err != nil {
+	if err := c.db.Where("is_del = 0 AND online = 1 AND parent_id != 0").Find(&categorys).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Find failed, err: %v", err)
 		return nil, err
 	}

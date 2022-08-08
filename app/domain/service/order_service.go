@@ -296,13 +296,10 @@ func (s *orderService) orderGoodsSnapshot(ctx context.Context, userId int, order
 			return err
 		}
 		// 减库存
-
 		if err := s.skuRepos.UpdateSkuStockById(ctx, v.SkuId, v.Num); err != nil {
 			return err
-
 		}
 		// 商品销量
-
 		if err := s.goodsRepos.UpdateGoodsSaleNum(ctx, v.GoodsId, v.Num); err != nil {
 			return err
 		}
@@ -330,6 +327,9 @@ func (s *orderService) clearUserCart(ctx context.Context, goodsList []*entity.Ca
 
 // 优惠券-核销
 func (s *orderService) couponCannel(ctx context.Context, couponLogId int) error {
+	if couponLogId == 0 {
+		return nil
+	}
 	couponLogDO, _ := s.couponRepos.QueryCouponLogById(ctx, couponLogId)
 	if couponLogDO.ID == 0 {
 		return errors.New("not found coupon log record")

@@ -12,6 +12,7 @@ import (
 	"wechat-mall-backend/app/domain/view"
 	"wechat-mall-backend/consts"
 	"wechat-mall-backend/errcode"
+	"wechat-mall-backend/pkg/log"
 	"wechat-mall-backend/pkg/utils"
 )
 
@@ -24,6 +25,7 @@ func (m *MallHttpServiceImpl) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	token, userId, err := m.userService.LoginCodeAuth(r.Context(), code)
 	if err != nil {
+		log.ErrorContextf(r.Context(), "call LoginCodeAuth failed, err: %v", err)
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
 	}
@@ -69,6 +71,7 @@ func (m *MallHttpServiceImpl) AuthPhone(w http.ResponseWriter, r *http.Request) 
 	authorization := r.Header.Get("Authorization")
 	accessToken := strings.Split(authorization, " ")[1]
 	if err := m.userService.DoWxUserPhoneSignature(r.Context(), userId, accessToken, req.EncryptedData, req.Iv); err != nil {
+		log.ErrorContextf(r.Context(), "call DoWxUserPhoneSignature failed, err: %v", err)
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
 	}
@@ -97,6 +100,7 @@ func (m *MallHttpServiceImpl) AuthUserInfo(w http.ResponseWriter, r *http.Reques
 		City:     req.City,
 	}
 	if err := m.userService.DoUserAuthInfo(r.Context(), userDO); err != nil {
+		log.ErrorContextf(r.Context(), "call DoUserAuthInfo failed, err: %v", err)
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
 	}
@@ -115,7 +119,7 @@ func (m *MallHttpServiceImpl) UserBrowseHistory(w http.ResponseWriter, r *http.R
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
 	}
-	data := map[string]interface{}{}
+	data := make(map[string]interface{})
 	data["list"] = recordList
 	data["total"] = total
 	Ok(w, data)

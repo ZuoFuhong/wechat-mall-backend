@@ -124,7 +124,7 @@ func (c *CouponRepos) AddCouponLog(ctx context.Context, couponLog *entity.Wechat
 
 func (c *CouponRepos) UpdateCouponLogOverdueStatus(ctx context.Context, userId int) error {
 	empty := new(entity.WechatMallCouponLogDO)
-	if err := c.db.Table(empty.TableName()).Where("is_del = 0 AND expire_time < now() AND user_id = ?", userId).Update("status = ?", 2).Error; err != nil {
+	if err := c.db.Table(empty.TableName()).Where("is_del = 0 AND expire_time < now() AND user_id = ?", userId).Update("status", 2).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Update failed, err: %v", err)
 		return err
 	}

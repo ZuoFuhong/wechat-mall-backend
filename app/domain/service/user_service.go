@@ -55,13 +55,12 @@ func (s *UserService) LoginCodeAuth(ctx context.Context, code string) (string, i
 		return "", 0, err
 	}
 	data := make(map[string]interface{})
-	err = json.Unmarshal([]byte(tmpVal), &data)
-	if err != nil {
+	if err = json.Unmarshal([]byte(tmpVal), &data); err != nil {
 		return "", 0, err
 	}
 	// {"session_key":"TppZM2zEd6\/dGzkqbbrriQ==","expires_in":7200,"openid":"oQOru0EUuLdidBZH0r_F8fDURPjI"}
 	if data["errcode"] != nil {
-		return "", 0, errors.New("wechat internal error")
+		return "", 0, errors.New(tmpVal)
 	}
 	userId, err := s.registerUser(ctx, data["openid"].(string))
 	if err != nil {

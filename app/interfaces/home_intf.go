@@ -42,17 +42,17 @@ func (m *MallHttpServiceImpl) GetGridCategoryList(w http.ResponseWriter, r *http
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
 	}
-
-	gridVOList := make([]*view.PortalGridCategoryVO, 0)
-	for _, v := range gridList {
-		gridVO := &view.PortalGridCategoryVO{}
-		gridVO.Id = v.ID
-		gridVO.Name = v.Name
-		gridVO.Picture = v.Picture
-		gridVO.CategoryId = v.CategoryID
-		gridVOList = append(gridVOList, gridVO)
+	voList := make([]*view.PortalGridCategoryVO, 0)
+	for _, grid := range gridList {
+		gridVO := &view.PortalGridCategoryVO{
+			Id:         grid.ID,
+			Name:       grid.Name,
+			Picture:    grid.Picture,
+			CategoryId: grid.CategoryID,
+		}
+		voList = append(voList, gridVO)
 	}
-	Ok(w, gridList)
+	Ok(w, voList)
 }
 
 // GetSubCategoryList 查询-全部二级分类

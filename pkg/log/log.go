@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"runtime"
 	"wechat-mall-backend/consts"
 )
 
@@ -21,6 +22,7 @@ func Warnf(format string, args ...interface{}) {
 
 func Errorf(format string, args ...interface{}) {
 	log.Printf("ERROR "+format+"\n", args...)
+	printStack()
 }
 
 func Fatalf(format string, args ...interface{}) {
@@ -49,4 +51,11 @@ func ErrorContextf(ctx context.Context, format string, args ...interface{}) {
 	traceId := ctx.Value(consts.TraceKey).(string)
 	prefix := fmt.Sprintf("ERROR %s ", traceId)
 	log.Printf(prefix+format+"\n", args...)
+	printStack()
+}
+
+func printStack() {
+	var buf [4096]byte
+	n := runtime.Stack(buf[:], false)
+	log.Print(string(buf[:n]))
 }

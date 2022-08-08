@@ -10,6 +10,7 @@ import (
 	"wechat-mall-backend/app/domain/view"
 	"wechat-mall-backend/consts"
 	"wechat-mall-backend/errcode"
+	"wechat-mall-backend/pkg/log"
 )
 
 // PlaceOrder 订单-C端下订单
@@ -22,16 +23,17 @@ func (m *MallHttpServiceImpl) PlaceOrder(w http.ResponseWriter, r *http.Request)
 	userId := r.Context().Value(consts.ContextKey).(int)
 	dispatchAmount, err := decimal.NewFromString(req.DispatchAmount)
 	if err != nil {
-		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
+		Error(w, errcode.BadRequestParam, "金额错误")
 		return
 	}
 	expectAmount, err := decimal.NewFromString(req.ExpectAmount)
 	if err != nil {
-		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
+		Error(w, errcode.BadRequestParam, "金额错误")
 		return
 	}
 	data, err := m.orderService.GenerateOrder(r.Context(), userId, req.AddressId, req.CouponLogId, dispatchAmount, expectAmount, req.GoodsList)
 	if err != nil {
+		log.ErrorContextf(r.Context(), "call GenerateOrder failed, err: %v", err)
 		Error(w, errcode.ErrorInternalFaults, "系统繁忙")
 		return
 	}

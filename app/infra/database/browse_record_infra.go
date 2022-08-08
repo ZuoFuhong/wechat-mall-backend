@@ -37,7 +37,7 @@ func (c *BrowseRepos) SelectGoodsBrowse(ctx context.Context, userId, goodsId int
 
 func (c *BrowseRepos) DeleteBrowseRecordById(ctx context.Context, id int) error {
 	record := new(entity.WechatMallGoodsBrowseRecord)
-	if err := c.db.Table(record.TableName()).Where("id = ?", id).Update("is_del = ?", 1).Error; err != nil {
+	if err := c.db.Table(record.TableName()).Where("id = ?", id).Update("is_del", 1).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Update failed, err: %v", err)
 		return err
 	}

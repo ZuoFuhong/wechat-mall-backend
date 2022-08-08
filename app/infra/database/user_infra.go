@@ -69,7 +69,7 @@ func (u *UserRepos) ListUserAddress(ctx context.Context, userId, page, size int)
 	}
 	empty := new(entity.WechatMallUserAddressDO)
 	var total int64
-	if err := u.db.Table(empty.TableName()).Where("is_del = 0 AND user_id = ?", userId).Find(&total).Error; err != nil {
+	if err := u.db.Table(empty.TableName()).Where("is_del = 0 AND user_id = ?", userId).Count(&total).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Count failed, err: %v", err)
 		return nil, 0, err
 	}
@@ -78,7 +78,7 @@ func (u *UserRepos) ListUserAddress(ctx context.Context, userId, page, size int)
 
 func (u *UserRepos) QueryUserAddressById(ctx context.Context, id int) (*entity.WechatMallUserAddressDO, error) {
 	address := new(entity.WechatMallUserAddressDO)
-	if err := u.db.Table("id = ?", id).Find(address).Error; err != nil {
+	if err := u.db.Where("id = ?", id).Find(address).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Find failed, err: %v", err)
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (u *UserRepos) UpdateUserAddress(ctx context.Context, address *entity.Wecha
 
 func (u *UserRepos) QueryDefaultAddress(ctx context.Context, userId int) (*entity.WechatMallUserAddressDO, error) {
 	address := new(entity.WechatMallUserAddressDO)
-	if err := u.db.Table("is_del = 0 AND is_default = 1 AND user_id = ?", userId).Find(address).Error; err != nil {
+	if err := u.db.Where("is_del = 0 AND is_default = 1 AND user_id = ?", userId).Find(address).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Find failed, err: %v", err)
 		return nil, err
 	}

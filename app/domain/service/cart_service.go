@@ -43,24 +43,24 @@ func (s *cartService) DoEditCart(ctx context.Context, userId, goodsId, skuId, nu
 	}
 	goodsDO, err := s.goodsReps.QueryGoodsById(ctx, goodsId)
 	if err != nil {
-		return err
+		return errors.New("系统繁忙")
 	}
 	if goodsDO.ID == consts.ZERO || goodsDO.Del == consts.DELETE || goodsDO.Online == consts.OFFLINE {
-		return errors.New("not found goods record")
+		return errors.New("商品不存在")
 	}
 	skuDO, err := s.skuRepos.GetSKUById(ctx, skuId)
 	if err != nil {
-		return err
+		return errors.New("系统繁忙")
 	}
 	if skuDO.ID == consts.ZERO || skuDO.Del == consts.DELETE || skuDO.Online == consts.OFFLINE {
-		return errors.New("not found sku record")
+		return errors.New("SKU不存在")
 	}
 	if skuDO.Stock <= 0 {
-		return errors.New("Inventory shortage")
+		return errors.New("库存不足")
 	}
 	cartDO, err := s.repos.QueryCartByParams(ctx, userId, goodsId, skuId)
 	if err != nil {
-		return err
+		return errors.New("系统繁忙")
 	}
 	if num > 0 {
 		if cartDO.ID == consts.ZERO {
@@ -73,25 +73,29 @@ func (s *cartService) DoEditCart(ctx context.Context, userId, goodsId, skuId, nu
 			err = s.repos.AddUserCart(ctx, userCartDO)
 		} else {
 			if skuDO.Stock < cartDO.Num+num {
-				return errors.New("Inventory shortage")
+				return errors.New("库存不足")
 			}
 			if cartDO.Num+num > consts.CartMax {
 				cartDO.Num = consts.CartMax
 			} else {
 				cartDO.Num += num
 			}
-			err = s.repos.UpdateCartById(ctx, cartDO)
+			if err := s.repos.UpdateCartById(ctx, cartDO); err != nil {
+				return errors.New("系统繁忙")
+			}
 		}
 	} else {
 		if cartDO.ID == consts.ZERO {
-			return errors.New("not found cart goods")
+			return errors.New("商品不存在")
 		}
 		if cartDO.Num+num >= 1 {
 			cartDO.Num += num
-			err = s.repos.UpdateCartById(ctx, cartDO)
+			if err := s.repos.UpdateCartById(ctx, cartDO); err != nil {
+				return errors.New("系统繁忙")
+			}
 		}
 	}
-	return err
+	return nil
 }
 
 func (s *cartService) GetCartGoods(ctx context.Context, userId, page, size int) ([]*entity.PortalCartGoods, int, error) {
@@ -119,16 +123,18 @@ func (s *cartService) GetCartGoods(ctx context.Context, userId, page, size int) 
 			}
 		}
 		price, _ := strconv.ParseFloat(skuDO.Price, 2)
-		vo := &entity.PortalCartGoods{
+		cartVO := &entity.PortalCartGoods{
 			Id:      cart.ID,
 			GoodsId: cart.GoodsID,
 			SkuId:   cart.SkuID,
 			Title:   goodsDO.Title,
 			Price:   price,
+			Picture: skuDO.Picture,
+			Specs:   skuDO.Specs,
 			Num:     cart.Num,
 			Status:  status,
 		}
-		voList = append(voList, vo)
+		voList = append(voList, cartVO)
 	}
 	return voList, total, nil
 }
