@@ -121,7 +121,7 @@ func (c *GoodsRepos) CountGoodsSpecBySpecId(ctx context.Context, specId int) (in
 
 func (c *GoodsRepos) DeleteGoodsSpec(ctx context.Context, goodsId int) error {
 	empty := new(entity.WechatMallGoodsSpecDO)
-	if err := c.db.Table(empty.TableName()).Where("goods_id = ?", goodsId).Update("is_del = ?", 1).Error; err != nil {
+	if err := c.db.Table(empty.TableName()).Where("goods_id = ?", goodsId).Update("is_del", 1).Error; err != nil {
 		log.ErrorContextf(ctx, "call db.Update failed, err: %v", err)
 		return err
 	}
